@@ -42,6 +42,14 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   
   springConnection <- springConnection[overlap,]
   
+  overlap <- springConnection[,1] %in% rownames(MODifieR_input$annotated_exprs_matrix)
+  
+  springConnection <- springConnection[overlap,]
+  
+  overlap <- springConnection[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
+  
+  springConnection <- springConnection[overlap,]
+  
   springConnection <- springConnection[springConnection[,3] > cutOffRank,]
   
   springConnection[,3] <- springConnection[,3] / 1000
