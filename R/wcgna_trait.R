@@ -157,7 +157,7 @@ wgcna_adjust_significance <- function(p_value, wgcna_module){
   
   return(wgcna_module)
 }
-
+#Returns new module objects by color
 wgcna_split_module_by_color <- function(wgcna_module){
   module_colors <- wgcna_module$module_colors
   module_genes <- lapply(X = module_colors, FUN = function(x, module){
