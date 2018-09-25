@@ -18,7 +18,7 @@
 #' 
 #' @export
 create_input <- function (expression_matrix, probe_map, group1_indici, group2_indici, group1_label, group2_label,
-                             expression = F, diff_data = F, correlation_clique = F){
+                             expression = F, diff_data = F, collapse_method = "MaxMean"){
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
@@ -32,16 +32,16 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
 
   #Should expression data be generated? Note that expression data is precursor
   #for correlation method data
-  if (expression == T || correlation_clique == T){
-    collapsed_exprs_mat <- sapply(X = unique(probe_map$ENTREZID), FUN = collapse_probes,
-                                  exprs_mat = expression_matrix, probe_entrez_mat = probe_map)
-
-    collapsed_exprs_mat <- na.omit(t(collapsed_exprs_mat))
-    colnames(collapsed_exprs_mat) <- colnames(expression_matrix)
-
+  if (expression == T){
+    collapsed_data <-WGCNA::collapseRows(datET = expression_matrix,
+                                         rowGroup =  probe_map$ENTREZID,
+                                         rowID =  probe_map$PROBEID, method = collapse_method)
+    
+    collapsed_exprs_mat <- collapsed_data$datETcollapsed
+    
   }
   #Same for expression data, which is also a precursor to correlation data.
-  if (diff_data == T || correlation_clique == T){
+  if (diff_data == T){
     group_factor <- create_group_factor(samples = colnames(expression_matrix),
                                          group1_indici = group1_indici,
                                          group2_indici = group2_indici)
