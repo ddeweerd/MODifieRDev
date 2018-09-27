@@ -30,8 +30,7 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
   #Making sure column names for the annotation dataframe are right...
   colnames(probe_map) <- c("PROBEID", "SYMBOL", "ENTREZID")
 
-  #Should expression data be generated? Note that expression data is precursor
-  #for correlation method data
+  #Should expression data be generated? 
   if (expression == T){
     collapsed_data <-WGCNA::collapseRows(datET = expression_matrix,
                                          rowGroup =  probe_map$ENTREZID,
@@ -40,7 +39,7 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
     collapsed_exprs_mat <- collapsed_data$datETcollapsed
     
   }
-  #Same for expression data, which is also a precursor to correlation data.
+  #Same for expression data
   if (diff_data == T){
     group_factor <- create_group_factor(samples = colnames(expression_matrix),
                                          group1_indici = group1_indici,

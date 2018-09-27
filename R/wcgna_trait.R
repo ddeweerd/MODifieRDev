@@ -116,7 +116,11 @@ wgcna_get_trait_data <- function(MODifieR_input){
   
   return (trait_data)
 }
-#Returns a list of all module colors (includes non-significant) with their respective genes. 
+#' Generate a list of module colors with their respective genes. 
+#'@param wgcna_module Module object that has been produced by \code{wgcna_trait} function
+#'@return Returns a \code{named list} of module genes where the names are the module colors. Includes 
+#'non-significant colors 
+#'@export
 wgcna_get_all_module_genes <- function(wgcna_module){
   module_colors <- rownames(wgcna_module$correlation_to_trait_table)
   
@@ -127,8 +131,14 @@ wgcna_get_all_module_genes <- function(wgcna_module){
 wgcna_get_module_genes <- function(module_color, probe_info_table){
   probe_info_table[probe_info_table[,3] == module_color ,1 ]
 }
-#Returns a module with only postively/negatively associated module colors to the trait
-#Only significant colors are used
+#'@title Split WGCNA module in module containing only positive or negative correlation
+#'@param wgcna_module Module object that has been produced by \code{wgcna_trait} function
+#'@param mode Character. "p" or "positive" for positive correlation, "n" or "negative" 
+#'for negative correlation
+#'
+#'Only significant colors are used
+#'@return Returns a \code{wgcna_module} object with only postively/negatively associated module colors to the trait
+#' @export
 wgcna_get_module_genes_by_sign <- function(wgcna_module, mode){
   if (mode == "p" || mode =="positive"){
     module_colors <-  rownames(wgcna_module$correlation_to_trait_table)[
@@ -147,10 +157,14 @@ wgcna_get_module_genes_by_sign <- function(wgcna_module, mode){
   
   return(wgcna_module)
 }
-
-wgcna_adjust_significance <- function(p_value, wgcna_module){
+#' @export
+wgcna_adjust_significance <- function(p_value, wgcna_module, use_unadjusted = F){
+  col=3
+  if (use_unadjusted){
+    col=2
+  }
   module_colors <- rownames(wgcna_module$correlation_to_trait_table)[
-  wgcna_module$correlation_to_trait_table[ ,3] < p_value]
+  wgcna_module$correlation_to_trait_table[ ,col] < p_value]
   
   wgcna_module$settings$pval_cutoff <- p_value
   wgcna_module$module_genes <- wgcna_module$probe_info_table[which(wgcna_module$probe_info_table[ ,3] %in% module_colors), 1]
@@ -158,6 +172,7 @@ wgcna_adjust_significance <- function(p_value, wgcna_module){
   return(wgcna_module)
 }
 #Returns new module objects by color
+#' @export
 wgcna_split_module_by_color <- function(wgcna_module){
   module_colors <- wgcna_module$module_colors
   module_genes <- lapply(X = module_colors, FUN = function(x, module){
@@ -180,4 +195,26 @@ wgcna_split_module_by_color <- function(wgcna_module){
   }
   return(new_wgcna_modules)
 }
-
+#' Returns a wgcna module close to \code{parameter}
+#' @export
+wgcna_set_module_size <- function(size, wgcna_module){
+  counter <- 0
+  module_colors <- NULL
+  while (size > 0){
+    counter <- counter + 1
+    current_color <- lengths(wgcna_get_all_module_genes(example_module))[(order(example_module$correlation_to_trait_table[,2]))][counter]
+    size <- size - current_color
+    module_colors[counter] <- names(current_color)
+    
+  }
+  new_wgcna_module <-      wgcna_module_constructor(module_genes = wgcna_module$probe_info_table
+                                                    [which(wgcna_module$probe_info_table[ ,3] %in% module_colors), 1], 
+                                                    probe_info_table = wgcna_module$probe_info_table, 
+                                                    module_cor_and_p_value = wgcna_module$correlation_to_trait_table, 
+                                                    powerEstimate = wgcna_module$softthreshold_value, 
+                                                    module_colors = module_colors, 
+                                                    settings = wgcna_module$settings)
+  
+  return(new_wgcna_module)
+  
+}

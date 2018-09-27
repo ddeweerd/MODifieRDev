@@ -6,7 +6,7 @@
 \usage{
 create_input(expression_matrix, probe_map, group1_indici, group2_indici,
   group1_label, group2_label, expression = F, diff_data = F,
-  correlation_clique = F)
+  collapse_method = "MaxMean")
 }
 \arguments{
 \item{expression_matrix}{Normalized expression matrix where the samples are columns and probes are rows}
@@ -22,11 +22,11 @@ create_input(expression_matrix, probe_map, group1_indici, group2_indici,
 
 \item{diff_data}{boolean, calculate differentially expressed data?}
 
-\item{correlation_clique}{boolean, calculate correlation matrix?}
-
 \item{group_indici}{vectors containing indici for different groups (Column numbers)}
 
 \item{group_labels}{Labels for each group, for example "patient" and "control"}
+
+\item{correlation_clique}{boolean, calculate correlation matrix?}
 }
 \description{
 The MODifieR input object can be used
