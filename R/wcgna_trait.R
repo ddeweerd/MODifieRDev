@@ -176,7 +176,7 @@ wgcna_adjust_significance <- function(p_value, wgcna_module, use_unadjusted = F)
 wgcna_split_module_by_color <- function(wgcna_module){
   module_colors <- wgcna_module$module_colors
   module_genes <- lapply(X = module_colors, FUN = function(x, module){
-    module$probe_info_table[module$probe_info_table[ ,3] == x, 1]}, module = wgcna_module)
+  module$probe_info_table[module$probe_info_table[ ,3] == x, 1]}, module = wgcna_module)
   
   probe_info_table <- wgcna_module$probe_info_table
   correlation_to_trait_table <- wgcna_module$correlation_to_trait_table
@@ -202,7 +202,7 @@ wgcna_set_module_size <- function(size, wgcna_module){
   module_colors <- NULL
   while (size > 0){
     counter <- counter + 1
-    current_color <- lengths(wgcna_get_all_module_genes(example_module))[(order(example_module$correlation_to_trait_table[,2]))][counter]
+    current_color <- lengths(wgcna_get_all_module_genes(wgcna_module))[(order(wgcna_module$correlation_to_trait_table[,2]))][counter]
     size <- size - current_color
     module_colors[counter] <- names(current_color)
     
