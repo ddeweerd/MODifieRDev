@@ -127,12 +127,11 @@ mcode.post.process<-function(graph,vertex.weight,haircut,fluff,fdt=0.8,
 ##' @references Bader GD, Hogue CW. An automated method for finding molecular complexes in large protein interaction networks. BMC Bioinformatics. 2003 Jan 13;4(1):2.
 ##' @return A list of clusters.
 ##' @seealso \code{\link{cluster}}
-##' @export
 ##' @examples
 ##' nlocal<-data.frame(c("DVL1","DVL2","DVL3"))
 ##' net<-construction(input=nlocal,db="HPRD",species="human",ID.type="Gene symbol",hierarchy=1)
 ##' mcode(net,vwp=0.9,haircut=TRUE,fluff=TRUE,fdt=0.1)
-mcoder<-function(graph,vwp=0.5,haircut=FALSE,fluff=FALSE,fdt=0.8,loops=TRUE)
+mcode <- function(graph,vwp=0.5,haircut=FALSE,fluff=FALSE,fdt=0.8,loops=TRUE)
 {
   stopifnot(is.igraph(graph))
   if(vwp>1 | vwp <0){

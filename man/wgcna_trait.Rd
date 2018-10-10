@@ -10,11 +10,12 @@ wgcna_trait(MODifieR_input, minModuleSize = 30, deepSplit = 2,
   dataset_name = deparse(substitute(MODifieR_input)))
 }
 \arguments{
-\item{MODifieR_input}{An input object created by \link{wgcna} function}
+\item{MODifieR_input}{An input object created by \code{\link[WGCNA]{blockwiseModules}} function
+Paap: \code{\link[WGCNA]{blockwiseModules}}}
 }
 \description{
 An implementation of WGCNA to correlate coexpression modules to disease
 }
 \seealso{
-\code{\link{create_input}}
+\code{\link[MASS]{abbey}}
 }

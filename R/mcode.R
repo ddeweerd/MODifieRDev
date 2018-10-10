@@ -39,7 +39,7 @@ mod_mcode <- function(MODifieR_input, ppi_network, type = "Gene symbol", hierarc
                          ID.type = type,
                          hierarchy = 1)
 
-  result <- mcoder(network, vwp = vwp, haircut = haircut,
+  result <- mcode(network, vwp = vwp, haircut = haircut,
                           fluff = fluff, fdt = fdt)
 
   result_genes <- result$COMPLEX[result$score > module_cutoff]
