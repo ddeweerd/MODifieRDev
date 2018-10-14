@@ -32,7 +32,10 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   
   springConnection <- ppi_network[,1:3]
   
-  pValueMatrix <- na.omit(MODifieR_input$diff_genes)
+  pValueMatrix <- plyr::ddply(.data = MODifieR_input$diff_genes, 
+                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+  
+  pValueMatrix <- na.omit(pValueMatrix)
 
   overlap <- springConnection[,1] %in% pValueMatrix[,1]
   

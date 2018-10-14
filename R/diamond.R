@@ -4,12 +4,13 @@
 #' 
 #' @param ppi_network path to the desired background ppi network 
 #' @param input_genes path to the tab delimited file consisting of seed genes 
+#' @param deg_cutoff p value cutoff for differentially expressed genes
 #' @param n_output_genes maximum number of genes to be included in the final module 
 #' @param seed_weight Numeric additional parameter to assign weight for the seed genes 
 #' @param include_seed Logical TRUE/FALSE for inclusion of seed genes in the output module 
 #' @return A disease module  
 #' @export
-diamond <- function(MODifieR_input, ppi_network, n_output_genes = 200, seed_weight = 10,
+diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
                     include_seed = T, tempfile_genes = tempfile(), dataset_name = NULL){
   # Retrieve settings
   default_args <- formals()
@@ -20,9 +21,15 @@ diamond <- function(MODifieR_input, ppi_network, n_output_genes = 200, seed_weig
     settings$MODifieR_input <- dataset_name
   }
   
+  diamond_genes <- plyr::ddply(.data = MODifieR_input$diff_genes, 
+                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+  
+  diamond_genes <- diamond_genes[diamond_genes$pvalue < deg_cutoff, ]
+  diamond_genes <- unique(na.omit(diamond_genes$ENTREZID)) 
+
   input_genes <- tempfile_genes
   input_ppi <- tempfile()
-  write.table(x = MODifieR_input$diamond_genes, file = input_genes, sep = "\t" ,
+  write.table(x = diamond_genes, file = input_genes, sep = "\t" ,
               row.names = FALSE , quote = FALSE, col.names = F)
   
   write.table(x = ppi_network, file = input_ppi, sep = "\t" ,
@@ -64,4 +71,18 @@ diamond <- function(MODifieR_input, ppi_network, n_output_genes = 200, seed_weig
 split_values <- function(values){
   values <- gsub(pattern = " ", replacement = "", x = values)
   strsplit(x = values, split = ",")
+}
+
+#' @export
+remove_diamond_seed_genes <- function(diamond_module){
+  diamond_module$module_genes <- setdiff(diamond_module$module_genes, diamond_module$seed_genes)
+  diamond_module$settings$include_seed <- F
+  return(diamond_module)
+}
+
+#' @export
+add_diamond_seed_genes <- function(diamond_module){
+  diamond_module$module_genes <- unique(c(diamond_module$module_genes, diamond_module$seed_genes))
+  diamond_module$settings$include_seed <- T
+  return(diamond_module)
 }

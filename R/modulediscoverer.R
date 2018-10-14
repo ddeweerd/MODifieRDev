@@ -22,10 +22,9 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
-  
-  if (class(MODifieR_input)[1] == "MODifieR_input"){
-    diffgen <- MODifieR_input$diff_genes
-  }
+
+  diffgen <- plyr::ddply(.data = MODifieR_input$diff_genes, 
+                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
   
   colnames(diffgen) <- c("gene" , "p_val")
   ppi_network <- graph.data.frame(ppi_network , directed = FALSE)

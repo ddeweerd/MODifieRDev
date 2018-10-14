@@ -12,24 +12,24 @@
 #' @param loops	Boolean value, whether to include self-loops (TRUE) or not (FALSE).
 #' @export
 mod_mcode <- function(MODifieR_input, ppi_network, type = "Gene symbol", hierarchy = 1, vwp =0.5, haircut = F, fluff = F,
-                  fdt = 0.8, loops = T, diffgen_cutoff = 1.3, module_cutoff = 3.5, dataset_name = NULL){
+                  fdt = 0.8, loops = T, diffgen_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL){
   default_args <- formals()
   user_args <- as.list(match.call(expand.dots = T)[-1])
   settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
-  
-  MODifieR_input$diff_genes$pvalue <- -log10(MODifieR_input$diff_genes$pvalue)
-  
+
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
 
-  if (class(MODifieR_input)[1] == "MODifieR_input"){
-    deg_genes <- MODifieR_input$diff_genes
-    deg_genes <- deg_genes[order(deg_genes$pvalue, decreasing = T),]
-  }
+  deg_genes <- plyr::ddply(.data = MODifieR_input$diff_genes, 
+                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+  
+  deg_genes$pvalue <- -log10(deg_genes$pvalue)
+  
+  deg_genes <- deg_genes[order(deg_genes$pvalue, decreasing = T),]
   
   colnames(deg_genes) <- c("hgnc_symbol" , "p_val")
-  deg_genes <- deg_genes[deg_genes[,2] > diffgen_cutoff, ]
+  deg_genes <- deg_genes[deg_genes$p_val > (-log10(diffgen_cutoff)), ]
  
   colnames(ppi_network) <- c("Interactor.1.Gene.symbol", "Interactor.2.Gene.symbol")
   
