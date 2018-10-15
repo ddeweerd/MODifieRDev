@@ -22,6 +22,7 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
+  limma_probe_table <- NULL
   group_indici <- list("group_1_indici" = group1_indici,
                        "group_2_indici" = group2_indici)
   names(group_indici) <- c(group1_label, group2_label)
@@ -36,7 +37,6 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
                                          rowID =  probe_map$PROBEID, method = collapse_method)
     
     collapsed_exprs_mat <- collapsed_data$datETcollapsed
-    
   }
   #Same for expression data
   if (diff_data == T){
@@ -44,11 +44,17 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
                                         group1_indici = group1_indici,
                                         group2_indici = group2_indici)
     
-    diff_genes_data <- differential_expression(group_factor = group_factor,
+    limma_probe_table <- differential_expression(group_factor = group_factor,
                                                expression_matrix = expression_matrix,
                                                probe_table = probe_map)
+    
+    diff_genes <- plyr::ddply(.data = , limma_probe_table,
+                             .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+    
+    diff_genes <- na.omit(diff_genes)
   }
-  modifier_input <- list("diff_genes" = diff_genes_data,
+  modifier_input <- list("diff_genes" = diff_genes,
+                         "limma_probe_table" = limma_probe_table,
                          "annotated_exprs_matrix" = collapsed_exprs_mat,
                          "expression_matrix" = expression_matrix,
                          "annotation_table" = probe_map,

@@ -21,8 +21,7 @@ mod_mcode <- function(MODifieR_input, ppi_network, type = "Gene symbol", hierarc
     settings$MODifieR_input <- dataset_name
   }
 
-  deg_genes <- plyr::ddply(.data = MODifieR_input$diff_genes, 
-                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+  deg_genes <- MODifieR_input$diff_genes
   
   deg_genes$pvalue <- -log10(deg_genes$pvalue)
   

@@ -21,8 +21,7 @@ clique_sum <- function(MODifieR_input, ppi_network, simplify_graph = T, n_iter =
     settings$MODifieR_input <- dataset_name
   }
   
-  deg_genes <- plyr::ddply(.data = MODifieR_input$diff_genes, 
-                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+  deg_genes <- MODifieR_input$diff_genes
   
   #Convert 2 column dataframe to named vector, names will be the gene names, values will be the p value
   deg_genes <- dataframe_to_vector(as.data.frame(deg_genes))

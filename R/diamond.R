@@ -21,8 +21,7 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
     settings$MODifieR_input <- dataset_name
   }
   
-  diamond_genes <- plyr::ddply(.data = MODifieR_input$diff_genes, 
-                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+  diamond_genes <- MODifieR_input$diff_genes
   
   diamond_genes <- diamond_genes[diamond_genes$pvalue < deg_cutoff, ]
   diamond_genes <- unique(na.omit(diamond_genes$ENTREZID)) 

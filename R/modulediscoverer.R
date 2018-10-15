@@ -23,9 +23,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
     settings$MODifieR_input <- dataset_name
   }
 
-  diffgen <- plyr::ddply(.data = MODifieR_input$diff_genes, 
-                           .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
-  
+  diffgen <- MODifieR_input$diff_genes
   colnames(diffgen) <- c("gene" , "p_val")
   ppi_network <- graph.data.frame(ppi_network , directed = FALSE)
   ppi_network <- simplify(ppi_network, remove.multiple = TRUE, remove.loops = TRUE)
