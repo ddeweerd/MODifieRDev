@@ -5,8 +5,8 @@
 \title{Network construction}
 \usage{
 construction_mod(input, local.net = FALSE, node.attribute = NULL, db,
-  species = c("human", "ath"), ID.type = c("Gene symbol", "Entrez Gene"),
-  hierarchy = 1)
+  species = c("human", "ath"), ID.type = c("Gene symbol",
+  "Entrez Gene"), hierarchy = 1)
 }
 \arguments{
 \item{input}{A data frame containing the experimental data.}

@@ -4,9 +4,10 @@
 \alias{mod_mcode}
 \title{MCODE}
 \usage{
-mod_mcode(MODifieR_input, ppi_network, type = "Gene symbol", hierarchy = 1,
-  vwp = 0.5, haircut = F, fluff = F, fdt = 0.8, loops = T,
-  diffgen_cutoff = 1.3, module_cutoff = 3.5, dataset_name = NULL)
+mod_mcode(MODifieR_input, ppi_network, type = "Gene symbol",
+  hierarchy = 1, vwp = 0.5, haircut = F, fluff = F, fdt = 0.8,
+  loops = T, deg_cutoff = 0.05, module_cutoff = 3.5,
+  dataset_name = NULL)
 }
 \arguments{
 \item{type}{keytype of the gene that is provide (default = "Gene Symbol")}

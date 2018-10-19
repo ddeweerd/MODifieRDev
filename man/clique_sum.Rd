@@ -4,26 +4,41 @@
 \alias{clique_sum}
 \title{Clique Sum}
 \usage{
-clique_sum(MODifieR_input, ppi_network, simplify_graph = T, n_iter = 10000,
-  cutoff = 0.05, min_clique_size = 5, min_deg_clique = 3,
+clique_sum(MODifieR_input, ppi_network, simplify_graph = T,
+  n_iterations = 10000, clique_significance = 0.05,
+  deg_cutoff = 0.05, min_clique_size = 5, min_deg_in_clique = 3,
   dataset_name = NULL)
 }
 \arguments{
-\item{n_iter}{number of iterations to be performed}
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{cutoff}{Desired P-value cutoff}
+\item{ppi_network}{A PPi network as a 2 column dataframe}
 
-\item{min_clique_size}{Numeric shortest clique size (default = 5)}
+\item{n_iterations}{Number of iterations to be performed for the permutation based p-value}
 
-\item{min_deg_clique}{Numeric Minimum degree of the clique}
+\item{clique_significance}{p-value for cliques to be considered significant}
 
-\item{deg_genes}{A nx2 dataframe consisting of differentially expressed genes and their respective -log10p values}
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 
-\item{igraph_network}{A path to dataframe csv PPi network of your choice}
+\item{min_clique_size}{Minimal size for cliques}
+
+\item{min_deg_in_clique}{Minimum number of DEGs to be present in the clique}
 }
 \value{
-A MODifieR class object with disease module and settings
+clique_sum returns an object of class "MODifieR_module" with subclass "Clique_Sum". 
+This object is a named list containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
-A Clique based Algorithm proposed by Fredrik Barranais to produce a disease module from Differentially expressed genes using a core sum approach
+An implementation of the clique-based disease module inference method proposed by Barrenäs et al.
+}
+\details{
+The clique sum algorithm obtains \emph{maximal cliques}, cliques that are not contained within another clique,
+ from the \code{ppi_network}. The minimal size of the obtained cliques is equal to \code{min_clique_size}. 
+ The union of maximal cliques with a permutation based p-value below \code{clique_significance} and at 
+ least \code{min_deg_in_clique} is the disease module
+}
+\references{
+\cite{Barrenäs F, Chavali S, Alves AC, et al. Highly interconnected genes in disease-specific networks are enriched for disease-associated polymorphisms. Genome Biology. 2012;13(6):R46. doi:10.1186/gb-2012-13-6-r46.}
 }

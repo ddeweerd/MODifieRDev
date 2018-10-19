@@ -17,3 +17,6 @@ Only significant colors are used}
 \value{
 Returns a \code{wgcna_module} object with only postively/negatively associated module colors to the trait
 }
+\description{
+Split WGCNA module in module containing only positive or negative correlation
+}

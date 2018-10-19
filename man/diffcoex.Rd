@@ -4,11 +4,11 @@
 \alias{diffcoex}
 \title{DiffCoEx}
 \usage{
-diffcoex(MODifieR_input, value = 20, beta = 6, cor_method = "spearman",
-  cluster_method = "average", cuttree_method = "hybrid",
-  cut_height = 0.996, deep_split = 0, pam_respects = F,
-  min_cluster_size = 20, cluster_merge_cut_height = 0.2,
-  dataset_name = NULL)
+diffcoex(MODifieR_input, value = 20, beta = 6,
+  cor_method = "spearman", cluster_method = "average",
+  cuttree_method = "hybrid", cut_height = 0.996, deep_split = 0,
+  pam_respects = F, min_cluster_size = 20,
+  cluster_merge_cut_height = 0.2, dataset_name = NULL)
 }
 \arguments{
 \item{cor_method}{correlation method to be used (default is "spearman")}

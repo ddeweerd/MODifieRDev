@@ -4,11 +4,14 @@
 \alias{diamond}
 \title{DIAMOnD module}
 \usage{
-diamond(MODifieR_input, ppi_network, n_output_genes = 200, seed_weight = 10,
-  include_seed = T, tempfile_genes = tempfile(), dataset_name = NULL)
+diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
+  n_output_genes = 200, seed_weight = 10, include_seed = T,
+  tempfile_genes = tempfile(), dataset_name = NULL)
 }
 \arguments{
 \item{ppi_network}{path to the desired background ppi network}
+
+\item{deg_cutoff}{p value cutoff for differentially expressed genes}
 
 \item{n_output_genes}{maximum number of genes to be included in the final module}
 

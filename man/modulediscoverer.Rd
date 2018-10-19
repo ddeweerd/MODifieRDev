@@ -5,19 +5,19 @@
 \title{Module Discoverer}
 \usage{
 modulediscoverer(MODifieR_input, ppi_network, permutations = 10000,
-  pval_cutoff = 0.05, repeats = 15, times = 1000, p_val = 0.01,
-  dataset_name = NULL)
+  deg_cutoff = 0.05, repeats = 15, times = 1000,
+  clique_cutoff = 0.01, dataset_name = NULL)
 }
 \arguments{
 \item{ppi_network}{A dataframe  PPi network of your choice}
 
-\item{pval_cutoff}{Numeric pvalue cutoff for choosing number of differentially expressed genes}
+\item{deg_cutoff}{Numeric pvalue cutoff for choosing number of differentially expressed genes}
 
 \item{repeats}{Number of repeats to be performed for single seed run}
 
 \item{times}{Number of iterations to be performed}
 
-\item{p_val}{cutoff pvalue for significant cliques}
+\item{clique_cutoff}{cutoff pvalue for significant cliques}
 
 \item{diffgen}{A nx2 dataframe consisting of differentially expressed genes and their respective -log10 p values}
 }

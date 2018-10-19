@@ -5,14 +5,14 @@
 #'
 #' @param diffgen A nx2 dataframe consisting of differentially expressed genes and their respective -log10 p values
 #' @param ppi_network A dataframe  PPi network of your choice
-#' @param pval_cutoff Numeric pvalue cutoff for choosing number of differentially expressed genes
+#' @param deg_cutoff Numeric pvalue cutoff for choosing number of differentially expressed genes
 #' @param repeats Number of repeats to be performed for single seed run
 #' @param times  Number of iterations to be performed
-#' @param p_val cutoff pvalue for significant cliques
+#' @param clique_cutoff cutoff pvalue for significant cliques
 #' @return A MODifieR class object with disease module and settings
 #' @export
-modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, pval_cutoff = 0.05, repeats = 15,
-                             times = 1000, p_val =0.01, dataset_name = NULL){
+modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, deg_cutoff = 0.05, repeats = 15,
+                             times = 1000, clique_cutoff = 0.01, dataset_name = NULL){
 
   # Retrieve settings
   default_args <- formals()
@@ -40,7 +40,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
 
   background <-unique(diffgen[,1])
 
-  degs <- diffgen$gene[diffgen$p_val < pval_cutoff]
+  degs <- diffgen$gene[diffgen$p_val < deg_cutoff]
   
   degs_random_datasets <- replicate(n = permutations, expr = sample(background,
                                                                     size = length(degs),
@@ -74,7 +74,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
 
   result_singleSeed.ec = moduleDiscoverer.db.extractEnrichedCliques(database=database_singleSeed,
                                                                     result=result_singleSeed,
-                                                                    p.value=p_val)
+                                                                    p.value=clique_cutoff)
 
   module_singleSeed = moduleDiscoverer.module.createModule(result=result_singleSeed.ec)
 

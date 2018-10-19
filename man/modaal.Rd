@@ -4,8 +4,9 @@
 \alias{modaal}
 \title{MODA}
 \usage{
-modaal(MODifieR_input, CuttingCriterion = "Density", specificTheta = 0.1,
-  conservedTheta = 0.1, dataset_name = NULL, group_of_interest)
+modaal(MODifieR_input, CuttingCriterion = "Density",
+  specificTheta = 0.1, conservedTheta = 0.1, dataset_name = NULL,
+  group_of_interest)
 }
 \arguments{
 \item{datExpr1}{A dataframe of the microarray matrix of the Control samples}

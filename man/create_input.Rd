@@ -5,8 +5,8 @@
 \title{Creates an object of class "MODifieR input"}
 \usage{
 create_input(expression_matrix, probe_map, group1_indici, group2_indici,
-  group1_label, group2_label, expression = F, diff_data = F,
-  collapse_method = "MaxMean")
+  group1_label, group2_label, expression = T,
+  differential_expression = T, collapse_method = "MaxMean")
 }
 \arguments{
 \item{expression_matrix}{Normalized expression matrix where the samples are columns and probes are rows}
@@ -20,7 +20,7 @@ create_input(expression_matrix, probe_map, group1_indici, group2_indici,
 
 \item{expression}{boolean, calculate expression values?}
 
-\item{diff_data}{boolean, calculate differentially expressed data?}
+\item{differential_expression}{boolean, calculate differentially expressed data?}
 
 \item{group_indici}{vectors containing indici for different groups (Column numbers)}
 

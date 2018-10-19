@@ -13,12 +13,12 @@
 #'@param group_indici vectors containing indici for different groups (Column numbers)
 #'@param group_labels Labels for each group, for example "patient" and "control"
 #'@param expression boolean, calculate expression values?
-#'@param diff_data boolean, calculate differentially expressed data?
+#'@param differential_expression boolean, calculate differentially expressed data?
 #'@param correlation_clique boolean, calculate correlation matrix?
 #' 
 #' @export
 create_input <- function (expression_matrix, probe_map, group1_indici, group2_indici, group1_label, group2_label,
-                          expression = F, diff_data = F, collapse_method = "MaxMean"){
+                          expression = T,  differential_expression= T, collapse_method = "MaxMean"){
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL

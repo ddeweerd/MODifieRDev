@@ -2,23 +2,40 @@
 #'
 #' A clique based method to find a disease module from correlated gene expression
 #'
-#'@param pval_matrix A nx2 dataframe of the entrez ids and their respective p-values
-#'@param correlation_matrix A nxn matrix of Correlated p-values of n genes 
-#'@param ppi_network A dataframe of PPI network of your choice
-#'@param iteration Number of iterations to be performed
-#'@param cutoffRank Score cutoff of the string PPI network
-#'@param cliquetestCriteria type of test to be perfomed for enrichment of cliques (default = "FisherTest")
-#'@param probabailitySacleFactor Scale for enriched cliques 
-#'@param frequency_cutoff Numeric significance out of number of iterations performed (default = 0.05) 
-#'@param signif_cutoff Cutoff for Fisher exact test for cliques
-#'@param gene_significance Cutoff for significant genes
-#'@return A MODifieR class object with disease module and settings
-#'@export
+#' @inheritParams clique_sum
+#' @inheritParams clique_sum
+#' @param iteration Number of iterations to be performed
+#' @param probabilityScaleFactor Scale for enriched cliques 
+#' @param frequency_cutoff significance out of number of iterations performed (default = 0.05) 
+#' @param signif_cutoff Cutoff for Fisher exact test for cliques
+#' @param deg_cutoff Cutoff for significant genes
+#' @details 
+#' The correlation clique is a clique-based algorithm using consensus clustering.
+#' The algorithm starts with calculating a correlation score between each interaction in the PPi network.
+#' The correlation score is obtained by subtracting the Pearson correlation p-value:
+#' \deqn{correlation score = 1 - Pearson p-value}
+#' Subsequently, the correlation score is multiplied by 
+#' the correlation confidence and scaled with the scale factor to get the edge score:
+#' \deqn{edge score = \sqrt(correlation score * confidence score  ) * scale_factor}
+#' When the edge scores are calculated the iterative part of the algorithm commences:
+#' All edge scores are compared to random variables from the uniform distribution between (0,1)
+#' only interactions where the edge score is higher than the random variable are used to construct
+#' a new PPi network. Then, maximal cliques are inferred from this new network.
+#' The cliques are tested for significant enrichment of DEGs by Fisher's exact test and
+#' the union of significant cliques is the disease module for this iteration
+#' The final disease module will consist of genes that have been present in at least \code{frequency_cutoff} iterations
+#' 
+#' @return correlation_clique returns an object of class "MODifieR_module" with subclass "Correlation_clique". 
+#' This object is a named list containing the following components:
+#' \item{module_genes}{A character vector containing the genes in the final module}
+#' \item{frequency_table}{A table containing the fraction of times the genes were present in an iteration module}
+#' \item{settings}{A named list containing the parameters used in generating the object}
+#' @export
 correlation_clique <- function(MODifieR_input, ppi_network,
                                 frequency_cutoff = .5, cutOffRank = 700,
                                 probabilityScaleFactor = 0.6,
                                 iteration = 50, signif_cutoff = 0.01, 
-                                gene_significance = 0.05,
+                                deg_cutoff = 0.05,
                                 dataset_name = NULL){
   
   # Retrieve settings
@@ -55,15 +72,15 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   springConnection <- springConnection[springConnection[,3] > cutOffRank,]
   
   springConnection[,3] <- springConnection[,3] / 1000
-  #Calculates (1- p value) for all relevent connections in the PPi network, and is stored in column 1.
+  #Calculates (1- p value) for all relevant connections in the PPi network, and is stored in column 1.
   #Column 2 will contain the PPi score from the PPi network
   corrPvalues <- cbind(apply(X = springConnection, MARGIN = 1, FUN = calculate_correlation, 
                              expression_matrix = MODifieR_input$annotated_exprs_matrix),
                        springConnection[,3])
-  #Calculates square root of P value * PPi score. This is then scaled by probabilityScaleFactor. 
+  #Calculates square root of p-value * PPi score. This is then scaled by probabilityScaleFactor. 
   pval_score <- apply(X = corrPvalues, MARGIN = 1, FUN = function(x){sqrt(x[1] * x[2]) * probabilityScaleFactor})
   #Get the significant genes
-  signifgenes <- pValueMatrix$gene[pValueMatrix$pvalue < gene_significance]
+  signifgenes <- pValueMatrix$gene[pValueMatrix$pvalue < deg_cutoff]
   n_unsignif <- nrow(pValueMatrix)
   
 
@@ -86,8 +103,8 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   module_genes <- names(tabled_frequencies[tabled_frequencies >= frequency_cutoff])
   
   new_correlation_clique_module <- list("module_genes" = module_genes,
-                                        "settings" = settings,
-                                        "frequency_table" = tabled_frequencies)
+                                        "frequency_table" = tabled_frequencies,
+                                        "settings" = settings)
   
   class( new_correlation_clique_module) <- c("MODifieR_module", "Correlation_clique")
   
@@ -149,7 +166,7 @@ calculate_correlation <- function(row, expression_matrix){
   1 - round(cor.test(x = expression_matrix[x_y[1],], y = expression_matrix[x_y[2],])$p.value, 3)
 }
 #Convert edge list to igraph object, and convert to adjacency matrix. This matrix will be converted to an adjacency graph.
-#As this adjecency matrix will be used to search for maximal cliques, the mode is undirected
+#As this adjacency matrix will be used to search for maximal cliques, the mode is undirected
 graph_score <- function(adjecency_list){
   g <- igraph::graph.data.frame(adjecency_list)
   score_matrix <- as.matrix(igraph::get.adjacency(g , attr = colnames(adjecency_list)[3]))
