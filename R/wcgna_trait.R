@@ -17,9 +17,8 @@ wgcna_module_constructor <- function(module_genes, probe_info_table,
 
 #' An implementation of WGCNA to correlate coexpression modules to disease
 #'
-#' @param MODifieR_input An input object created by \code{\link[WGCNA]{blockwiseModules}} function
-#' Paap: \code{\link[WGCNA]{blockwiseModules}}
-#' @seealso \code{\link[MASS]{abbey}}
+#' @inheritParams clique_sum
+#' @inheritParams WGCNA::blockwiseModules
 #' @export
 wgcna_trait <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
                         mergeCutHeight = 0.1, numericLabels = T, min_KME = 0, pval_cutoff = 0.05,

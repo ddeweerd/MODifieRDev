@@ -8,6 +8,8 @@ moda(MODifieR_input, CuttingCriterion = "Density", specificTheta = 0.1,
   conservedTheta = 0.1, result_folder, dataset_name = NULL)
 }
 \arguments{
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+
 \item{datExpr1}{A dataframe of the microarray matrix of the Control samples}
 
 \item{datExpr2}{A dataframe of the microarray matrix of the Control samples}

@@ -3,7 +3,6 @@
 #' A clique based method to find a disease module from correlated gene expression
 #'
 #' @inheritParams clique_sum
-#' @inheritParams clique_sum
 #' @param iteration Number of iterations to be performed
 #' @param probabilityScaleFactor Scale for enriched cliques 
 #' @param frequency_cutoff significance out of number of iterations performed (default = 0.05) 

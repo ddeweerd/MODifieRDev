@@ -1,4 +1,6 @@
+#'@inheritParams clique_sum
 #' @export
+#' 
 dime <- function(MODifieR_input, dataset_name = NULL){
   
   default_args <- formals()

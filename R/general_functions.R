@@ -5,36 +5,46 @@
 #' @import WGCNA
 #' @importFrom Rcpp sourceCpp
 #' @importFrom flashClust flashClust
-#' @importFrom dynamicTreeCut printFlush
 #' @useDynLib MODifieRDev
+#' @importFrom dynamicTreeCut printFlush
 
+#'@title Convert the module genes in a MODifieR_input object from official gene symbols to ENTREZ gene IDs
+#' @param MODifieR_module An object of class MODifieR_module
+#' @details 
+#' The function uses the \code{org.Hs.egSYMBOL} function from the package \code{org.Hs.eg.db}
+#' to convert ENTREZ IDs to official gene symbols
+#' @seealso 
+#' \code{\link[org.Hs.eg.db]{org.Hs.egSYMBOL}}
+#' 
+#'  \code{\link{entrez_to_symbol}}
 #' @export
-symbol_to_entrez <- function(module){
+symbol_to_entrez <- function(MODifieR_module){
   conv <- toTable(org.Hs.eg.db::org.Hs.egSYMBOL)
-  module$module_genes <- conv$gene_id[conv$symbol %in% module$module_genes]
-  return(module)
+  MODifieR_module$module_genes <- conv$gene_id[conv$symbol %in% MODifieR_module$module_genes]
+  return(MODifieR_module)
 }
 
+#' Convert the module genes in a MODifieR_input object from ENTREZ gene IDs to official gene symbols
+#' @param MODifieR_module An object of class MODifieR_module
+#' @details 
+#' The function uses the \code{org.Hs.egSYMBOL} function from the package \code{org.Hs.eg.db}
+#' to convert official gene symbols to ENTREZ IDs
+#' @seealso 
+#' \code{\link[org.Hs.eg.db]{org.Hs.egSYMBOL}}
+#' 
+#' \code{\link{symbol_to_entrez}}
 #' @export
-symbol_to_entrez_mcode <- function(module){
+entrez_to_symbol <- function(MODifieR_module){
   conv <- toTable(org.Hs.eg.db::org.Hs.egSYMBOL)
-  module <- conv$gene_id[conv$symbol %in% module]
-  return(module)
+  MODifieR_module$module_genes <- conv$symbol[conv$gene_id %in% MODifieR_module$module_genes]
+  return(MODifieR_module)
 }
-
-#' @export
-entrez_to_symbol <- function(module){
-  conv <- toTable(org.Hs.eg.db::org.Hs.egSYMBOL)
-  module$module_genes <- conv$symbol[conv$gene_id %in% module$module_genes]
-  return(module)
-}
-
 dataframe_to_vector <- function(dataframe){
   setNames(dataframe[,2],dataframe[,1])
 }
 
-summary.MODifieR_module <- function(module){
- length(module$module_genes)
+summary.MODifieR_module <- function(MODifieR_module){
+ length(MODifieR_module$module_genes)
 }
 
 settings_function <- function(...) {
@@ -86,14 +96,15 @@ prot_to_entrez <- function(dataframe){
 }
 
 #' @export
-extract_module_data <- function(module, data_field){
-  get(data_field, module)
+extract_module_data <- function(MODifieR_module, data_field){
+  get(data_field, MODifieR_module)
 }
 #' @export
-extract_module_class <- function(module){
-  class(module)[2]
+extract_module_class <- function(MODifieR_module){
+  class(MODifieR_module)[2]
 }
 #' @export
+#Unsure if this should be included in the package
 print_super_module <- function(super_module, output_file){
   sapply(X = 1:length(super_module), FUN =  function(i){
   invisible(write.table(x = t(c(names(super_module[i]), "", super_module[[i]])),

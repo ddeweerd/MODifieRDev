@@ -9,6 +9,8 @@ modaal(MODifieR_input, CuttingCriterion = "Density",
   group_of_interest)
 }
 \arguments{
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+
 \item{datExpr1}{A dataframe of the microarray matrix of the Control samples}
 
 \item{datExpr2}{A dataframe of the microarray matrix of the Control samples}

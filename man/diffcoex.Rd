@@ -11,6 +11,8 @@ diffcoex(MODifieR_input, value = 20, beta = 6,
   cluster_merge_cut_height = 0.2, dataset_name = NULL)
 }
 \arguments{
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+
 \item{cor_method}{correlation method to be used (default is "spearman")}
 
 \item{dataset1}{A dataframe of the microarray matrix of the Control samples}

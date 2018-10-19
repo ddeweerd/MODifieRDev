@@ -1,7 +1,7 @@
 #' DiffCoEx
 #' 
 #' A Coexpression based Algorithm to identify disease module 
-#' 
+#' @inheritParams clique_sum
 #' @param dataset1 A dataframe of the microarray matrix of the Control samples
 #' @param dataset2 A dataframe of the microarray matrix of the Patient samples
 #' @param cor_method correlation method to be used (default is "spearman")

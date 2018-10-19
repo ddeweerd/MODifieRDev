@@ -10,6 +10,10 @@ mod_mcode(MODifieR_input, ppi_network, type = "Gene symbol",
   dataset_name = NULL)
 }
 \arguments{
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+
+\item{ppi_network}{A PPi network as a 2 column dataframe}
+
 \item{type}{keytype of the gene that is provide (default = "Gene Symbol")}
 
 \item{hierarchy}{the hierarchical level of the PPI network to be used (default = 1)}
@@ -24,7 +28,7 @@ mod_mcode(MODifieR_input, ppi_network, type = "Gene symbol",
 
 \item{loops}{Boolean value, whether to include self-loops (TRUE) or not (FALSE).}
 
-\item{deg_genes}{A nx2 dataframe sorted ranked list of genes with their respective -log10 p-values}
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 }
 \description{
 A clique based Algorithm to identify disease module from differentially expressed genes

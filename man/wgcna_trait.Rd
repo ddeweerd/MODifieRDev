@@ -10,12 +10,26 @@ wgcna_trait(MODifieR_input, minModuleSize = 30, deepSplit = 2,
   dataset_name = deparse(substitute(MODifieR_input)))
 }
 \arguments{
-\item{MODifieR_input}{An input object created by \code{\link[WGCNA]{blockwiseModules}} function
-Paap: \code{\link[WGCNA]{blockwiseModules}}}
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+
+\item{minModuleSize}{ minimum module size for module detection. See
+\code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.  }
+
+\item{deepSplit}{ integer value between 0 and 4. Provides a simplified control over how sensitive
+module detection should be to module splitting, with 0 least and 4 most sensitive. See
+\code{\link[dynamicTreeCut]{cutreeDynamic}} for more details. }
+
+\item{pamRespectsDendro}{Logical, only used when \code{pamStage} is \code{TRUE}. 
+If \code{TRUE}, the PAM stage will
+respect the dendrogram in the sense an object can be PAM-assigned only to clusters that lie below it on
+the branch that the object is merged into. 
+     See \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details. }
+
+\item{mergeCutHeight}{ dendrogram cut height for module merging. }
+
+\item{numericLabels}{ logical: should the returned modules be labeled by colors (\code{FALSE}), or by
+numbers (\code{TRUE})? }
 }
 \description{
 An implementation of WGCNA to correlate coexpression modules to disease
-}
-\seealso{
-\code{\link[MASS]{abbey}}
 }

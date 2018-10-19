@@ -2,7 +2,7 @@
 #' 
 #' A clique based Algorithm to identify disease module from differentially expressed genes 
 #' 
-#' @param deg_genes A nx2 dataframe sorted ranked list of genes with their respective -log10 p-values 
+#' @inheritParams clique_sum
 #' @param type keytype of the gene that is provide (default = "Gene Symbol")
 #' @param hierarchy the hierarchical level of the PPI network to be used (default = 1)
 #' @param vwp Vertex weight percentage. Default value is 0.5.

@@ -1,7 +1,7 @@
 #' MODA
 #'
 #'A Coexpression based algorithm to identify disease module
-#' 
+#' @inheritParams clique_sum
 #' @param datExpr1 A dataframe of the microarray matrix of the Control samples
 #' @param datExpr2 A dataframe of the microarray matrix of the Control samples
 #' @export

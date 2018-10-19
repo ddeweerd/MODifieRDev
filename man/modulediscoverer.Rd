@@ -9,6 +9,8 @@ modulediscoverer(MODifieR_input, ppi_network, permutations = 10000,
   clique_cutoff = 0.01, dataset_name = NULL)
 }
 \arguments{
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+
 \item{ppi_network}{A dataframe  PPi network of your choice}
 
 \item{deg_cutoff}{Numeric pvalue cutoff for choosing number of differentially expressed genes}
@@ -18,8 +20,6 @@ modulediscoverer(MODifieR_input, ppi_network, permutations = 10000,
 \item{times}{Number of iterations to be performed}
 
 \item{clique_cutoff}{cutoff pvalue for significant cliques}
-
-\item{diffgen}{A nx2 dataframe consisting of differentially expressed genes and their respective -log10 p values}
 }
 \value{
 A MODifieR class object with disease module and settings

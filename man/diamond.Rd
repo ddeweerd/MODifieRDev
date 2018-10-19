@@ -9,21 +9,42 @@ diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
   tempfile_genes = tempfile(), dataset_name = NULL)
 }
 \arguments{
-\item{ppi_network}{path to the desired background ppi network}
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{deg_cutoff}{p value cutoff for differentially expressed genes}
+\item{ppi_network}{A PPi network as a 2 column dataframe}
+
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 
 \item{n_output_genes}{maximum number of genes to be included in the final module}
 
 \item{seed_weight}{Numeric additional parameter to assign weight for the seed genes}
 
 \item{include_seed}{Logical TRUE/FALSE for inclusion of seed genes in the output module}
-
-\item{input_genes}{path to the tab delimited file consisting of seed genes}
 }
 \value{
-A disease module
+diamond returns an object of class "MODifieR_module" with subclass "DIAMOnD". 
+This object is a named list containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{seed_genes}{Character vector containing genes that have been used as seed genes in the algorithm}
+\item{ignored_genes}{Potential seed genes that have not been used to infer the module}
+\item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
 A seed gene based algorithm to identify disease module from Differentially Expressed Genes
+}
+\details{
+A slightly modified version of the original DIAMOnD python script is called from within R. the exchange of 
+data is handled by temporary files. The only change to the orginal algorithm is the option to include the seed genes
+to the module. There are also function to add or remove the seed genes from the output object, namely:
+\code{\link{add_diamond_seed_genes}} and \code{\link{remove_diamond_seed_genes}}
+
+the only change is the option
+to include seed genes in the final module. The original python script is called from within R and  For a detailed description of how the algorithm works, please see
+the paper referenced below.
+}
+\references{
+\cite{Ghiassian, S. D., Menche, J., & Barabási, A. L. (2015). 
+A DIseAse MOdule Detection (DIAMOnD) Algorithm Derived from a Systematic Analysis of 
+Connectivity Patterns of Disease Proteins in the Human Interactome. PLoS Computational 
+Biology, 11(4), 1–21. https://doi.org/10.1371/journal.pcbi.1004120}
 }

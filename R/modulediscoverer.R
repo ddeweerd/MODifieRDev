@@ -3,7 +3,7 @@
 #' A clique based Algorithm by Sebastian Vlaic to produce disease module from Differentially Expressed Genes
 #'
 #'
-#' @param diffgen A nx2 dataframe consisting of differentially expressed genes and their respective -log10 p values
+#' @inheritParams clique_sum
 #' @param ppi_network A dataframe  PPi network of your choice
 #' @param deg_cutoff Numeric pvalue cutoff for choosing number of differentially expressed genes
 #' @param repeats Number of repeats to be performed for single seed run
