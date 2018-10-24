@@ -14,7 +14,7 @@ Convert the module genes in a MODifieR_input object from ENTREZ gene IDs to offi
 }
 \details{
 The function uses the \code{org.Hs.egSYMBOL} function from the package \code{org.Hs.eg.db}
-to convert ENTREZ IDs to official gene symbols
+to convert official gene symbols to ENTREZ IDs
 }
 \seealso{
 \code{\link[org.Hs.eg.db]{org.Hs.egSYMBOL}}

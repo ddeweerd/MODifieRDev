@@ -11,19 +11,34 @@ modulediscoverer(MODifieR_input, ppi_network, permutations = 10000,
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{ppi_network}{A dataframe  PPi network of your choice}
+\item{ppi_network}{A PPi network as a 2 column dataframe}
 
-\item{deg_cutoff}{Numeric pvalue cutoff for choosing number of differentially expressed genes}
+\item{permutations}{Number of permutations to perform to identify the community structure}
 
-\item{repeats}{Number of repeats to be performed for single seed run}
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 
-\item{times}{Number of iterations to be performed}
+\item{repeats}{Number of times the algorithm is repeated}
 
 \item{clique_cutoff}{cutoff pvalue for significant cliques}
 }
 \value{
-A MODifieR class object with disease module and settings
+modulediscoverer returns an object of class "MODifieR_module" with subclass "module_discoverer". 
+This object is a named list containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{graph}{\code{\link[igraph]{igraph}} graph containing the disease module}
+\item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
-A clique based Algorithm by Sebastian Vlaic to produce disease module from Differentially Expressed Genes
+A clique based algorithm by Vlaic et al. to produce disease module from Differentially Expressed Genes
+}
+\details{
+This is an implmentation of the \emph{single seed} Module Discoverer algorithm.
+The code has been adapted from the orignal code by Vlaic et al. For details, please see the paper referenced below
+}
+\references{
+\cite{Vlaic, S., Tokarski-schnelle, C., Gustafsson, M., Dahmen, U., Guthke, R., & Schuster, S. (2017). 
+ModuleDiscoverer: Identification of regulatory modules in protein-protein interaction networks., 1–17.}
+}
+\seealso{
+\url{https://www.leibniz-hki.de/en/modulediscoverer.html}
 }

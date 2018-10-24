@@ -6,7 +6,7 @@
 \usage{
 wgcna_trait(MODifieR_input, minModuleSize = 30, deepSplit = 2,
   pamRespectsDendro = F, mergeCutHeight = 0.1, numericLabels = T,
-  min_KME = 0, pval_cutoff = 0.05, save_toms = T,
+  pval_cutoff = 0.05, saveTOMs = T,
   dataset_name = deparse(substitute(MODifieR_input)))
 }
 \arguments{
@@ -29,6 +29,11 @@ the branch that the object is merged into.
 
 \item{numericLabels}{ logical: should the returned modules be labeled by colors (\code{FALSE}), or by
 numbers (\code{TRUE})? }
+
+\item{pval_cutoff}{The p-value cutoff to be used for significant co-expression modules (colors)}
+
+\item{saveTOMs}{ logical: should the consensus topological overlap matrices for each block be saved
+and returned?  }
 }
 \description{
 An implementation of WGCNA to correlate coexpression modules to disease

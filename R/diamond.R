@@ -1,6 +1,6 @@
 #' DIAMOnD module
 #' 
-#' A seed gene based algorithm to identify disease module from Differentially Expressed Genes
+#' A seed gene based algorithm to identify disease module from differentially expressed genes
 #' 
 #' @inheritParams clique_sum
 #' @param n_output_genes maximum number of genes to be included in the final module 
@@ -11,10 +11,7 @@
 #' data is handled by temporary files. The only change to the orginal algorithm is the option to include the seed genes
 #' to the module. There are also function to add or remove the seed genes from the output object, namely:
 #' \code{\link{add_diamond_seed_genes}} and \code{\link{remove_diamond_seed_genes}}
-#' 
-#' the only change is the option
-#' to include seed genes in the final module. The original python script is called from within R and  For a detailed description of how the algorithm works, please see
-#' the paper referenced below.
+#' For a detailed description of how the algorithm works, please see the paper referenced below.
 #' @return 
 #' diamond returns an object of class "MODifieR_module" with subclass "DIAMOnD". 
 #' This object is a named list containing the following components:
@@ -26,7 +23,7 @@
 #' \cite{Ghiassian, S. D., Menche, J., & Barabási, A. L. (2015). 
 #' A DIseAse MOdule Detection (DIAMOnD) Algorithm Derived from a Systematic Analysis of 
 #' Connectivity Patterns of Disease Proteins in the Human Interactome. PLoS Computational 
-#' Biology, 11(4), 1–21. https://doi.org/10.1371/journal.pcbi.1004120}
+#' Biology, 11(4), 1–21. \url{https://doi.org/10.1371/journal.pcbi.1004120}}
 #' @export
 diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
                     include_seed = T, tempfile_genes = tempfile(), dataset_name = NULL){

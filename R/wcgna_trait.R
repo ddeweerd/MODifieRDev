@@ -19,10 +19,11 @@ wgcna_module_constructor <- function(module_genes, probe_info_table,
 #'
 #' @inheritParams clique_sum
 #' @inheritParams WGCNA::blockwiseModules
+#' @param pval_cutoff The p-value cutoff to be used for significant co-expression modules (colors)
 #' @export
 wgcna_trait <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
-                        mergeCutHeight = 0.1, numericLabels = T, min_KME = 0, pval_cutoff = 0.05,
-                        save_toms = T, dataset_name = deparse(substitute(MODifieR_input))){
+                        mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05,
+                        saveTOMs = T, dataset_name = deparse(substitute(MODifieR_input))){
   # Retrieve settings
   default_args <- formals()
   user_args <- as.list(match.call(expand.dots = T)[-1])

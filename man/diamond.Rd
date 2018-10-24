@@ -30,21 +30,18 @@ This object is a named list containing the following components:
 \item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
-A seed gene based algorithm to identify disease module from Differentially Expressed Genes
+A seed gene based algorithm to identify disease module from differentially expressed genes
 }
 \details{
 A slightly modified version of the original DIAMOnD python script is called from within R. the exchange of 
 data is handled by temporary files. The only change to the orginal algorithm is the option to include the seed genes
 to the module. There are also function to add or remove the seed genes from the output object, namely:
 \code{\link{add_diamond_seed_genes}} and \code{\link{remove_diamond_seed_genes}}
-
-the only change is the option
-to include seed genes in the final module. The original python script is called from within R and  For a detailed description of how the algorithm works, please see
-the paper referenced below.
+For a detailed description of how the algorithm works, please see the paper referenced below.
 }
 \references{
 \cite{Ghiassian, S. D., Menche, J., & Barabási, A. L. (2015). 
 A DIseAse MOdule Detection (DIAMOnD) Algorithm Derived from a Systematic Analysis of 
 Connectivity Patterns of Disease Proteins in the Human Interactome. PLoS Computational 
-Biology, 11(4), 1–21. https://doi.org/10.1371/journal.pcbi.1004120}
+Biology, 11(4), 1–21. \url{https://doi.org/10.1371/journal.pcbi.1004120}}
 }

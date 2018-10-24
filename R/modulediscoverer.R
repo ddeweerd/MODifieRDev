@@ -1,15 +1,30 @@
 #'Module Discoverer
 #'
-#' A clique based Algorithm by Sebastian Vlaic to produce disease module from Differentially Expressed Genes
+#' A clique based algorithm by Vlaic et al. to produce disease module from Differentially Expressed Genes
 #'
 #'
 #' @inheritParams clique_sum
-#' @param ppi_network A dataframe  PPi network of your choice
-#' @param deg_cutoff Numeric pvalue cutoff for choosing number of differentially expressed genes
-#' @param repeats Number of repeats to be performed for single seed run
-#' @param times  Number of iterations to be performed
+#' @param repeats Number of times the algorithm is repeated
+#' @param permutations  Number of permutations to perform to identify the community structure
 #' @param clique_cutoff cutoff pvalue for significant cliques
-#' @return A MODifieR class object with disease module and settings
+#' 
+#' @details 
+#' This is an implmentation of the \emph{single seed} Module Discoverer algorithm.
+#' The code has been adapted from the orignal code by Vlaic et al. For details, please see the paper referenced below
+#' 
+#' @return 
+#' modulediscoverer returns an object of class "MODifieR_module" with subclass "module_discoverer". 
+#' This object is a named list containing the following components:
+#' \item{module_genes}{A character vector containing the genes in the final module}
+#' \item{graph}{\code{\link[igraph]{igraph}} graph containing the disease module}
+#' \item{settings}{A named list containing the parameters used in generating the object}
+#' 
+#' @seealso 
+#' 
+#' \url{https://www.leibniz-hki.de/en/modulediscoverer.html}
+#' 
+#' @references \cite{Vlaic, S., Tokarski-schnelle, C., Gustafsson, M., Dahmen, U., Guthke, R., & Schuster, S. (2017). 
+#' ModuleDiscoverer: Identification of regulatory modules in protein-protein interaction networks., 1–17.}
 #' @export
 modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, deg_cutoff = 0.05, repeats = 15,
                              times = 1000, clique_cutoff = 0.01, dataset_name = NULL){

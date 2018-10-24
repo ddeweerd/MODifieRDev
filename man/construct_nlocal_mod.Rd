@@ -5,7 +5,7 @@
 \title{Non-local network construction}
 \usage{
 construct_nlocal_mod(input, db, species = c("human", "ath"),
-  ID.type = c("Gene symbol", "Entrez Gene"), hierarchy = 1)
+  hierarchy = 1)
 }
 \arguments{
 \item{input}{A data frame containing the experimental data.}
@@ -13,8 +13,6 @@ construct_nlocal_mod(input, db, species = c("human", "ath"),
 \item{db}{Integrated PPI database, either \code{Biogrid} or \code{\link{HPRD}}.}
 
 \item{species}{This parameter indicates the biological species to which analyzable PPI data is related; currently \code{human} for "Homo sapiens" and \code{ath} for "Arabidopsis thaliana" are available.}
-
-\item{ID.type}{The ID type of the biological genes or proteins, possible values are \code{Entrez gene} and \code{Gene symbol} when \code{db} is \code{Biogrid}, or \code{Gene symbol} when \code{db} is \code{\link{HPRD}}.}
 
 \item{hierarchy}{This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.}
 }

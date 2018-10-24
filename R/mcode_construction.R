@@ -7,7 +7,6 @@
 ##' @param node.attribute A data frame containing node attributes. Default value is \code{NULL}.
 ##' @param db Integrated PPI database, either \code{Biogrid} or \code{\link{HPRD}}.
 ##' @param species This parameter indicates the biological species to which analyzable PPI data is related; currently \code{human} for "Homo sapiens" and \code{ath} for "Arabidopsis thaliana" are available.
-##' @param ID.type The ID type of the biological genes or proteins, possible values are \code{Entrez gene} and \code{Gene symbol} when \code{db} is \code{Biogrid}, or \code{Gene symbol} when \code{db} is \code{\link{HPRD}}.
 ##' @param hierarchy This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.
 ##' @return A network in igraph format.
 ##' @seealso \code{\link{construct_local}}, \code{\link{construct_nlocal}}
@@ -22,18 +21,16 @@
 ##' net<-construction(input=nlocal,db="HPRD",species="human",ID.type="Gene symbol",hierarchy=1)
 construction_mod <- function(input,local.net=FALSE,node.attribute=NULL,
                        db, species=c("human","ath"),
-                       ID.type=c("Gene symbol","Entrez Gene"),
                        hierarchy=1)
 {
   species <- match.arg(species)
-  ID.type <- match.arg(ID.type)
-  
+
   if(local.net){
     graph <- construct_local_mod(input=input,node.attribute=node.attribute)
   }else{
     species <- match.arg(species)
     graph <- construct_nlocal_mod(input=input,db=db,species=species,
-                            ID.type=ID.type,hierarchy=hierarchy)
+                           hierarchy=hierarchy)
   }
   
   return(graph)
@@ -83,7 +80,6 @@ construct_local_mod <- function(input,node.attribute)
 ##' @param input A data frame containing the experimental data.
 ##' @param db Integrated PPI database, either \code{Biogrid} or \code{\link{HPRD}}.
 ##' @param species This parameter indicates the biological species to which analyzable PPI data is related; currently \code{human} for "Homo sapiens" and \code{ath} for "Arabidopsis thaliana" are available.
-##' @param ID.type The ID type of the biological genes or proteins, possible values are \code{Entrez gene} and \code{Gene symbol} when \code{db} is \code{Biogrid}, or \code{Gene symbol} when \code{db} is \code{\link{HPRD}}.
 ##' @param hierarchy This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.
 ##' @return A network in igraph format.
 ##' @seealso \code{\link{construction}}, \code{\link{construct_local}}.
@@ -91,13 +87,10 @@ construct_local_mod <- function(input,node.attribute)
 ##' @examples
 ##' nlocal<-data.frame(c("DVL1","DVL2","DVL3"))
 ##' net<-construct_nlocal(input=nlocal,db="HPRD",species="human",ID.type="Gene symbol",hierarchy=1)
-construct_nlocal_mod<-function(input,db, species=c("human","ath"),
-                           ID.type=c("Gene symbol","Entrez Gene"),
-                           hierarchy=1)
+construct_nlocal_mod<-function(input,db, species=c("human","ath"),hierarchy=1)
 {
   species <- match.arg(species)
-  ID.type <- match.arg(ID.type)
-  
+
   if(!missing(input)){
     if( !is.data.frame(input)){
       stop("Not a data frame")
@@ -116,7 +109,7 @@ construct_nlocal_mod<-function(input,db, species=c("human","ath"),
   index <- match(input[,1],V(net)$name)
   index <- index[!is.na(index)]
   ##  create a  sub network
-  graph <- igraph::induced.subgraph(graph=net,unlist(igraph::neighborhood(graph=net,order=hierarchy,nodes=index)))
+  graph <- igraph::induced.subgraph(graph=net, unlist(igraph::neighborhood(graph=net,order=hierarchy,nodes=index)))
   ##  vertex.hierarchy
   V(graph)$vertex.hierarchy<-rep(hierarchy,vcount(graph))
   if(hierarchy>=1){

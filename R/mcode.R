@@ -1,17 +1,36 @@
 #' MCODE
 #' 
-#' A clique based Algorithm to identify disease module from differentially expressed genes 
+#' A clique based algorithm to identify disease modules from differentially expressed genes 
+#' originally by Bader et al
+#' 
+#' @details 
+#' 
+#' Much of the code an documentation has been taken from the now defunct package "ProNet"
 #' 
 #' @inheritParams clique_sum
-#' @param type keytype of the gene that is provide (default = "Gene Symbol")
-#' @param hierarchy the hierarchical level of the PPI network to be used (default = 1)
+#' @param hierarchy This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.
 #' @param vwp Vertex weight percentage. Default value is 0.5.
 #' @param haircut	Boolean value, whether to remove singly-connected nodes from clusters (TRUE) or not (FALSE).
 #' @param fluff	Boolean value, whether to spand cluster cores by one neighbour shell outwards (TRUE) or not (FALSE).
 #' @param fdt	Cluster density cutoff. Default value is 0.8.
 #' @param loops	Boolean value, whether to include self-loops (TRUE) or not (FALSE).
+#' 
+#' @return 
+#' mod_mcode returns a list of objects of class "MODifieR_module" with subclass "Mcode". 
+#' The objects are named lists containing the following components:
+#' \item{module_genes}{A character vector containing the genes in the final module}
+#' \item{module_scores}{A numeric value that denotes the score of the module. Higher is better}
+#' \item{settings}{A named list containing the parameters used in generating the object}
+#' 
+#' @seealso 
+#' 
+#' \url{https://github.com/cran/ProNet}
+#' 
+#' @references \cite{Bader, G. D., & Hogue, C. W. (2003). An automated method for finding molecular complexes in 
+#' large protein interaction networks. BMC Bioinformatics, 4(1), 2. \url{https://doi.org/10.1186/1471-2105-4-2}}
+#' 
 #' @export
-mod_mcode <- function(MODifieR_input, ppi_network, type = "Gene symbol", hierarchy = 1, vwp =0.5, haircut = F, fluff = F,
+mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, haircut = F, fluff = F,
                   fdt = 0.8, loops = T, deg_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL){
   default_args <- formals()
   user_args <- as.list(match.call(expand.dots = T)[-1])
@@ -35,7 +54,6 @@ mod_mcode <- function(MODifieR_input, ppi_network, type = "Gene symbol", hierarc
   network <-construction_mod(input = as.data.frame(deg_genes$hgnc_symbol),
                          db = ppi_network,
                          species = "human",
-                         ID.type = type,
                          hierarchy = 1)
 
   result <- mcode(network, vwp = vwp, haircut = haircut,

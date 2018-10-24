@@ -44,7 +44,7 @@ dime <- function(MODifieR_input, dataset_name = NULL){
   dimVg = length(V(g))
   popsize = 50
   
-  com <- MODifieRDev:::commextr(d = dimVg, 
+  com <- commextr(d = dimVg, 
                                 ps = as.integer(popsize), 
                                 matrix = as.vector(adj), 
                                 res = as.integer(as.vector(rep(0,dimVg))), 

@@ -11,7 +11,8 @@ Imports:
     doParallel,
     Rcpp,
     fdrtool,
-    dynamicTreeCut
+    dynamicTreeCut,
+    flashClust
 Depends:
     igraph,
     org.Hs.eg.db,

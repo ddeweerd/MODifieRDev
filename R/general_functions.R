@@ -5,8 +5,9 @@
 #' @import WGCNA
 #' @importFrom Rcpp sourceCpp
 #' @importFrom flashClust flashClust
-#' @useDynLib MODifieRDev
 #' @importFrom dynamicTreeCut printFlush
+#' @useDynLib MODifieRDev
+
 
 #'@title Convert the module genes in a MODifieR_input object from official gene symbols to ENTREZ gene IDs
 #' @param MODifieR_module An object of class MODifieR_module
@@ -52,54 +53,13 @@ settings_function <- function(...) {
   func_args <- gsub(pattern = "\"", replacement = "", x = func_args)
   return(func_args)
 }
-#' @export
-get_string_DB_ppi <- function(version = "10", score_threshold = 900, simplify_graph = T){
-  string_db <- STRINGdb$new( version=as.character(version), species=9606,
-                             score_threshold=score_threshold, input_directory="" )
-  ppi_network <- string_db$get_graph()
 
-  if (simplify_graph == T){
-    ppi_network <- igraph::simplify(ppi_network)
-  }
 
-  return (ppi_network)
-}
-
-#' @export
-symbol_to_prot <- function(dataframe, remove_NA = T){
-  prot_ids_list <-  mapIds(org.Hs.eg.db,
-                      keys=dataframe[,1],
-                      column="ENSEMBLPROT",
-                      keytype="SYMBOL",
-                      multiVals="list")
-  prot_ids_unlisted <- lapply(X = 1:length(prot_ids_list), FUN = function(x){
-    cbind(names(prot_ids_list[x]), unlist(prot_ids_list[x], use.names = F))
-  })
-
-  prot_ids_final <- base::Reduce(f = rbind, x = prot_ids_unlisted)
-  if (remove_NA == T){
-    prot_ids_final <- na.omit(prot_ids_final)
-  }
-
-  colnames(prot_ids_final) <- c("hgnc_symbol", "ensembl_peptide_id")
-
-  return(prot_ids_final)
-}
-#' @export
-prot_to_entrez <- function(dataframe){
-  entrez_ids <-  na.omit(t(as.data.frame(mapIds(org.Hs.eg.db,
-                        keys= dataframe[,1],
-                        column="ENTREZID",
-                        keytype="ENSEMBLPROT",
-                        multiVals="list"))))
-  return(entrez_ids[,1])
-}
-
-#' @export
+#' Generic getter for data fields
 extract_module_data <- function(MODifieR_module, data_field){
   get(data_field, MODifieR_module)
 }
-#' @export
+#Generic subclass extractor
 extract_module_class <- function(MODifieR_module){
   class(MODifieR_module)[2]
 }
