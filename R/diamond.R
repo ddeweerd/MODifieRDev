@@ -53,7 +53,7 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
               row.names = FALSE , quote = FALSE, col.names = F)
   
   # Sets python path
-  python_path <- paste(system.file(package="MODifieR"), "DIAMOnD_MODifieR.py", sep="/")
+  python_path <- paste(system.file(package="MODifieRDev"), "DIAMOnD_MODifieR.py", sep="/")
   # Concetenates python call with CL arguments
   python_call <- paste("python", python_path, input_ppi, input_genes,
                        n_output_genes, seed_weight, sep = " ")
