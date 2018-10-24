@@ -10,19 +10,19 @@
 # Last Modified: 2014-12-05
 
 # This code runs the DIAMOnD algorithm as described in
-# 
+#
 # A DIseAse MOdule Detection (DIAMOnD) Algorithm derived from a
 # systematic analysis of connectivity patterns of disease proteins in
 # the Human Interactome
 #
 # by Susan Dina Ghiassian, Joerg Menche & Albert-Laszlo Barabasi
-# 
-# 
+#
+#
 # -----------------------------------------------------------------------
 """
 
 import time
-import cPickle
+#import cPickle
 import networkx as nx
 import numpy as np
 import copy
@@ -34,25 +34,25 @@ import sys
 
 # =============================================================================
 def print_usage():
-   
-    print ' '
-    print '        usage: ./DIAMOnD network_file seed_file n alpha(optional) outfile_name (optional)'
-    print '        -----------------------------------------------------------------'
-    print '        network_file : The edgelist must be provided as any delimiter-separated'
-    print '                       table. Make sure the delimiter does not exit in gene IDs' 
-    print '                       and is consistent across the file.' 
-    print '                       The first two columns of the table will be'
-    print '                       interpreted as an interaction gene1 <==> gene2'
-    print '        seed_file    : table containing the seed genes (if table contains'
-    print '                       more than one column they must be tab-separated;'
-    print '                       the first column will be used only)'
-    print '        n            : desired number of DIAMOnD genes, 200 is a reasonable'
-    print '                       starting point.'
-    print '        alpha        : an integer representing weight of the seeds,default'
-    print '                       value is set to 1'
-    print '        outfile_name : results will be saved under this file name'
-    print '                       by default the outfile_name is set to "first_n_added_nodes_weight_alpha.txt"'
-    print ' '
+
+    print (' ')
+    print ('        usage: ./DIAMOnD network_file seed_file n alpha(optional) outfile_name (optional)')
+    print ('        -----------------------------------------------------------------')
+    print ('        network_file : The edgelist must be provided as any delimiter-separated')
+    print ('                       table. Make sure the delimiter does not exit in gene IDs')
+    print ('                       and is consistent across the file.' )
+    print ('                       The first two columns of the table will be')
+    print ('                       interpreted as an interaction gene1 <==> gene2')
+    print ('        seed_file    : table containing the seed genes (if table contains')
+    print ('                       more than one column they must be tab-separated;')
+    print ('                       the first column will be used only)')
+    print ('        n            : desired number of DIAMOnD genes, 200 is a reasonable')
+    print ('                       starting point.')
+    print ('        alpha        : an integer representing weight of the seeds,default')
+    print ('                       value is set to 1')
+    print ('        outfile_name : results will be saved under this file name')
+    print ('                       by default the outfile_name is set to "first_n_added_nodes_weight_alpha.txt"')
+    print (' ')
 
 
 # =============================================================================
@@ -65,8 +65,8 @@ def check_input_style(input_list):
     except:
         print_usage()
         sys.exit(0)
-        return 
-    
+        return
+
     alpha = 1
     outfile_name = 'first_%d_added_nodes_weight_%d.txt'%(max_number_of_added_nodes,alpha)
 
@@ -75,14 +75,14 @@ def check_input_style(input_list):
             alpha = int(input_list[4])
             outfile_name = 'first_%d_added_weight_%d.txt'%(max_number_of_added_nodes,alpha)
         except:
-            outfile_name = input_list[4] 
-    
-    if len(input_list)==6:    
+            outfile_name = input_list[4]
+
+    if len(input_list)==6:
         try:
             alpha = int(input_list[4])
             outfile_name = input_list[5]
         except:
-            print_usage()       
+            print_usage()
             sys.exit(0)
             return
     return network_edgelist_file,seeds_file,max_number_of_added_nodes,alpha,outfile_name
@@ -113,7 +113,7 @@ def read_input(network_file,seed_file):
             line_delimiter = dialect.delimiter
             break
     if line_delimiter == None:
-        print 'network_file format not correct'
+        print ('network_file format not correct')
         sys.exit(0)
 
 
@@ -149,7 +149,7 @@ def read_input(network_file,seed_file):
 # ================================================================================
 def compute_all_gamma_ln(N):
     """
-    precomputes all logarithmic gammas 
+    precomputes all logarithmic gammas
     """
     gamma_ln = {}
     for i in range(1,N+1):
@@ -161,40 +161,40 @@ def compute_all_gamma_ln(N):
 def logchoose(n, k, gamma_ln):
     if n-k+1 <= 0:
         return scipy.infty
-    lgn1  = gamma_ln[n+1]                                                      
-    lgk1  = gamma_ln[k+1]                                                      
-    lgnk1 = gamma_ln[n-k+1]                                                    
-    return lgn1 - [lgnk1 + lgk1]                                               
+    lgn1  = gamma_ln[n+1]
+    lgk1  = gamma_ln[k+1]
+    lgnk1 = gamma_ln[n-k+1]
+    return lgn1 - [lgnk1 + lgk1]
 
 # =============================================================================
-def gauss_hypergeom(x, r, b, n, gamma_ln):                                     
+def gauss_hypergeom(x, r, b, n, gamma_ln):
     return np.exp(logchoose(r, x, gamma_ln) +
                   logchoose(b, n-x, gamma_ln) -
-                  logchoose(r+b, n, gamma_ln))     
-                                                                               
+                  logchoose(r+b, n, gamma_ln))
+
 # =============================================================================
-def pvalue(kb, k, N, s, gamma_ln):                                        
-    """                                                                        
-    -------------------------------------------------------------------        
-    Computes the p-value for a node that has kb out of k links to              
-    seeds, given that there's a total of s sees in a network of N nodes.       
-                                                                               
-    p-val = \sum_{n=kb}^{k} HypergemetricPDF(n,k,N,s)                          
-    -------------------------------------------------------------------        
-    """                                                                        
-    p = 0.0                                                                    
-    for n in range(kb,k+1):                                                    
-        if n > s:                                                              
-            break                                                              
-        prob = gauss_hypergeom(n, s, N-s, k, gamma_ln)                         
-        # print prob                                                           
+def pvalue(kb, k, N, s, gamma_ln):
+    """
+    -------------------------------------------------------------------
+    Computes the p-value for a node that has kb out of k links to
+    seeds, given that there's a total of s sees in a network of N nodes.
+
+    p-val = \sum_{n=kb}^{k} HypergemetricPDF(n,k,N,s)
+    -------------------------------------------------------------------
+    """
+    p = 0.0
+    for n in range(kb,k+1):
+        if n > s:
+            break
+        prob = gauss_hypergeom(n, s, N-s, k, gamma_ln)
+        # print prob
         p += prob
-                                                                 
-                                                                               
-    if p > 1:                                                                  
-        return 1                                                               
-    else:                                                                      
-        return float(p)                                                               
+
+
+    if p > 1:
+        return 1
+    else:
+        return float(p)
 
 # =============================================================================
 def get_neighbors_and_degrees(G):
@@ -210,55 +210,55 @@ def get_neighbors_and_degrees(G):
 # =============================================================================
 # Reduce number of calculations
 # =============================================================================
-def reduce_not_in_cluster_nodes(all_degrees,neighbors,G,not_in_cluster,cluster_nodes,alpha): 
-    reduced_not_in_cluster = {}                                                        
-    kb2k = defaultdict(dict)                                                           
-    for node in not_in_cluster:                                                        
-        
-        k = all_degrees[node]                                                          
-        kb = 0                                                                         
-        # Going through all neighbors and counting the number of module neighbors        
-        for neighbor in neighbors[node]:                                               
-            if neighbor in cluster_nodes:                                              
+def reduce_not_in_cluster_nodes(all_degrees,neighbors,G,not_in_cluster,cluster_nodes,alpha):
+    reduced_not_in_cluster = {}
+    kb2k = defaultdict(dict)
+    for node in not_in_cluster:
+
+        k = all_degrees[node]
+        kb = 0
+        # Going through all neighbors and counting the number of module neighbors
+        for neighbor in neighbors[node]:
+            if neighbor in cluster_nodes:
                 kb += 1
-        
+
         #adding wights to the the edges connected to seeds
         k += (alpha-1)*kb
         kb += (alpha-1)*kb
         kb2k[kb][k] =node
 
-    # Going to choose the node with largest kb, given k                                
-    k2kb = defaultdict(dict)                                                           
-    for kb,k2node in kb2k.iteritems():                                                 
-        min_k = min(k2node.keys())                                                     
-        node = k2node[min_k]                                                           
-        k2kb[min_k][kb] = node                                                         
-                                                                                       
-    for k,kb2node in k2kb.iteritems():                                                 
-        max_kb = max(kb2node.keys())                                                   
-        node = kb2node[max_kb]                                                         
-        reduced_not_in_cluster[node] =(max_kb,k)                                       
-                                                                                       
-    return reduced_not_in_cluster                                                      
+    # Going to choose the node with largest kb, given k
+    k2kb = defaultdict(dict)
+    for kb,k2node in kb2k.items():
+        min_k = min(k2node.keys())
+        node = k2node[min_k]
+        k2kb[min_k][kb] = node
+
+    for k,kb2node in k2kb.items():
+        max_kb = max(kb2node.keys())
+        node = kb2node[max_kb]
+        reduced_not_in_cluster[node] =(max_kb,k)
+
+    return reduced_not_in_cluster
 
 #======================================================================================
 #   C O R E    A L G O R I T H M
 #======================================================================================
 def diamond_iteration_of_first_X_nodes(G,S,X,alpha):
-    
+
     """
 
-    Parameters:                                                                     
-    ----------                                                                      
+    Parameters:
+    ----------
     - G:     graph
-    - S:     seeds 
+    - S:     seeds
     - X:     the number of iterations, i.e only the first X gened will be
              pulled in
     - alpha: seeds weight
 
-    Returns:                                                                        
+    Returns:
     --------
-    
+
     - added_nodes: ordered list of nodes in the order by which they
       are agglomerated. Each entry has 4 info:
 
@@ -268,7 +268,7 @@ def diamond_iteration_of_first_X_nodes(G,S,X,alpha):
       * p    : p-value at agglomeration
 
     """
-    
+
     N = G.number_of_nodes()
 
     added_nodes = []
@@ -283,19 +283,19 @@ def diamond_iteration_of_first_X_nodes(G,S,X,alpha):
     # ------------------------------------------------------------------
     # Setting up initial set of nodes in cluster
     # ------------------------------------------------------------------
-    
+
     cluster_nodes = set(S)
     not_in_cluster = set()
     s0 = len(cluster_nodes)
-    
+
     s0 += (alpha-1)*s0
     N +=(alpha-1)*s0
-    
+
     # ------------------------------------------------------------------
     # precompute the logarithmic gamma functions
     # ------------------------------------------------------------------
     gamma_ln = compute_all_gamma_ln(N+1)
-    
+
     # ------------------------------------------------------------------
     # Setting initial set of nodes not in cluster
     # ------------------------------------------------------------------
@@ -306,45 +306,45 @@ def diamond_iteration_of_first_X_nodes(G,S,X,alpha):
 
     # ------------------------------------------------------------------
     #
-    # M A I N     L O O P 
+    # M A I N     L O O P
     #
     # ------------------------------------------------------------------
 
     all_p = {}
 
-    while len(added_nodes) < X:    
+    while len(added_nodes) < X:
 
         # ------------------------------------------------------------------
         #
         # Going through all nodes that are not in the cluster yet and
-        # record k, kb and p 
+        # record k, kb and p
         #
         # ------------------------------------------------------------------
-        
+
         info = {}
-    
+
         pmin = 10
         next_node = 'nix'
         reduced_not_in_cluster = reduce_not_in_cluster_nodes(all_degrees,
                                                              neighbors,G,
                                                              not_in_cluster,
                                                              cluster_nodes,alpha)
-        
-        for node,kbk in reduced_not_in_cluster.iteritems():
+
+        for node,kbk in reduced_not_in_cluster.items():
             # Getting the p-value of this kb,k
             # combination and save it in all_p, so computing it only once!
             kb,k = kbk
             try:
                 p = all_p[(k,kb,s0)]
             except KeyError:
-                p = pvalue(kb, k, N, s0, gamma_ln)    
+                p = pvalue(kb, k, N, s0, gamma_ln)
                 all_p[(k,kb,s0)] = p
-             
+
             # recording the node with smallest p-value
             if p < pmin:
                 pmin = p
                 next_node = node
-    
+
             info[node] = (k,kb,p)
 
         # ---------------------------------------------------------------------
@@ -366,7 +366,7 @@ def diamond_iteration_of_first_X_nodes(G,S,X,alpha):
 # ===========================================================================
 #
 #   M A I N    D I A M O n D    A L G O R I T H M
-# 
+#
 # ===========================================================================
 def DIAMOnD(G_original,seed_genes,max_number_of_added_nodes,alpha,outfile = None):
 
@@ -377,8 +377,8 @@ def DIAMOnD(G_original,seed_genes,max_number_of_added_nodes,alpha,outfile = None
     ------
      - G_original :
              The network
-     - seed_genes : 
-             a set of seed genes 
+     - seed_genes :
+             a set of seed genes
      - max_number_of_added_nodes:
              after how many added nodes should the algorithm stop
      - alpha:
@@ -394,19 +394,19 @@ def DIAMOnD(G_original,seed_genes,max_number_of_added_nodes,alpha,outfile = None
             * k    : degree of the node
             * kb   : number of neighbors that are part of the module (at agglomeration)
             * p    : connectivity p-value at agglomeration
-      -           
+      -
     """
-    
+
     # 1. throwing away the seed genes that are not in the network
     all_genes_in_network = set(G_original.nodes())
     seed_genes = set(seed_genes)
     disease_genes = seed_genes & all_genes_in_network
     ignored_genes = seed_genes.difference(all_genes_in_network)
-	
+
     #if len(disease_genes) != len(seed_genes):
         #print "DIAMOnD(): ignoring %s of %s seed genes that are not in the network" %(
-            #len(seed_genes - all_genes_in_network), len(seed_genes)) 
-    # 2. agglomeration algorithm. 
+            #len(seed_genes - all_genes_in_network), len(seed_genes))
+    # 2. agglomeration algorithm.
     added_nodes = diamond_iteration_of_first_X_nodes(G_original,
                                                      disease_genes,
                                                      max_number_of_added_nodes,alpha)
@@ -420,23 +420,23 @@ def DIAMOnD(G_original,seed_genes,max_number_of_added_nodes,alpha,outfile = None
         #p = float(DIAMOnD_node_info[3])
             #print>>fout,'\t'.join(map(str,([DIAMOnD_node]))) + '\t',
         #print map(str,([DIAMOnD_node]))
-    
-    
+
+
     nodes_name = [str(item[0]) for item in added_nodes]
     nodes_degree = [str(item[1]) for item in added_nodes]
     nodes_n_neighbors = [str(item[2]) for item in added_nodes]
     nodes_p = [str(item[3]) for item in added_nodes]
-    print ', '.join(disease_genes)
-    print ', '.join(ignored_genes)
-    print ', '.join(nodes_name)
-    print ', '.join(nodes_degree)
-    print ', '.join(nodes_n_neighbors)
-    print ', '.join(nodes_p)
-  
-	#print>>fout,'\n',
-  
+    print (', '.join(disease_genes))
+    print (', '.join(ignored_genes))
+    print (', '.join(nodes_name))
+    print (', '.join(nodes_degree))
+    print (', '.join(nodes_n_neighbors))
+    print (', '.join(nodes_p))
 
-			
+	#print>>fout,'\n',
+
+
+
     return added_nodes
 
 
@@ -463,23 +463,21 @@ if __name__ == '__main__':
     #
     # [3] number of desired iterations
     #
-    # [4] (optional) seeds weight (integer), default value is 1 
-    # [5] (optional) name for the results file 
+    # [4] (optional) seeds weight (integer), default value is 1
+    # [5] (optional) name for the results file
 
     #check if input style is correct
     input_list = sys.argv
     network_edgelist_file,seeds_file,max_number_of_added_nodes,alpha,outfile_name= check_input_style(input_list)
-    
+
     # read the network and the seed genes:
     G_original,seed_genes = read_input(network_edgelist_file,seeds_file)
-    
+
     # run DIAMOnD
     added_nodes = DIAMOnD(G_original,
                           seed_genes,
                           max_number_of_added_nodes,alpha,
                           outfile=outfile_name)
-    
+
     #print "\n results have been saved to '%s' \n" %outfile_name
-
-
 
