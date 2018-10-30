@@ -5,7 +5,7 @@
 \title{DIAMOnD module}
 \usage{
 diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
-  n_output_genes = 200, seed_weight = 10, include_seed = T,
+  n_output_genes = 200, seed_weight = 10, include_seed = TRUE,
   tempfile_genes = tempfile(), dataset_name = NULL)
 }
 \arguments{
@@ -27,6 +27,9 @@ This object is a named list containing the following components:
 \item{module_genes}{A character vector containing the genes in the final module}
 \item{seed_genes}{Character vector containing genes that have been used as seed genes in the algorithm}
 \item{ignored_genes}{Potential seed genes that have not been used to infer the module}
+\item{added_genes} A table containing information on all added genes. First column is the name of the gene,
+the second column is the degree of the node (gene). The third column is the number of +1 neighbors 
+and the fourth column is the p-value.
 \item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{

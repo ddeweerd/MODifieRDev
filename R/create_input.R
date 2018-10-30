@@ -13,7 +13,6 @@
 #'@param group_labels Labels for each group, for example "patient" and "control"
 #'@param expression boolean, calculate expression values?
 #'@param differential_expression boolean, calculate differentially expressed data?
-#'@param correlation_clique boolean, calculate correlation matrix?
 #' @inheritParams WGCNA::collapseRows
 #' @details 
 #' The function creates an input object to be used in all disease module inference methods. Differentially
@@ -36,7 +35,7 @@
 #' \item{group_indici}{A named list containg 2 numeric vectors. The names are the group labels and the values 
 #' are the group indici}
 #' @export
-create_input <- function (expression_matrix, probe_map, group1_indici, group2_indici, group1_label, group2_label,
+create_input <- function (expression_matrix, annotation_table, group1_indici, group2_indici, group1_label, group2_label,
                           expression = T,  differential_expression= T, method = "MaxMean"){
   #Initialize outputs
   diff_genes <- NULL
@@ -47,25 +46,32 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
   names(group_indici) <- c(group1_label, group2_label)
   
   #Making sure column names for the annotation dataframe are right...
-  colnames(probe_map) <- c("PROBEID", "SYMBOL", "ENTREZID")
+  colnames(annotation_table) <- c("PROBEID", "SYMBOL", "ENTREZID")
   
   #Should expression data be generated? 
   if (expression == T){
+    
+    freq_probes <- table(annotation_table$PROBEID)
+    
+    probe_names <- names(freq_probes[freq_probes == 1])
+    
+    annotation_table <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
+    
     collapsed_data <-WGCNA::collapseRows(datET = expression_matrix,
-                                         rowGroup =  probe_map$ENTREZID,
-                                         rowID =  probe_map$PROBEID, method = collapse_method)
+                                         rowGroup =  annotation_table$ENTREZID,
+                                         rowID =  annotation_table$PROBEID, method = method)
     
     collapsed_exprs_mat <- collapsed_data$datETcollapsed
   }
   #Same for expression data
-  if (diff_data == T){
+  if (differential_expression == T){
     group_factor <- create_group_factor(samples = colnames(expression_matrix),
                                         group1_indici = group1_indici,
                                         group2_indici = group2_indici)
     
     limma_probe_table <- differential_expression(group_factor = group_factor,
                                                expression_matrix = expression_matrix,
-                                               probe_table = probe_map)
+                                               probe_table = annotation_table)
     
     diff_genes <- plyr::ddply(.data = , limma_probe_table,
                              .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
@@ -76,7 +82,7 @@ create_input <- function (expression_matrix, probe_map, group1_indici, group2_in
                          "limma_probe_table" = limma_probe_table,
                          "annotated_exprs_matrix" = collapsed_exprs_mat,
                          "expression_matrix" = expression_matrix,
-                         "annotation_table" = probe_map,
+                         "annotation_table" = annotation_table,
                          "group_indici" = group_indici)
   class(modifier_input) <- c("MODifieR_input", "Expression")
   return (modifier_input)

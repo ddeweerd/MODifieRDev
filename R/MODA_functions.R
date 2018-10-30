@@ -1,16 +1,17 @@
+#Adapted code from original MODA package
 WMPH <- function (datExpr, indicatename, cutmethod = c("Density", "Modularity"), power = 10) 
 {
   #dir.create(file.path("./", foldername), showWarnings = FALSE)
   ADJ1 = abs(cor(datExpr, use = "p"))^power
   dissADJ = 1 - ADJ1
-  hierADJ = hclust(as.dist(dissADJ), method = "average")
+  hierADJ = flashClust::hclust(stats::as.dist(dissADJ), method = "average")
   cutHeights <- seq(0.05, 1, by = 0.05)
   NumCutHeights <- length(cutHeights)
   pDensity <- numeric(length <- NumCutHeights)
   maxpDensity <- 0
   maxHeight <- 0
   for (i in 1:NumCutHeights) {
-    groups <- cutree(hierADJ, h = cutHeights[i])
+    groups <- stats::cutree(hierADJ, h = cutHeights[i])
     if (cutmethod == "Density") {
       pDensity[i] <- MODA::PartitionDensity(ADJ1, groups)
     }
@@ -45,7 +46,7 @@ WMPH <- function (datExpr, indicatename, cutmethod = c("Density", "Modularity"),
   
   return(densegenes_list)
 }
-
+#Adapted code from original MODA package
 compare_modules <- function (module_list1, module_list2) 
 {
   #Set the lengths for simplicity
@@ -62,11 +63,11 @@ compare_modules <- function (module_list1, module_list2)
   }
   return(my.array)
 }
-
+#Adapted code from original MODA package
 moda_extract_modules_index_specific <- function(module_score_array, specificTheta = 0.1){
   which(rowSums(module_score_array) <= min(rowSums(module_score_array)) + specificTheta)
 }
-
+#Adapted code from original MODA package
 moda_extract_modules_index_conserved <- function(module_score_array, conservedTheta = 0.1){
   which(rowSums(module_score_array) >= max(rowSums(module_score_array)) - conservedTheta)
 }

@@ -10,13 +10,18 @@ wgcna_get_module_genes_by_sign(wgcna_module, mode)
 \item{wgcna_module}{Module object that has been produced by \code{wgcna_trait} function}
 
 \item{mode}{Character. "p" or "positive" for positive correlation, "n" or "negative" 
-for negative correlation
-
-Only significant colors are used}
+for negative correlation.}
 }
 \value{
-Returns a \code{wgcna_module} object with only postively/negatively associated module colors to the trait
+\code{wgcna_module} object
 }
 \description{
 Split WGCNA module in module containing only positive or negative correlation
+}
+\details{
+The functions returns a new \code{wgcna} module object that only contains positively or 
+negatively correlated colors
+}
+\seealso{
+\code{\link{wgcna_trait}}
 }

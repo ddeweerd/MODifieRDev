@@ -50,7 +50,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   
   pValueMatrix <- MODifieR_input$diff_genes
   
-  pValueMatrix <- na.omit(pValueMatrix)
+  pValueMatrix <- stats::na.omit(pValueMatrix)
 
   overlap <- springConnection[,1] %in% pValueMatrix[,1]
   
@@ -162,7 +162,7 @@ calculate_correlation <- function(row, expression_matrix){
   
   x_y <- c(which(rownames(expression_matrix) == row[1]), which(rownames(expression_matrix) == row[2]))
   
-  1 - round(cor.test(x = expression_matrix[x_y[1],], y = expression_matrix[x_y[2],])$p.value, 3)
+  1 - round(stats::cor.test(x = expression_matrix[x_y[1],], y = expression_matrix[x_y[2],])$p.value, 3)
 }
 #Convert edge list to igraph object, and convert to adjacency matrix. This matrix will be converted to an adjacency graph.
 #As this adjacency matrix will be used to search for maximal cliques, the mode is undirected

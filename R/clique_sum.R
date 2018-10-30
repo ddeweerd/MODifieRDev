@@ -37,7 +37,7 @@ clique_sum <- function(MODifieR_input, ppi_network, simplify_graph = T, n_iterat
   #Convert 2 column dataframe to named vector, names will be the gene names, values will be the p value
   deg_genes <- dataframe_to_vector(as.data.frame(deg_genes))
   
-  deg_genes <- deg_genes[deg_genes < cutoff]
+  deg_genes <- deg_genes[deg_genes < deg_cutoff]
   #Convert PPi to igraph object
   graphed_frame <- igraph::graph.data.frame(unique(ppi_network) , directed = FALSE)
   #Only retain DEGs that are also present in the PPi network
@@ -63,8 +63,8 @@ clique_sum <- function(MODifieR_input, ppi_network, simplify_graph = T, n_iterat
   p_values <- unlist(sapply(X = deg_sizes, FUN = permute_scores,
                             n_iterations = n_iterations, deg_genes = deg_genes, unpermuted_scores,
                             n_deg_clique = n_deg_clique))
-  #Retain cliques that have a significance < than the cutoff
-  significant_cliques <- p_values < cutoff
+  #Retain cliques that have a significance < than the deg_cutoff
+  significant_cliques <- p_values < deg_cutoff
 
   cv <- cv[significant_cliques]
   #Unlist all cliques and remove duplicate genes. This is the final disease module

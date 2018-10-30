@@ -4,16 +4,58 @@
 \alias{moda}
 \title{MODA}
 \usage{
-moda(MODifieR_input, CuttingCriterion = "Density", specificTheta = 0.1,
-  conservedTheta = 0.1, result_folder, dataset_name = NULL)
+moda(MODifieR_input, cutmethod = "Density", specificTheta = 0.1,
+  conservedTheta = 0.1, dataset_name = NULL, group_of_interest)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{datExpr1}{A dataframe of the microarray matrix of the Control samples}
+\item{cutmethod}{cutting the dendrogram based on maximal average Density 
+or Modularity}
 
-\item{datExpr2}{A dataframe of the microarray matrix of the Control samples}
+\item{specificTheta}{the threshold to define min(s)+specificTheta, 
+less than which is considered as condition specific module. 
+s is the sums of rows in Jaccard index matrix. See supplementary file.}
+
+\item{conservedTheta}{The threshold to define max(s)-conservedTheta, 
+greater than which is considered as condition conserved module. 
+s is the sums of rows in Jaccard index matrix. See supplementary file.}
+}
+\value{
+moda returns an object of class "MODifieR_module" with subclass "MODA". 
+This object is a named list containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{group1_modules}{A list containing all co-expression modules in the background network}
+\item{group2_modules}{A list containing all co-expression modules in the condition specific network}
+\item{jaccard_table}{A matrix with all Jaccard indexes for all co-expression modules}
+\item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
-A Coexpression based algorithm to identify disease module
+An implementation of MODA co-expression based algorithm.
+}
+\details{
+This implementation follows a workflow as described in the MODA vignette. First,
+two separate networks are constructed, a background network containing expression
+data from all samples and a condition specific network consisting of all samples minus
+the condition specific samples.
+Then, hierarchical clustering is performed and cutting height estimated from either 
+maximal average \code{density} or \code{modularity}
+
+\emph{Condition} specific co-expression modules are then extracted 
+using the Jaccard index and \code{specificTheta}. 
+
+The final module will consist of the co-expression module that has the minimal 
+Jaccard index complemented by co-expression modules that have a Jaccard index 
+below this minimal + \code{specificTheta}
+
+After analysis, the \code{specificTheta}
+and thereby the disease module can be adjusted using 
+\code{\link{moda_change_specific_threshold}}
+}
+\references{
+\cite{Li D, Brown JB, Orsini L, Pan Z, Hu G, He S (2016). MODA: MODA: 
+MOdule Differential Analysis for weighted gene co-expression network. R package version 1.6.0}
+}
+\seealso{
+\url{https://bioconductor.org/packages/release/bioc/vignettes/MODA/inst/doc/MODA.html}
 }

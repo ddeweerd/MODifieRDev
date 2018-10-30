@@ -114,23 +114,6 @@ mcode.post.process<-function(graph,vertex.weight,haircut,fluff,fdt=0.8,
   return(set.complex.g)
 }
 
-##' @title MCODE network clustering
-##' 
-##' @description Clustering of the network using the MCODE method.
-##' 
-##' @param graph An igraph object.
-##' @param vwp Vertex weight percentage. Default value is \code{0.5}.
-##' @param haircut Boolean value, whether to remove singly-connected nodes from clusters (\code{TRUE}) or not (\code{FALSE}).
-##' @param fluff Boolean value, whether to spand cluster cores by one neighbour shell outwards (\code{TRUE}) or not (\code{FALSE}).
-##' @param fdt Cluster density cutoff. Default value is \code{0.8}.
-##' @param loops Boolean value, whether to include self-loops (\code{TRUE}) or not (\code{FALSE}).
-##' @references Bader GD, Hogue CW. An automated method for finding molecular complexes in large protein interaction networks. BMC Bioinformatics. 2003 Jan 13;4(1):2.
-##' @return A list of clusters.
-##' @seealso \code{\link{cluster}}
-##' @examples
-##' nlocal<-data.frame(c("DVL1","DVL2","DVL3"))
-##' net<-construction(input=nlocal,db="HPRD",species="human",ID.type="Gene symbol",hierarchy=1)
-##' mcode(net,vwp=0.9,haircut=TRUE,fluff=TRUE,fdt=0.1)
 mcode <- function(graph,vwp=0.5,haircut=FALSE,fluff=FALSE,fdt=0.8,loops=TRUE)
 {
   stopifnot(is.igraph(graph))

@@ -4,12 +4,19 @@
 \alias{create_input}
 \title{Creates an input object for downstream analysis}
 \usage{
-create_input(expression_matrix, probe_map, group1_indici, group2_indici,
-  group1_label, group2_label, expression = T,
+create_input(expression_matrix, annotation_table, group1_indici,
+  group2_indici, group1_label, group2_label, expression = T,
   differential_expression = T, method = "MaxMean")
 }
 \arguments{
 \item{expression_matrix}{Normalized expression matrix where the samples are columns and probes are rows}
+
+\item{annotation_table}{A dataframe providing annotation for the probes. The dataframe should have 3 columns: 
+\itemize{
+\item {PROBEID}: The probe id as it is in the expression matrix
+\item {SYMBOL}: The gene symbol (if available) associated with the probe
+\item{ENTREZID}: The entrez id (if available) associated with the probe
+}}
 
 \item{expression}{boolean, calculate expression values?}
 
@@ -28,18 +35,9 @@ exactly 2 corresponding rows or when connectivityBasedCollapsing=FALSE. These ar
 Note: if method="ME", "Average" or "function", the output parameters "group2row" and "selectedRow" are not informative.
 }
 
-\item{annotation_table}{A dataframe providing annotation for the probes. The dataframe should have 3 columns: 
-\itemize{
-\item {PROBEID}: The probe id as it is in the expression matrix
-\item {SYMBOL}: The gene symbol (if available) associated with the probe
-\item{ENTREZID}: The entrez id (if available) associated with the probe
-}}
-
 \item{group_indici}{vectors containing indici for different groups (Column numbers)}
 
 \item{group_labels}{Labels for each group, for example "patient" and "control"}
-
-\item{correlation_clique}{boolean, calculate correlation matrix?}
 }
 \value{
 The function returns an object of class "MODifieR_input". The object is a named list containing the

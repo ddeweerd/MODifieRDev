@@ -12,7 +12,8 @@ Imports:
     Rcpp,
     fdrtool,
     dynamicTreeCut,
-    flashClust
+    flashClust,
+    reticulate
 Depends:
     igraph,
     org.Hs.eg.db,

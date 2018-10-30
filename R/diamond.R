@@ -18,6 +18,9 @@
 #' \item{module_genes}{A character vector containing the genes in the final module}
 #' \item{seed_genes}{Character vector containing genes that have been used as seed genes in the algorithm}
 #' \item{ignored_genes}{Potential seed genes that have not been used to infer the module}
+#' \item{added_genes} A table containing information on all added genes. First column is the name of the gene,
+#' the second column is the degree of the node (gene). The third column is the number of +1 neighbors 
+#' and the fourth column is the p-value.
 #' \item{settings}{A named list containing the parameters used in generating the object}
 #' @references 
 #' \cite{Ghiassian, S. D., Menche, J., & Barabási, A. L. (2015). 
@@ -26,7 +29,7 @@
 #' Biology, 11(4), 1–21. \url{https://doi.org/10.1371/journal.pcbi.1004120}}
 #' @export
 diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
-                    include_seed = T, tempfile_genes = tempfile(), dataset_name = NULL){
+                               include_seed = TRUE, tempfile_genes = tempfile(), dataset_name = NULL){
   # Retrieve settings
   default_args <- formals()
   user_args <- as.list(match.call(expand.dots = T)[-1])
@@ -36,55 +39,34 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
     settings$MODifieR_input <- dataset_name
   }
   
+  #Get the input genes
   diamond_genes <- MODifieR_input$diff_genes
-  
   diamond_genes <- diamond_genes[diamond_genes$pvalue < deg_cutoff, ]
-  diamond_genes <- unique(na.omit(diamond_genes$ENTREZID)) 
-
-  input_genes <- tempfile_genes
-  input_ppi <- tempfile()
-  write.table(x = diamond_genes, file = input_genes, sep = "\t" ,
-              row.names = FALSE , quote = FALSE, col.names = F)
+  diamond_genes <- unique(na.omit(diamond_genes$gene)) 
+  #Convert to python objects
+  diamond_set <- to_set_py(diamond_genes)
+  ppi_graph <- to_graph_py(as.matrix(ppi_network))
+  #Run python scri[t]
+  raw_module_py <- diamond_core(ppi_graph, diamond_set, as.integer(n_output_genes), as.integer(seed_weight))
+  #Extract data
+  raw_module <- raw_module_py[[1]]
+  seed_genes <- raw_module_py[[2]] 
+  ignored_genes <- raw_module_py[[3]]
+  #Prepare the added genes info table
+  added_genes <- data.frame(cbind(sapply(X = 1:4, FUN = function(i){sapply(raw_module, function(x)x[[i]])})), stringsAsFactors = F)
+  added_genes[,2:4] <- sapply(added_genes[,2:4], FUN = as.numeric)
+  colnames(added_genes) <-   c("Gene","Degree", "Connectivity", "p-value")
   
-  write.table(x = ppi_network, file = input_ppi, sep = "\t" ,
-              row.names = FALSE , quote = FALSE, col.names = F)
-  
-  # Sets python path
-  python_path <- paste(system.file(package="MODifieRDev"), "DIAMOnD_MODifieR.py", sep="/")
-  # Concetenates python call with CL arguments
-  python_call <- paste("python", python_path, input_ppi, input_genes,
-                       n_output_genes, seed_weight, sep = " ")
-  # Gets output from python script as character vector
-  raw_module <- system(command = python_call, intern = T)
-  # Python scripts returns concatented ouput delimited by ",", split it
-  split_module <- sapply(X = raw_module, FUN = split_values)
-  # Include seed genes used?
-  if (include_seed == T){
-    module_genes <- c(split_module[[2]], split_module[[3]])
-  } else{
-    module_genes <- split_module[[3]]
-  }
   # Build new MODifieR object
-  new_diamond_module <- list("module_genes" = module_genes,
-                             "seed_genes" =  split_module[[2]],
-                             "ignored_genes" = split_module[[1]],
-                             "added_genes" = as.data.frame(x = (split_module[3:6]),
-                                                           row.names = 1:length(split_module[[3]]),
-                                                           col.names =      c("Gene",
-                                                                              "Degree",
-                                                                              "Connectivity",
-                                                                              "p-value"),
-                                                           stringsAsFactors = F),
+  new_diamond_module <- list("module_genes" = sapply(raw_module, function(x)x[[1]]),
+                             "seed_genes" =  seed_genes,
+                             "ignored_genes" = ignored_genes,
+                             "added_genes" = added_genes,
                              "settings" = settings)
-
+  
   class(new_diamond_module) <- c("MODifieR_module", "DIAMOnD")
-
+  
   return(new_diamond_module)
-}
-# Splits character vector on ","
-split_values <- function(values){
-  values <- gsub(pattern = " ", replacement = "", x = values)
-  strsplit(x = values, split = ",")
 }
 
 #' Remove seed genes from a DIAMOnD MODifieR_module

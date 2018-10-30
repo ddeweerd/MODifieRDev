@@ -35,6 +35,47 @@ numbers (\code{TRUE})? }
 \item{saveTOMs}{ logical: should the consensus topological overlap matrices for each block be saved
 and returned?  }
 }
+\value{
+wgcna_trait returns an object of class "MODifieR_module" with subclass "WGCNA". 
+This object is a named list containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{info_table}{A data.frame containing all genes and their assigned colors}
+\item{correlation_to_trait_table}{A data.frame containing all module colors and their p- and adjusted p-value}
+\item{softthreshold_value}{A numeric, the soft threshold power that is used. See: \code{\link[WGCNA]{pickSoftThreshold}}}
+\item{module_colors}{A character vector containing the colors that make up the final disease module}
+\item{settings}{A named list containing the parameters used in generating the object}
+}
 \description{
 An implementation of WGCNA to correlate coexpression modules to disease
+}
+\details{
+wgcna_trait is an implementation of WGCNA that
+associates co-expression modules (denoted by color) to a trait. Co-expression modules with an
+adjusted p-value < \code{pval_cutoff} will make up the final disease module.
+
+The algorithm infers co-expression modules from combined expression dataset from both \code{group1}
+and \code{group2}.
+Co-expression modules are then correlated to trait (group 1 ~ group 2). 
+
+After analysis there are some post-processing functions available:
+
+\itemize{
+\item{\code{\link{wgcna_get_all_module_genes}}} Get a list with all genes sorted by module color
+\item{\code{\link{wgcna_get_module_genes_by_sign}}} Get a module with either only postively correlated
+genes or negatively correlated genes
+\item{\code{\link{wgcna_adjust_significance }}} Adjust p-value cutoff
+\item{\code{\link{wgcna_split_module_by_color}}} Get a list where each color is a separate module
+\item{\code{\link{wgcna_set_module_size}}} Get a module close to a specific size
+}
+}
+\references{
+\cite{Langfelder P and Horvath S, WGCNA: an R package for weighted correlation network analysis. 
+BMC Bioinformatics 2008, 9:559 \url{doi:10.1186/1471-2105-9-559} }
+
+
+\cite{Peter Langfelder, Steve Horvath (2012). Fast R Functions for Robust Correlations and Hierarchical Clustering. J
+ournal of Statistical Software, 46(11), 1-17. URL \url{http://www.jstatsoft.org/v46/i11/}}
+}
+\seealso{
+
 }

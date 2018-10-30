@@ -16,3 +16,6 @@ non-significant colors
 \description{
 Generate a list of module colors with their respective genes.
 }
+\seealso{
+\code{\link{wgcna_trait}}
+}
