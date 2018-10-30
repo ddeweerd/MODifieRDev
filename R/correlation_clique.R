@@ -45,29 +45,18 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
-  
+  MODifieR_input$diff_genes <- MODifieR_input$diff_genes[MODifieR_input$diff_genes$gene %in% rownames(MODifieR_input$annotated_exprs_matrix), ]
+  #Making sure the PPi network has 3 columns
   springConnection <- ppi_network[,1:3]
-  
+  #Get DEGs
   pValueMatrix <- MODifieR_input$diff_genes
-  
   pValueMatrix <- stats::na.omit(pValueMatrix)
-
-  overlap <- springConnection[,1] %in% pValueMatrix[,1]
-  
+  #Remove genes from PPi that are not in input
+  overlap <- springConnection[,1] %in% pValueMatrix[,1] & springConnection[,1] %in% rownames(MODifieR_input$annotated_exprs_matrix)
   springConnection <- springConnection[overlap,]
-  
-  overlap <- springConnection[,2] %in% pValueMatrix[,1]
-  
+  overlap <- springConnection[,2] %in% pValueMatrix[,1] & springConnection[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
   springConnection <- springConnection[overlap,]
-  
-  overlap <- springConnection[,1] %in% rownames(MODifieR_input$annotated_exprs_matrix)
-  
-  springConnection <- springConnection[overlap,]
-  
-  overlap <- springConnection[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
-  
-  springConnection <- springConnection[overlap,]
-  
+  #Remove connections in PPi below score
   springConnection <- springConnection[springConnection[,3] > cutOffRank,]
   
   springConnection[,3] <- springConnection[,3] / 1000

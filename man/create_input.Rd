@@ -15,7 +15,7 @@ create_input(expression_matrix, annotation_table, group1_indici,
 \itemize{
 \item {PROBEID}: The probe id as it is in the expression matrix
 \item {SYMBOL}: The gene symbol (if available) associated with the probe
-\item{ENTREZID}: The entrez id (if available) associated with the probe
+\item{IDENTIFIER}: The entrez id (if available) associated with the probe
 }}
 
 \item{expression}{boolean, calculate expression values?}

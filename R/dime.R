@@ -56,8 +56,6 @@ dime <- function(MODifieR_input, dataset_name = NULL){
   
   module_genes <- probes
   
-  #module_genes <- annotation_table$ENTREZID[annotation_table$PROBEID %in% probes]
-  
   module_genes <- module_genes[!is.na(module_genes)]
   
   new_dime_module <- list("module_genes" =  module_genes,

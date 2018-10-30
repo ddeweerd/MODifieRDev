@@ -2,10 +2,9 @@ Package: MODifieRDev
 Type: Package
 Title: MODifieRDev
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Dirk de Weerd
+Maintainer: Dirk de Weerd <dirkdeweerd.work@gmail.com>
+Description: An implementation of a set of disease module inference methods bundled in one package.
 Imports:
     foreach,
     doParallel,
@@ -19,9 +18,8 @@ Depends:
     org.Hs.eg.db,
     STRINGdb,
     WGCNA
-License: What license is it under?
+License: GNU Lesser General Public License
 Encoding: UTF-8
 LazyData: true
-URL: http://github.com/ddeweerd/MODifieR
 RoxygenNote: 6.1.0
 LinkingTo: Rcpp

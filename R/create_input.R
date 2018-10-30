@@ -7,7 +7,7 @@
 #' \itemize{
 #' \item {PROBEID}: The probe id as it is in the expression matrix
 #' \item {SYMBOL}: The gene symbol (if available) associated with the probe
-#' \item{ENTREZID}: The entrez id (if available) associated with the probe
+#' \item{IDENTIFIER}: The entrez id (if available) associated with the probe
 #'}
 #'@param group_indici vectors containing indici for different groups (Column numbers)
 #'@param group_labels Labels for each group, for example "patient" and "control"
@@ -46,7 +46,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
   names(group_indici) <- c(group1_label, group2_label)
   
   #Making sure column names for the annotation dataframe are right...
-  colnames(annotation_table) <- c("PROBEID", "SYMBOL", "ENTREZID")
+  colnames(annotation_table) <- c("PROBEID", "IDENTIFIER")
   
   #Should expression data be generated? 
   if (expression == T){
@@ -55,11 +55,13 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     
     probe_names <- names(freq_probes[freq_probes == 1])
     
-    annotation_table <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
+    annotation_table_expression <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
+    
+    annotation_table_expression <- na.omit(annotation_table)
     
     collapsed_data <-WGCNA::collapseRows(datET = expression_matrix,
-                                         rowGroup =  annotation_table$ENTREZID,
-                                         rowID =  annotation_table$PROBEID, method = method)
+                                         rowGroup =  annotation_table_expression$IDENTIFIER,
+                                         rowID =  annotation_table_expression$PROBEID, method = method)
     
     collapsed_exprs_mat <- collapsed_data$datETcollapsed
   }
@@ -74,9 +76,10 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
                                                probe_table = annotation_table)
     
     diff_genes <- plyr::ddply(.data = , limma_probe_table,
-                             .variables = "ENTREZID", .fun = plyr::summarise, pvalue = min(P.Value))
+                             .variables = "IDENTIFIER", .fun = plyr::summarise, pvalue = min(P.Value))
     
     diff_genes <- na.omit(diff_genes)
+    colnames(diff_genes) <- c("gene", "pvalue")
   }
   modifier_input <- list("diff_genes" = diff_genes,
                          "limma_probe_table" = limma_probe_table,
@@ -90,7 +93,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
 #Calculate differentially expressed genes
 differential_expression <- function(group_factor, expression_matrix, probe_table){
   design <- model.matrix(~group_factor)
-  fit <- limma::lmFit(expression_matrix, design)
+  fit <- invisible(limma::lmFit(expression_matrix, design))
   fit2 <- limma::eBayes(fit)
   diff_genes <- limma::topTable(fit = fit2,  number = Inf, adjust.method = "BH")
   annotated_probes <- lapply(X = rownames(diff_genes), FUN = annotate_probe,
