@@ -69,7 +69,7 @@ def check_input_style(input_list):
     return network_edgelist_file,seeds_file,max_number_of_added_nodes,alpha,outfile_name
 
 # =============================================================================
-def read_input(network_file,seed_file):
+#def read_input(network_file,seed_file):
 """
 
     sniffer = csv.Sniffer()
