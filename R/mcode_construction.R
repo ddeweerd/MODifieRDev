@@ -1,57 +1,21 @@
-##' @title Network construction
-##' 
-##' @description Construction a network from experimental data or integrated PPI database.
-##' 
-##' @param input A data frame containing the experimental data.
-##' @param local.net Logical value, indicating whether to construct a network from experimental data (if \code{TRUE}) or not (if \code{FLASE}). Default value is \code{FALSE}.
-##' @param node.attribute A data frame containing node attributes. Default value is \code{NULL}.
-##' @param db Integrated PPI database, either \code{Biogrid} or \code{\link{HPRD}}.
-##' @param species This parameter indicates the biological species to which analyzable PPI data is related; currently \code{human} for "Homo sapiens" and \code{ath} for "Arabidopsis thaliana" are available.
-##' @param ID.type The ID type of the biological genes or proteins, possible values are \code{Entrez gene} and \code{Gene symbol} when \code{db} is \code{Biogrid}, or \code{Gene symbol} when \code{db} is \code{\link{HPRD}}.
-##' @param hierarchy This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.
-##' @return A network in igraph format.
-##' @seealso \code{\link{construct_local}}, \code{\link{construct_nlocal}}
-##' @export
-##' @examples
-##' ## Construction a local network.
-##' local<-data.frame(1:5,2:6)
-##' attribute<-data.frame(1:6,c(2.2,5.3,1.2,4.5,6.2,0.6))
-##' net<-construction(input=local,local.net=TRUE,node.attribute=attribute)
-##' ## Construction a network from the human HPRD database.
-##' nlocal<-data.frame(c("DVL1","DVL2","DVL3"))
-##' net<-construction(input=nlocal,db="HPRD",species="human",ID.type="Gene symbol",hierarchy=1)
 construction_mod <- function(input,local.net=FALSE,node.attribute=NULL,
                        db, species=c("human","ath"),
-                       ID.type=c("Gene symbol","Entrez Gene"),
                        hierarchy=1)
 {
   species <- match.arg(species)
-  ID.type <- match.arg(ID.type)
-  
+
   if(local.net){
     graph <- construct_local_mod(input=input,node.attribute=node.attribute)
   }else{
     species <- match.arg(species)
     graph <- construct_nlocal_mod(input=input,db=db,species=species,
-                            ID.type=ID.type,hierarchy=hierarchy)
+                           hierarchy=hierarchy)
   }
   
   return(graph)
 }
 
-##' @title Local network construction
-##' 
-##' @description Construction a network from experimental data.
-##' 
-##' @param input A data frame containing the experimental data.
-##' @param node.attribute A data frame containing node attributes.
-##' @return A network in igraph format.
-##' @seealso \code{\link{construction}}, \code{\link{construct_nlocal}}.
-##' @export
-##' @examples
-##' local<-data.frame(1:5,2:6)
-##' attribute<-data.frame(c(0.2,0.3,0.2,0.5,0.1))
-##' net<-construct_local(input=local,node.attribute=attribute)
+
 construct_local_mod <- function(input,node.attribute)
 {
   if(missing(input)){
@@ -76,28 +40,11 @@ construct_local_mod <- function(input,node.attribute)
   return(graph)
 }
 
-##' @title Non-local network construction
-##' 
-##' @description Construction a network from integrated PPI database.
-##' 
-##' @param input A data frame containing the experimental data.
-##' @param db Integrated PPI database, either \code{Biogrid} or \code{\link{HPRD}}.
-##' @param species This parameter indicates the biological species to which analyzable PPI data is related; currently \code{human} for "Homo sapiens" and \code{ath} for "Arabidopsis thaliana" are available.
-##' @param ID.type The ID type of the biological genes or proteins, possible values are \code{Entrez gene} and \code{Gene symbol} when \code{db} is \code{Biogrid}, or \code{Gene symbol} when \code{db} is \code{\link{HPRD}}.
-##' @param hierarchy This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.
-##' @return A network in igraph format.
-##' @seealso \code{\link{construction}}, \code{\link{construct_local}}.
-##' @export
-##' @examples
-##' nlocal<-data.frame(c("DVL1","DVL2","DVL3"))
-##' net<-construct_nlocal(input=nlocal,db="HPRD",species="human",ID.type="Gene symbol",hierarchy=1)
-construct_nlocal_mod<-function(input,db, species=c("human","ath"),
-                           ID.type=c("Gene symbol","Entrez Gene"),
-                           hierarchy=1)
+
+construct_nlocal_mod<-function(input,db, species=c("human","ath"),hierarchy=1)
 {
   species <- match.arg(species)
-  ID.type <- match.arg(ID.type)
-  
+
   if(!missing(input)){
     if( !is.data.frame(input)){
       stop("Not a data frame")
@@ -116,7 +63,7 @@ construct_nlocal_mod<-function(input,db, species=c("human","ath"),
   index <- match(input[,1],V(net)$name)
   index <- index[!is.na(index)]
   ##  create a  sub network
-  graph <- igraph::induced.subgraph(graph=net,unlist(igraph::neighborhood(graph=net,order=hierarchy,nodes=index)))
+  graph <- igraph::induced.subgraph(graph=net, unlist(igraph::neighborhood(graph=net,order=hierarchy,nodes=index)))
   ##  vertex.hierarchy
   V(graph)$vertex.hierarchy<-rep(hierarchy,vcount(graph))
   if(hierarchy>=1){

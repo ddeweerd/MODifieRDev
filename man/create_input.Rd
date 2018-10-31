@@ -2,34 +2,67 @@
 % Please edit documentation in R/create_input.R
 \name{create_input}
 \alias{create_input}
-\title{Creates an object of class "MODifieR input"}
+\title{Creates an input object for downstream analysis}
 \usage{
-create_input(expression_matrix, probe_map, group1_indici, group2_indici,
-  group1_label, group2_label, expression = F, diff_data = F,
-  correlation_clique = F)
+create_input(expression_matrix, annotation_table, group1_indici,
+  group2_indici, group1_label, group2_label, expression = T,
+  differential_expression = T, method = "MaxMean")
 }
 \arguments{
 \item{expression_matrix}{Normalized expression matrix where the samples are columns and probes are rows}
 
-\item{probe_map}{A dataframe providing annotation for the probes. The dataframe should have 3 columns: 
+\item{annotation_table}{A dataframe providing annotation for the probes. The dataframe should have 3 columns: 
 \itemize{
 \item {PROBEID}: The probe id as it is in the expression matrix
 \item {SYMBOL}: The gene symbol (if available) associated with the probe
-\item{ENTREZID}: The entrez id (if available) associated with the probe
+\item{IDENTIFIER}: The entrez id (if available) associated with the probe
 }}
 
 \item{expression}{boolean, calculate expression values?}
 
-\item{diff_data}{boolean, calculate differentially expressed data?}
+\item{differential_expression}{boolean, calculate differentially expressed data?}
 
-\item{correlation_clique}{boolean, calculate correlation matrix?}
+\item{method}{character string for determining which method is used to choose a probe among
+exactly 2 corresponding rows or when connectivityBasedCollapsing=FALSE. These are the options:
+"MaxMean" (default) or "MinMean" = choose the row with the highest or lowest mean value, respectively.
+"maxRowVariance" = choose the row with the highest variance (across the columns of \code{datET}). 
+"absMaxMean" or "absMinMean" = choose the row with the highest or lowest mean absolute value.
+"ME" = choose the eigenrow (first principal component of the rows in each group).  Note that with this
+       method option, connectivityBasedCollapsing is automatically set to FALSE.
+"Average" = for each column, take the average value of the rows in each group 
+"function" = use this method for a user-input function (see the description of the argument
+"methodFunction").
+Note: if method="ME", "Average" or "function", the output parameters "group2row" and "selectedRow" are not informative.
+}
 
 \item{group_indici}{vectors containing indici for different groups (Column numbers)}
 
 \item{group_labels}{Labels for each group, for example "patient" and "control"}
 }
+\value{
+The function returns an object of class "MODifieR_input". The object is a named list containing the
+following components:
+\item{diff_genes}{A 2 two column data.frame where the first column are genes and the second column unadjusted p-values}
+\item{limma_probe_table}{A data.frame from \code{limma topTable} with added gene annotation}
+\item{annotated_exprs_matrix}{A matrix where the rows are genes and the columns samples. Probes have been collapsed
+into genes using \code{collapse_method}}
+\item{expression_matrix}{A matrix, the original input expression matrix}
+\item{annotation_table}{A data.frame, the original annotation table used to annotate the probes}
+\item{group_indici}{A named list containg 2 numeric vectors. The names are the group labels and the values 
+are the group indici}
+}
 \description{
-The MODifieR input object can be used
-in downstream analysis using the disease module inference methods included
-in the MODifieR package.
+The MODifieR input object can be used in downstream analysis for the disease module inference methods included
+in this package.
+}
+\details{
+The function creates an input object to be used in all disease module inference methods. Differentially
+expressed genes are calculated using linear models from the \code{limma} package. Probes are collapsed into genes
+using collapseRows from \code{WGCNA}
+}
+\seealso{
+\code{\link[WGCNA]{collapseRows}}
+\code{\link[limma]{lmFit}}
+\code{\link[limma]{eBayes}}
+\code{\link[limma]{topTable}}
 }

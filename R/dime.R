@@ -1,4 +1,6 @@
+#'@inheritParams clique_sum
 #' @export
+#' 
 dime <- function(MODifieR_input, dataset_name = NULL){
   
   default_args <- formals()
@@ -42,7 +44,7 @@ dime <- function(MODifieR_input, dataset_name = NULL){
   dimVg = length(V(g))
   popsize = 50
   
-  com <- MODifieRDev:::commextr(d = dimVg, 
+  com <- commextr(d = dimVg, 
                                 ps = as.integer(popsize), 
                                 matrix = as.vector(adj), 
                                 res = as.integer(as.vector(rep(0,dimVg))), 
@@ -53,8 +55,6 @@ dime <- function(MODifieR_input, dataset_name = NULL){
   annotation_table <- MODifieR_input$annotation_table
   
   module_genes <- probes
-  
-  #module_genes <- annotation_table$ENTREZID[annotation_table$PROBEID %in% probes]
   
   module_genes <- module_genes[!is.na(module_genes)]
   

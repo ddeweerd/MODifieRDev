@@ -1,18 +1,33 @@
 #'Module Discoverer
 #'
-#' A clique based Algorithm by Sebastian Vlaic to produce disease module from Differentially Expressed Genes
+#' A clique based algorithm by Vlaic et al. to produce disease module from Differentially Expressed Genes
 #'
 #'
-#' @param diffgen A nx2 dataframe consisting of differentially expressed genes and their respective -log10 p values
-#' @param ppi_network A dataframe  PPi network of your choice
-#' @param pval_cutoff Numeric pvalue cutoff for choosing number of differentially expressed genes
-#' @param repeats Number of repeats to be performed for single seed run
-#' @param times  Number of iterations to be performed
-#' @param p_val cutoff pvalue for significant cliques
-#' @return A MODifieR class object with disease module and settings
+#' @inheritParams clique_sum
+#' @param repeats Number of times the algorithm is repeated
+#' @param permutations  Number of permutations to perform to identify the community structure
+#' @param clique_cutoff cutoff pvalue for significant cliques
+#' 
+#' @details 
+#' This is an implmentation of the \emph{single seed} Module Discoverer algorithm.
+#' The code has been adapted from the orignal code by Vlaic et al. For details, please see the paper referenced below
+#' 
+#' @return 
+#' modulediscoverer returns an object of class "MODifieR_module" with subclass "module_discoverer". 
+#' This object is a named list containing the following components:
+#' \item{module_genes}{A character vector containing the genes in the final module}
+#' \item{graph}{\code{\link[igraph]{igraph}} graph containing the disease module}
+#' \item{settings}{A named list containing the parameters used in generating the object}
+#' 
+#' @seealso 
+#' 
+#' \url{https://www.leibniz-hki.de/en/modulediscoverer.html}
+#' 
+#' @references \cite{Vlaic, S., Tokarski-schnelle, C., Gustafsson, M., Dahmen, U., Guthke, R., & Schuster, S. (2017). 
+#' ModuleDiscoverer: Identification of regulatory modules in protein-protein interaction networks., 1–17.}
 #' @export
-modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, pval_cutoff = 0.05, repeats = 15,
-                             times = 1000, p_val =0.01, dataset_name = NULL){
+modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, deg_cutoff = 0.05, repeats = 15,
+                             times = 1000, clique_cutoff = 0.01, dataset_name = NULL){
 
   # Retrieve settings
   default_args <- formals()
@@ -22,11 +37,8 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
-  
-  if (class(MODifieR_input)[1] == "MODifieR_input"){
-    diffgen <- MODifieR_input$diff_genes
-  }
-  
+
+  diffgen <- MODifieR_input$diff_genes
   colnames(diffgen) <- c("gene" , "p_val")
   ppi_network <- graph.data.frame(ppi_network , directed = FALSE)
   ppi_network <- simplify(ppi_network, remove.multiple = TRUE, remove.loops = TRUE)
@@ -43,7 +55,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
 
   background <-unique(diffgen[,1])
 
-  degs <- diffgen$gene[diffgen$p_val < pval_cutoff]
+  degs <- diffgen$gene[diffgen$p_val < deg_cutoff]
   
   degs_random_datasets <- replicate(n = permutations, expr = sample(background,
                                                                     size = length(degs),
@@ -77,7 +89,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
 
   result_singleSeed.ec = moduleDiscoverer.db.extractEnrichedCliques(database=database_singleSeed,
                                                                     result=result_singleSeed,
-                                                                    p.value=p_val)
+                                                                    p.value=clique_cutoff)
 
   module_singleSeed = moduleDiscoverer.module.createModule(result=result_singleSeed.ec)
 

@@ -1,7 +1,7 @@
 #' DiffCoEx
 #' 
 #' A Coexpression based Algorithm to identify disease module 
-#' 
+#' @inheritParams clique_sum
 #' @param dataset1 A dataframe of the microarray matrix of the Control samples
 #' @param dataset2 A dataframe of the microarray matrix of the Patient samples
 #' @param cor_method correlation method to be used (default is "spearman")
@@ -31,7 +31,7 @@ diffcoex <- function(MODifieR_input, value = 20, beta = 6, cor_method = "spearma
   diag(AdjMatC2)<-0
   WGCNA::collectGarbage()
 
-  dissTOMC1C2 <<- TOMdist((abs(AdjMatC1-AdjMatC2)/2)^(beta1/2))
+  dissTOMC1C2 <- TOMdist((abs(AdjMatC1-AdjMatC2)/2)^(beta1/2))
   WGCNA::collectGarbage()
 
   #Hierarchical clustering is performed using the Topological Overlap of the adjacency difference as input distance matrix

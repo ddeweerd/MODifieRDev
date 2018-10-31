@@ -4,14 +4,16 @@
 \alias{mod_mcode}
 \title{MCODE}
 \usage{
-mod_mcode(MODifieR_input, ppi_network, type = "Gene symbol", hierarchy = 1,
-  vwp = 0.5, haircut = F, fluff = F, fdt = 0.8, loops = T,
-  diffgen_cutoff = 1.3, module_cutoff = 3.5, dataset_name = NULL)
+mod_mcode(MODifieR_input, ppi_network, hierarchy = 1, vwp = 0.5,
+  haircut = F, fluff = F, fdt = 0.8, loops = T,
+  deg_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL)
 }
 \arguments{
-\item{type}{keytype of the gene that is provide (default = "Gene Symbol")}
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{hierarchy}{the hierarchical level of the PPI network to be used (default = 1)}
+\item{ppi_network}{A PPi network as a 2 column dataframe}
+
+\item{hierarchy}{This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.}
 
 \item{vwp}{Vertex weight percentage. Default value is 0.5.}
 
@@ -23,8 +25,26 @@ mod_mcode(MODifieR_input, ppi_network, type = "Gene symbol", hierarchy = 1,
 
 \item{loops}{Boolean value, whether to include self-loops (TRUE) or not (FALSE).}
 
-\item{deg_genes}{A nx2 dataframe sorted ranked list of genes with their respective -log10 p-values}
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
+}
+\value{
+mod_mcode returns a list of objects of class "MODifieR_module" with subclass "Mcode". 
+The objects are named lists containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{module_scores}{A numeric value that denotes the score of the module. Higher is better}
+\item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
-A clique based Algorithm to identify disease module from differentially expressed genes
+A clique based algorithm to identify disease modules from differentially expressed genes 
+originally by Bader et al
+}
+\details{
+Much of the code an documentation has been taken from the now defunct package "ProNet"
+}
+\references{
+\cite{Bader, G. D., & Hogue, C. W. (2003). An automated method for finding molecular complexes in 
+large protein interaction networks. BMC Bioinformatics, 4(1), 2. \url{https://doi.org/10.1186/1471-2105-4-2}}
+}
+\seealso{
+\url{https://github.com/cran/ProNet}
 }

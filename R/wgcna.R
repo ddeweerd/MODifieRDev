@@ -192,9 +192,7 @@ wgcna <- function(MODifieR_input, pval_cutoff = 0.05, min_module_size = 30, deep
   
   rownames(selectiv_consensusCor) <- gsub("ME", "", rownames(selectiv_consensusCor))
   module_genes <-info[info$ModuleColor %in% rownames(selectiv_consensusCor),]
-  
-  #module_genes <- annotation_table$ENTREZID[annotation_table$PROBEID %in% rownames(probes_sel)]
-  
+
   module_genes <- rownames(module_genes)
   module_genes <- module_genes[!is.na(module_genes)]
   

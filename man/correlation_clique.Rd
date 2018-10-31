@@ -6,32 +6,46 @@
 \usage{
 correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
   cutOffRank = 700, probabilityScaleFactor = 0.6, iteration = 50,
-  signif_cutoff = 0.01, gene_significance = 0.05, dataset_name = NULL)
+  signif_cutoff = 0.01, deg_cutoff = 0.05, dataset_name = NULL)
 }
 \arguments{
-\item{ppi_network}{A dataframe of PPI network of your choice}
+\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{frequency_cutoff}{Numeric significance out of number of iterations performed (default = 0.05)}
+\item{ppi_network}{A PPi network as a 2 column dataframe}
+
+\item{frequency_cutoff}{significance out of number of iterations performed (default = 0.05)}
+
+\item{probabilityScaleFactor}{Scale for enriched cliques}
 
 \item{iteration}{Number of iterations to be performed}
 
 \item{signif_cutoff}{Cutoff for Fisher exact test for cliques}
 
-\item{gene_significance}{Cutoff for significant genes}
-
-\item{pval_matrix}{A nx2 dataframe of the entrez ids and their respective p-values}
-
-\item{correlation_matrix}{A nxn matrix of Correlated p-values of n genes}
-
-\item{cutoffRank}{Score cutoff of the string PPI network}
-
-\item{cliquetestCriteria}{type of test to be perfomed for enrichment of cliques (default = "FisherTest")}
-
-\item{probabailitySacleFactor}{Scale for enriched cliques}
+\item{deg_cutoff}{Cutoff for significant genes}
 }
 \value{
-A MODifieR class object with disease module and settings
+correlation_clique returns an object of class "MODifieR_module" with subclass "Correlation_clique". 
+This object is a named list containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{frequency_table}{A table containing the fraction of times the genes were present in an iteration module}
+\item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
 A clique based method to find a disease module from correlated gene expression
+}
+\details{
+The correlation clique is a clique-based algorithm using consensus clustering.
+The algorithm starts with calculating a correlation score between each interaction in the PPi network.
+The correlation score is obtained by subtracting the Pearson correlation p-value:
+\deqn{correlation score = 1 - Pearson p-value}
+Subsequently, the correlation score is multiplied by 
+the correlation confidence and scaled with the scale factor to get the edge score:
+\deqn{edge score = \sqrt(correlation score * confidence score  ) * scale_factor}
+When the edge scores are calculated the iterative part of the algorithm commences:
+All edge scores are compared to random variables from the uniform distribution between (0,1)
+only interactions where the edge score is higher than the random variable are used to construct
+a new PPi network. Then, maximal cliques are inferred from this new network.
+The cliques are tested for significant enrichment of DEGs by Fisher's exact test and
+the union of significant cliques is the disease module for this iteration
+The final disease module will consist of genes that have been present in at least \code{frequency_cutoff} iterations
 }
