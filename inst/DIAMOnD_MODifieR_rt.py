@@ -67,7 +67,7 @@ def check_input_style(input_list):
             sys.exit(0)
             return
     return network_edgelist_file,seeds_file,max_number_of_added_nodes,alpha,outfile_name
-
+"""
 # =============================================================================
 def read_input(network_file,seed_file):
     """
@@ -92,7 +92,7 @@ def read_input(network_file,seed_file):
         else:
             dialect = sniffer.sniff(line)
             line_delimiter = dialect.delimiter
-	    break
+
     if line_delimiter == None:
         print ('network_file format not correct')
         sys.exit(0)
@@ -125,7 +125,7 @@ def read_input(network_file,seed_file):
         seed_genes.add(seed_gene)
 
     return G,seed_genes
-
+"""
 
 # ================================================================================
 def compute_all_gamma_ln(N):
