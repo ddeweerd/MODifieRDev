@@ -92,7 +92,7 @@ def read_input(network_file,seed_file):
         else:
             dialect = sniffer.sniff(line)
             line_delimiter = dialect.delimiter
-	    break
+	        break
     if line_delimiter == None:
         print ('network_file format not correct')
         sys.exit(0)
