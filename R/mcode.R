@@ -14,9 +14,10 @@
 #' @param fluff	Boolean value, whether to spand cluster cores by one neighbour shell outwards (TRUE) or not (FALSE).
 #' @param fdt	Cluster density cutoff. Default value is 0.8.
 #' @param loops	Boolean value, whether to include self-loops (TRUE) or not (FALSE).
+#' @param module_cutoff Minimal score for a module to be returned
 #' 
 #' @return 
-#' mod_mcode returns a list of objects of class "MODifieR_module" with subclass "Mcode". 
+#' mcode returns a list of objects of class "MODifieR_module" with subclass "Mcode". 
 #' The objects are named lists containing the following components:
 #' \item{module_genes}{A character vector containing the genes in the final module}
 #' \item{module_scores}{A numeric value that denotes the score of the module. Higher is better}

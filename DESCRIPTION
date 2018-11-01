@@ -12,14 +12,22 @@ Imports:
     fdrtool,
     dynamicTreeCut,
     flashClust,
-    reticulate
+    reticulate,
+    limma,
+    STRINGdb,
+    MODA,
+    AnnotationDbi,
+    plyr,
+    utils,
+    stats
 Depends:
+    R (>= 3.1.0),
     igraph,
     org.Hs.eg.db,
-    STRINGdb,
     WGCNA
 License: GNU Lesser General Public License
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0
 LinkingTo: Rcpp
+SystemRequirements: Python > 3, Anaconda

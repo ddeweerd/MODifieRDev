@@ -4,11 +4,14 @@
 #'
 #' @param MODifieR_input A MODifieR input object produced by \code{\link{create_input}} function
 #' @param ppi_network A PPi network as a 2 column dataframe
+#' @param simplify_graph Remove loops and multiple edges from PPi network?
 #' @param n_iterations Number of iterations to be performed for the permutation based p-value
 #' @param clique_significance p-value for cliques to be considered significant
 #' @param deg_cutoff  p-value cutoff for differentialy expressed genes
 #' @param min_clique_size Minimal size for cliques 
 #' @param min_deg_in_clique Minimum number of DEGs to be present in the clique
+#' @param dataset_name Optional name for the input object that will be stored in the settings object.
+#' Default is the variable name of the input object
 #' @return clique_sum returns an object of class "MODifieR_module" with subclass "Clique_Sum". 
 #' This object is a named list containing the following components:
 #' \item{module_genes}{A character vector containing the genes in the final module}

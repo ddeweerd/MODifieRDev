@@ -14,7 +14,7 @@ and healthy controls
 }
 \details{
 The expression matrix contains 16 microarray samples. Columns 1:9 are healthy controls,
-columns 10:16 are SLE patients. There are 52307 probes in this dataset
+columns 10:16 are SLE patients. There are 52307 probes in this dataset.
 }
 \references{
 \url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE4588}.

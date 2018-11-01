@@ -27,7 +27,7 @@
 #' ModuleDiscoverer: Identification of regulatory modules in protein-protein interaction networks., 1–17.}
 #' @export
 modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, deg_cutoff = 0.05, repeats = 15,
-                             times = 1000, clique_cutoff = 0.01, dataset_name = NULL){
+                             clique_cutoff = 0.01, dataset_name = NULL){
 
   # Retrieve settings
   default_args <- formals()
@@ -69,7 +69,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
   db_results_singleSeed <<- foreach(j = 1:repeats, .combine = 'append', .packages = "MODifieRDev") %dopar% {
     cat(paste("processing run:",j,'\n'))
     set.seed(j) # if we don't set a seed, each repeat will return identical results.
-    db_results <- lapply(1:times, function(i){return(MODifieRDev:::moduleDiscoverer.fragmentGraph(A=A, vlist=vlist, nbrOfSeeds=1))})
+    db_results <- lapply(1:permutations, function(i){return(MODifieRDev:::moduleDiscoverer.fragmentGraph(A=A, vlist=vlist, nbrOfSeeds=1))})
     return(db_results)
   }
 

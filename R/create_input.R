@@ -9,8 +9,10 @@
 #' \item {SYMBOL}: The gene symbol (if available) associated with the probe
 #' \item{IDENTIFIER}: The entrez id (if available) associated with the probe
 #'}
-#'@param group_indici vectors containing indici for different groups (Column numbers)
-#'@param group_labels Labels for each group, for example "patient" and "control"
+#'@param group1_indici vector containing indici for samples belonging to group 1 (Column numbers)
+#'@param group2_indici vector containing indici for samples belonging to group 2 (Column numbers)
+#'@param group1_label Label for each group 1, for example "patient" or "control"
+#'@param group2_label Label for each group 2, for example "patient" or "control"
 #'@param expression boolean, calculate expression values?
 #'@param differential_expression boolean, calculate differentially expressed data?
 #' @inheritParams WGCNA::collapseRows
@@ -57,7 +59,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     
     annotation_table_expression <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
     
-    annotation_table_expression <- na.omit(annotation_table)
+    annotation_table_expression <- stats::na.omit(annotation_table)
     
     collapsed_data <-WGCNA::collapseRows(datET = expression_matrix,
                                          rowGroup =  annotation_table_expression$IDENTIFIER,
@@ -78,7 +80,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     diff_genes <- plyr::ddply(.data = , limma_probe_table,
                              .variables = "IDENTIFIER", .fun = plyr::summarise, pvalue = min(P.Value))
     
-    diff_genes <- na.omit(diff_genes)
+    diff_genes <- stats::na.omit(diff_genes)
     colnames(diff_genes) <- c("gene", "pvalue")
   }
   modifier_input <- list("diff_genes" = diff_genes,
@@ -92,7 +94,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
 }
 #Calculate differentially expressed genes
 differential_expression <- function(group_factor, expression_matrix, probe_table){
-  design <- model.matrix(~group_factor)
+  design <- stats::model.matrix(~group_factor)
   fit <- invisible(limma::lmFit(expression_matrix, design))
   fit2 <- limma::eBayes(fit)
   diff_genes <- limma::topTable(fit = fit2,  number = Inf, adjust.method = "BH")

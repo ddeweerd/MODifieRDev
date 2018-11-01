@@ -4,21 +4,67 @@
 \alias{diffcoex}
 \title{DiffCoEx}
 \usage{
-diffcoex(MODifieR_input, value = 20, beta = 6,
-  cor_method = "spearman", cluster_method = "average",
-  cuttree_method = "hybrid", cut_height = 0.996, deep_split = 0,
-  pam_respects = F, min_cluster_size = 20,
-  cluster_merge_cut_height = 0.2, dataset_name = NULL)
+diffcoex(MODifieR_input, beta = 6, cor_method = "spearman",
+  cluster_method = "average", cuttree_method = "hybrid",
+  cut_height = 0.996, deepSplit = 0, pamRespectsDendro = F,
+  minClusterSize = 20, cutHeight = 0.2, dataset_name = NULL)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{cor_method}{correlation method to be used (default is "spearman")}
+\item{beta}{User-defined soft thresholding power
+For method=="tree" it defaults to 0.99. For method=="hybrid" it 
+defaults to 99% of the range between the 5th percentile and the
+ maximum of the joining heights on the dendrogram.}
 
-\item{dataset1}{A dataframe of the microarray matrix of the Control samples}
+\item{cor_method}{a character string indicating which correlation coefficient (or covariance)}
 
-\item{dataset2}{A dataframe of the microarray matrix of the Patient samples}
+\item{cluster_method}{the agglomeration method to be used. 
+This should be (an unambiguous abbreviation of) one of "ward", 
+"single", "complete", "average", "mcquitty", "median" or "centroid".
+This applies to hierachical clustering.}
+
+\item{cuttree_method}{Chooses the method to use. Recognized values are "hybrid" and "tree". 
+is to be computed. One of "pearson" (default), "kendall", or "spearman": can be abbreviated.}
+
+\item{cut_height}{Maximum joining heights that will be considered.}
+
+\item{deepSplit}{For method "hybrid", can be either logical or integer in the range 0 to 4. For method
+"tree", must be logical. In both cases, provides a rough control over sensitivity to cluster splitting.
+The higher the value (or if \code{TRUE}), the more and smaller clusters will be produced. For the
+"hybrid" method, a finer control can be achieved via \code{maxCoreScatter} and \code{minGap} below.}
+
+\item{pamRespectsDendro}{Logical, only used for method "hybrid". If \code{TRUE}, the PAM stage will
+respect the dendrogram in the sense that objects and small clusters will only be assigned to clusters
+that belong to the same branch that the objects or small clusters being assigned belong to.
+}
+
+\item{minClusterSize}{Minimum cluster size.  }
+
+\item{cutHeight}{Maximum joining heights that will be considered. For \code{method=="tree"} it
+defaults to 0.99. For \code{method=="hybrid"} it defaults to 99\% of the range between the 5th
+percentile and the maximum of the joining heights on the dendrogram.}
+
+\item{dataset_name}{Optional name for the input object that will be stored in the settings object.
+Default is the variable name of the input object}
+}
+\value{
+diffcoex returns an object of class "MODifieR_module" with subclass "DiffCoEx". 
+This object is a named list containing the following components:
+\item{module_genes}{A character vector containing the genes in the final module}
+\item{module_colors}{A character vector containing the colors that make up the final disease module}
+\item{color_vector}{A named character vector containing the genes as values and the color as name}
+\item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{
-A Coexpression based Algorithm to identify disease module
+An implementation of the DiffCoEx co-expression based algorithm
+}
+\details{
+DiffCoEx is a method for identifying correlation pattern changes, which builds on the commonly 
+ used Weighted Gene Coexpression Network Analysis (WGCNA) framework for coexpression analysis.
+}
+\references{
+\cite{Tesson, B. M., Breitling, R., & Jansen, R. C. (2010). DiffCoEx: a simple and sensitive
+ method to find differentially coexpressed gene modules. BMC Bioinformatics, 11, 497.
+  \url{https://doi.org/10.1186/1471-2105-11-497}}
 }

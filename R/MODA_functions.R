@@ -64,10 +64,10 @@ compare_modules <- function (module_list1, module_list2)
   return(my.array)
 }
 #Adapted code from original MODA package
-moda_extract_modules_index_specific <- function(module_score_array, specificTheta = 0.1){
-  which(rowSums(module_score_array) <= min(rowSums(module_score_array)) + specificTheta)
+moda_extract_modules_index_specific <- function(jaccard_table, specificTheta = 0.1){
+  which(rowSums(jaccard_table) <= min(rowSums(jaccard_table)) + specificTheta)
 }
 #Adapted code from original MODA package
-moda_extract_modules_index_conserved <- function(module_score_array, conservedTheta = 0.1){
-  which(rowSums(module_score_array) >= max(rowSums(module_score_array)) - conservedTheta)
+moda_extract_modules_index_conserved <- function(jaccard_table, conservedTheta = 0.1){
+  which(rowSums(jaccard_table) >= max(rowSums(jaccard_table)) - conservedTheta)
 }

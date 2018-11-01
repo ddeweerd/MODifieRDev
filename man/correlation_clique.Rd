@@ -5,8 +5,8 @@
 \title{Clique_correlation}
 \usage{
 correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
-  cutOffRank = 700, probabilityScaleFactor = 0.6, iteration = 50,
-  signif_cutoff = 0.01, deg_cutoff = 0.05, dataset_name = NULL)
+  probabilityScaleFactor = 0.6, iteration = 50, signif_cutoff = 0.01,
+  deg_cutoff = 0.05, dataset_name = NULL)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
@@ -22,6 +22,9 @@ correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
 \item{signif_cutoff}{Cutoff for Fisher exact test for cliques}
 
 \item{deg_cutoff}{Cutoff for significant genes}
+
+\item{dataset_name}{Optional name for the input object that will be stored in the settings object.
+Default is the variable name of the input object}
 }
 \value{
 correlation_clique returns an object of class "MODifieR_module" with subclass "Correlation_clique". 
