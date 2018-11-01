@@ -17,7 +17,6 @@
 ##< # protein-protein interaction networks in conjunction with expression data from high-throughput experiments.             #
 ##< ##########################################################################################################################
 
-#' @export
 moduleDiscoverer.fragmentGraph <- function(A=NULL, vlist=NULL, nbrOfSeeds=1, seed=NULL, verbose=FALSE){
   if(!is.null(seed)){
     set.seed(seed)
@@ -1003,29 +1002,6 @@ moduleDiscoverer.db.computeNetworkStability <- function(database=NULL, result=NU
   return(results)
 }
 
-moduleDiscoverer.db.plotComputedPValues <- function(result=NULL, fileName=NULL, p.value=0.05){
-  if(!is.null(fileName)){
-    CairoPDF(file=paste(fileName, "pdf",sep="."), width=8, height=5)
-  }else{
-    par(mfrow=c(length(result$p.value),2))
-  }
-
-  for(i in 1:length(result$p.value)){
-    if(result$computeOnTheFly){
-      o <- order(result$p.value[[i]][,1], decreasing=FALSE)
-      plot(result$p.value[[i]][o,2], pch=16, cex=1, type="p", col="green", main="", xlab="rank", ylab="p-value")
-      points(result$p.value[[i]][o,1], pch=16, cex=1, lwd=2, type="l", lty=2, col="blue")
-
-      plot(result$p.value[[i]][o,2], pch=16, cex=1, type="p", col="green", main="", xlab="rank", ylab="p-value", ylim=c(0,p.value), xlim=c(0, which(result$p.value[[i]][o,1]>=p.value)[1]-1))
-      points(result$p.value[[i]][o,1], pch=16, cex=1, lwd=2, type="l", lty=2, col="blue")
-    }else{
-    }
-  }
-
-  if(!is.null(fileName)){
-    dev.off()
-  }
-}
 
 moduleDiscoverer.module.annotateModule <- function(module=NULL, annotation.db=NULL, annotateWith=NULL, nodeIdentifier=NULL){
   if(is.null(module)){

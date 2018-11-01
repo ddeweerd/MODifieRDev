@@ -5,8 +5,8 @@
 \title{Module Discoverer}
 \usage{
 modulediscoverer(MODifieR_input, ppi_network, permutations = 10000,
-  deg_cutoff = 0.05, repeats = 15, times = 1000,
-  clique_cutoff = 0.01, dataset_name = NULL)
+  deg_cutoff = 0.05, repeats = 15, clique_cutoff = 0.01,
+  dataset_name = NULL)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
@@ -20,6 +20,9 @@ modulediscoverer(MODifieR_input, ppi_network, permutations = 10000,
 \item{repeats}{Number of times the algorithm is repeated}
 
 \item{clique_cutoff}{cutoff pvalue for significant cliques}
+
+\item{dataset_name}{Optional name for the input object that will be stored in the settings object.
+Default is the variable name of the input object}
 }
 \value{
 modulediscoverer returns an object of class "MODifieR_module" with subclass "module_discoverer". 

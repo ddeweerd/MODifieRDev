@@ -31,7 +31,7 @@
 #' \item{settings}{A named list containing the parameters used in generating the object}
 #' @export
 correlation_clique <- function(MODifieR_input, ppi_network,
-                                frequency_cutoff = .5, cutOffRank = 700,
+                                frequency_cutoff = .5, 
                                 probabilityScaleFactor = 0.6,
                                 iteration = 50, signif_cutoff = 0.01, 
                                 deg_cutoff = 0.05,
@@ -56,9 +56,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   springConnection <- springConnection[overlap,]
   overlap <- springConnection[,2] %in% pValueMatrix[,1] & springConnection[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
   springConnection <- springConnection[overlap,]
-  #Remove connections in PPi below score
-  springConnection <- springConnection[springConnection[,3] > cutOffRank,]
-  
+
   springConnection[,3] <- springConnection[,3] / 1000
   #Calculates (1- p value) for all relevant connections in the PPi network, and is stored in column 1.
   #Column 2 will contain the PPi score from the PPi network
@@ -142,7 +140,7 @@ infer_module <- function(cliques, signifgenes, n_unsignif, signif_cutoff){
 }
 #Pval Helper function
 fisher_pval <- function(clique_row){
-  fisher.test(x = matrix(data = clique_row, nrow = 2, byrow = T), alternative = "g")$p.value
+  stats::fisher.test(x = matrix(data = clique_row, nrow = 2, byrow = T), alternative = "g")$p.value
 }
 #This function takes as the first argument a row from a PPi network, retrieves the corresponding row and column
 #by row and column name and computes (1- correlation P value). 

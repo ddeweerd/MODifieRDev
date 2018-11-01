@@ -9,9 +9,6 @@ validate_input <- function(input_object){
   if(is.null(input_object$expression_matrix)){
     warning("No expression matrix\n")
   }
-  if(is.null(input_object$diamond_genes)){
-    warning("No diamond genes\n")
-  }
   if(is.null(input_object$annotation_table)){
     warning("No probe annotation table\n")
   }

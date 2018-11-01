@@ -6,7 +6,7 @@
 \usage{
 diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
   n_output_genes = 200, seed_weight = 10, include_seed = TRUE,
-  tempfile_genes = tempfile(), dataset_name = NULL)
+  dataset_name = NULL)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
@@ -20,6 +20,9 @@ diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
 \item{seed_weight}{Numeric additional parameter to assign weight for the seed genes}
 
 \item{include_seed}{Logical TRUE/FALSE for inclusion of seed genes in the output module}
+
+\item{dataset_name}{Optional name for the input object that will be stored in the settings object.
+Default is the variable name of the input object}
 }
 \value{
 diamond returns an object of class "MODifieR_module" with subclass "DIAMOnD". 
@@ -27,9 +30,9 @@ This object is a named list containing the following components:
 \item{module_genes}{A character vector containing the genes in the final module}
 \item{seed_genes}{Character vector containing genes that have been used as seed genes in the algorithm}
 \item{ignored_genes}{Potential seed genes that have not been used to infer the module}
-\item{added_genes} A table containing information on all added genes. First column is the name of the gene,
+\item{added_genes}{A table containing information on all added genes. First column is the name of the gene,
 the second column is the degree of the node (gene). The third column is the number of +1 neighbors 
-and the fourth column is the p-value.
+and the fourth column is the p-value.}
 \item{settings}{A named list containing the parameters used in generating the object}
 }
 \description{

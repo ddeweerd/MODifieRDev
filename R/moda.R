@@ -4,6 +4,7 @@
 #' @inheritParams clique_sum
 #' @inheritParams MODA::CompareAllNets
 #' @inheritParams MODA::WeightedModulePartitionHierarchical
+#' @param group_of_interest Numerical value denoting which group contains the condition of interest (1 or 2) 
 #' 
 #' @details 
 #' This implementation follows a workflow as described in the MODA vignette. First,

@@ -23,6 +23,6 @@ column 1 contains the first gene, column 2 the second. The third column is the c
 \seealso{
 \code{\link{probe_annotation}}
 
-#'\code{\link{expression_matrix}}
+\code{\link{expression_matrix}}
 }
 \keyword{datasets}

@@ -18,6 +18,14 @@ create_input(expression_matrix, annotation_table, group1_indici,
 \item{IDENTIFIER}: The entrez id (if available) associated with the probe
 }}
 
+\item{group1_indici}{vector containing indici for samples belonging to group 1 (Column numbers)}
+
+\item{group2_indici}{vector containing indici for samples belonging to group 2 (Column numbers)}
+
+\item{group1_label}{Label for each group 1, for example "patient" or "control"}
+
+\item{group2_label}{Label for each group 2, for example "patient" or "control"}
+
 \item{expression}{boolean, calculate expression values?}
 
 \item{differential_expression}{boolean, calculate differentially expressed data?}
@@ -34,10 +42,6 @@ exactly 2 corresponding rows or when connectivityBasedCollapsing=FALSE. These ar
 "methodFunction").
 Note: if method="ME", "Average" or "function", the output parameters "group2row" and "selectedRow" are not informative.
 }
-
-\item{group_indici}{vectors containing indici for different groups (Column numbers)}
-
-\item{group_labels}{Labels for each group, for example "patient" and "control"}
 }
 \value{
 The function returns an object of class "MODifieR_input". The object is a named list containing the

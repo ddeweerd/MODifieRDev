@@ -20,6 +20,11 @@ s is the sums of rows in Jaccard index matrix. See supplementary file.}
 \item{conservedTheta}{The threshold to define max(s)-conservedTheta, 
 greater than which is considered as condition conserved module. 
 s is the sums of rows in Jaccard index matrix. See supplementary file.}
+
+\item{dataset_name}{Optional name for the input object that will be stored in the settings object.
+Default is the variable name of the input object}
+
+\item{group_of_interest}{Numerical value denoting which group contains the condition of interest (1 or 2)}
 }
 \value{
 moda returns an object of class "MODifieR_module" with subclass "MODA". 

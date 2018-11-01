@@ -18,9 +18,9 @@
 #' \item{module_genes}{A character vector containing the genes in the final module}
 #' \item{seed_genes}{Character vector containing genes that have been used as seed genes in the algorithm}
 #' \item{ignored_genes}{Potential seed genes that have not been used to infer the module}
-#' \item{added_genes} A table containing information on all added genes. First column is the name of the gene,
+#' \item{added_genes}{A table containing information on all added genes. First column is the name of the gene,
 #' the second column is the degree of the node (gene). The third column is the number of +1 neighbors 
-#' and the fourth column is the p-value.
+#' and the fourth column is the p-value.}
 #' \item{settings}{A named list containing the parameters used in generating the object}
 #' @references 
 #' \cite{Ghiassian, S. D., Menche, J., & Barabási, A. L. (2015). 
@@ -29,7 +29,7 @@
 #' Biology, 11(4), 1–21. \url{https://doi.org/10.1371/journal.pcbi.1004120}}
 #' @export
 diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
-                               include_seed = TRUE, tempfile_genes = tempfile(), dataset_name = NULL){
+                               include_seed = TRUE, dataset_name = NULL){
   # Retrieve settings
   default_args <- formals()
   user_args <- as.list(match.call(expand.dots = T)[-1])
@@ -42,7 +42,7 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
   #Get the input genes
   diamond_genes <- MODifieR_input$diff_genes
   diamond_genes <- diamond_genes[diamond_genes$pvalue < deg_cutoff, ]
-  diamond_genes <- unique(na.omit(diamond_genes$gene)) 
+  diamond_genes <- unique(stats::na.omit(diamond_genes$gene)) 
   #Convert to python objects
   diamond_set <- to_set_py(diamond_genes)
   ppi_graph <- to_graph_py(as.matrix(ppi_network))
@@ -57,8 +57,12 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
   added_genes[,2:4] <- sapply(added_genes[,2:4], FUN = as.numeric)
   colnames(added_genes) <-   c("Gene","Degree", "Connectivity", "p-value")
   
+  module_genes <- sapply(raw_module, function(x)x[[1]])
+  if (include_seed){
+    module_genes <- c(module_genes, seed_genes)
+  }
   # Build new MODifieR object
-  new_diamond_module <- list("module_genes" = sapply(raw_module, function(x)x[[1]]),
+  new_diamond_module <- list("module_genes" = module_genes,
                              "seed_genes" =  seed_genes,
                              "ignored_genes" = ignored_genes,
                              "added_genes" = added_genes,

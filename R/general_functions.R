@@ -4,9 +4,15 @@
 #' @import doParallel
 #' @import WGCNA
 #' @import reticulate
+#' @import MODA
+#' @import AnnotationDbi
+#' @importFrom plyr ddply summarise
+#' @importFrom stats as.dist fisher.test hclust median na.omit p.adjust phyper pnorm
+#' @importFrom stats prcomp pt qt quantile runif
 #' @importFrom Rcpp sourceCpp
 #' @importFrom flashClust flashClust
 #' @importFrom dynamicTreeCut printFlush
+#' @importFrom utils combn
 #' @useDynLib MODifieRDev
 
 
@@ -36,7 +42,7 @@ diamond_core <- NULL
 #'  \code{\link{entrez_to_symbol}}
 #' @export
 symbol_to_entrez <- function(MODifieR_module){
-  conv <- toTable(org.Hs.eg.db::org.Hs.egSYMBOL)
+  conv <- AnnotationDbi::toTable(org.Hs.eg.db::org.Hs.egSYMBOL)
   MODifieR_module$module_genes <- conv$gene_id[conv$symbol %in% MODifieR_module$module_genes]
   return(MODifieR_module)
 }
@@ -52,12 +58,12 @@ symbol_to_entrez <- function(MODifieR_module){
 #' \code{\link{symbol_to_entrez}}
 #' @export
 entrez_to_symbol <- function(MODifieR_module){
-  conv <- toTable(org.Hs.eg.db::org.Hs.egSYMBOL)
+  conv <- AnnotationDbi::toTable(org.Hs.eg.db::org.Hs.egSYMBOL)
   MODifieR_module$module_genes <- conv$symbol[conv$gene_id %in% MODifieR_module$module_genes]
   return(MODifieR_module)
 }
 dataframe_to_vector <- function(dataframe){
-  setNames(dataframe[,2],dataframe[,1])
+  stats::setNames(dataframe[,2],dataframe[,1])
 }
 
 summary.MODifieR_module <- function(MODifieR_module){
@@ -69,21 +75,8 @@ settings_function <- function(...) {
   func_args <- gsub(pattern = "\"", replacement = "", x = func_args)
   return(func_args)
 }
-
-
-#' Generic getter for data fields
-extract_module_data <- function(MODifieR_module, data_field){
-  get(data_field, MODifieR_module)
-}
 #Generic subclass extractor
 extract_module_class <- function(MODifieR_module){
   class(MODifieR_module)[2]
 }
-#' @export
-#Unsure if this should be included in the package
-print_super_module <- function(super_module, output_file){
-  sapply(X = 1:length(super_module), FUN =  function(i){
-  invisible(write.table(x = t(c(names(super_module[i]), "", super_module[[i]])),
-                  file = output_file, append = T, row.names = F,
-                  col.names = F, sep = "\t", quote = F))})
-}
+
