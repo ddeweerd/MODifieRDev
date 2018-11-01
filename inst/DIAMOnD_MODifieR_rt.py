@@ -67,22 +67,9 @@ def check_input_style(input_list):
             sys.exit(0)
             return
     return network_edgelist_file,seeds_file,max_number_of_added_nodes,alpha,outfile_name
-'''
+"""
 # =============================================================================
 def read_input(network_file,seed_file):
-    """
-    Reads the network and the list of seed genes from external files.
-
-    * The edgelist must be provided as a tab-separated table. The
-    first two columns of the table will be interpreted as an
-    interaction gene1 <==> gene2
-
-    * The seed genes mus be provided as a table. If the table has more
-    than one column, they must be tab-separated. The first column will
-    be used only.
-
-    * Lines that start with '#' will be ignored in both cases
-    """
 
     sniffer = csv.Sniffer()
     line_delimiter = None
@@ -92,7 +79,7 @@ def read_input(network_file,seed_file):
         else:
             dialect = sniffer.sniff(line)
             line_delimiter = dialect.delimiter
-	        break
+
     if line_delimiter == None:
         print ('network_file format not correct')
         sys.exit(0)
@@ -125,7 +112,7 @@ def read_input(network_file,seed_file):
         seed_genes.add(seed_gene)
 
     return G,seed_genes
-'''
+"""
 
 # ================================================================================
 def compute_all_gamma_ln(N):
