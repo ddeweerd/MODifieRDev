@@ -15,8 +15,8 @@
 #' defaults to 99% of the range between the 5th percentile and the
 #'  maximum of the joining heights on the dendrogram.
 #' @param cor_method a character string indicating which correlation coefficient (or covariance)
-#' @param cuttree_method Chooses the method to use. Recognized values are "hybrid" and "tree". 
 #' is to be computed. One of "pearson" (default), "kendall", or "spearman": can be abbreviated.
+#' @param cuttree_method Chooses the method to use. Recognized values are "hybrid" and "tree". 
 #' 
 #' @details
 #'  DiffCoEx is a method for identifying correlation pattern changes, which builds on the commonly 

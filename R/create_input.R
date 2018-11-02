@@ -69,6 +69,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
   }
   #Same for expression data
   if (differential_expression == T){
+    P.Value = NULL
     group_factor <- create_group_factor(samples = colnames(expression_matrix),
                                         group1_indici = group1_indici,
                                         group2_indici = group2_indici)

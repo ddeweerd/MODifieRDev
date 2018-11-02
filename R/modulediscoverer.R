@@ -9,7 +9,7 @@
 #' @param clique_cutoff cutoff pvalue for significant cliques
 #' 
 #' @details 
-#' This is an implmentation of the \emph{single seed} Module Discoverer algorithm.
+#' This is an implementation of the \emph{single seed} Module Discoverer algorithm.
 #' The code has been adapted from the orignal code by Vlaic et al. For details, please see the paper referenced below
 #' 
 #' @return 
@@ -61,19 +61,19 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
                                                                     size = length(degs),
                                                                     replace = FALSE), simplify = F)
 
-  cl = makeCluster(3) # initialize the cluster with 3 cores.
+  cl = parallel::makeCluster(3) # initialize the cluster with 3 cores.
   doParallel::registerDoParallel(cl)
 
-  clusterCall(cl, function(x) .libPaths(x), .libPaths())
+  parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
 
-  db_results_singleSeed <<- foreach(j = 1:repeats, .combine = 'append', .packages = "MODifieRDev") %dopar% {
+  db_results_singleSeed <- foreach(j = 1:repeats, .combine = 'append', .packages = "MODifieRDev") %dopar% {
     cat(paste("processing run:",j,'\n'))
     set.seed(j) # if we don't set a seed, each repeat will return identical results.
     db_results <- lapply(1:permutations, function(i){return(MODifieRDev:::moduleDiscoverer.fragmentGraph(A=A, vlist=vlist, nbrOfSeeds=1))})
     return(db_results)
   }
 
-  stopCluster(cl) # stop the cluster
+  parallel::stopCluster(cl) # stop the cluster
 
   database_singleSeed <- moduleDiscoverer.createDatabase(results=db_results_singleSeed,
                                                         proteins=proteins)
