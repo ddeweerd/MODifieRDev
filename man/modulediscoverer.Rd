@@ -35,7 +35,7 @@ This object is a named list containing the following components:
 A clique based algorithm by Vlaic et al. to produce disease module from Differentially Expressed Genes
 }
 \details{
-This is an implmentation of the \emph{single seed} Module Discoverer algorithm.
+This is an implementation of the \emph{single seed} Module Discoverer algorithm.
 The code has been adapted from the orignal code by Vlaic et al. For details, please see the paper referenced below
 }
 \references{

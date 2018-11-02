@@ -64,4 +64,3 @@ settings_function <- function(...) {
 extract_module_class <- function(MODifieR_module){
   class(MODifieR_module)[2]
 }
-

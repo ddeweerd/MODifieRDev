@@ -9,7 +9,6 @@ Imports:
     foreach,
     doParallel,
     Rcpp,
-    fdrtool,
     dynamicTreeCut,
     flashClust,
     reticulate,
