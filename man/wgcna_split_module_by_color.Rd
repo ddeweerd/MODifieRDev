@@ -2,7 +2,7 @@
 % Please edit documentation in R/wcgna.R
 \name{wgcna_split_module_by_color}
 \alias{wgcna_split_module_by_color}
-\title{Returns new module objects by color}
+\title{Returns new WGCNA module objects by color}
 \usage{
 wgcna_split_module_by_color(wgcna_module)
 }
@@ -13,7 +13,7 @@ wgcna_split_module_by_color(wgcna_module)
 A list of \code{wgcna} module objects
 }
 \description{
-Returns new module objects by color
+Returns new WGCNA module objects by color
 }
 \details{
 The  \code{wgcna} module object is split into a series of \code{wgcna} objects by color.

@@ -96,8 +96,12 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
   #Name this list according to color
   names(module_genes_list) <- colors
   #Build new diffxoex object
+  
+  module_genes <- as.vector(unlist(unname(module_genes_list)))
+  module_colors <- names(module_list)
+  
   new_diffcoex_module <- construct_diffcoex_module(module_list = module_genes_list,
-                                                   annotation_table = MODifieR_input$annotation_table,
+                                                   module_colors = module_colors,
                                                    color_vector = color_vector,
                                                    settings = settings)
   
@@ -109,13 +113,11 @@ aggregate_colors <- function(color, genes, color_vector){
   genes[which(names(color_vector) == color)]
 }
 #Module constructor function
-construct_diffcoex_module <- function(module_list, annotation_table, color_vector, settings){
-  
-  module_genes <- as.vector(unlist(unname(module_list)))
-  module_colors <- names(module_list)
+construct_diffcoex_module <- function(module_genes, module_colors, color_vector, settings){
+
   
   new_diffcoex_module <- list("module_genes" =  module_genes,
-                              "module_colors"= module_colors,
+                              "module_colors" = module_colors,
                               "color_vector" =  color_vector,
                               "settings" = settings)
   
@@ -123,4 +125,31 @@ construct_diffcoex_module <- function(module_list, annotation_table, color_vecto
   
   
   return (new_diffcoex_module)
+}
+#' Returns new DiffCoEx module objects by color
+#' @param diffcoex_module Module object that has been produced by \code{diffcoex} function
+#' @details 
+#' The  \code{DiffCoEx} module object is split into a series of \code{DiffCoEx} objects by color.
+#' Eevery significant color in the module will be its own \code{DiffCoEx} module object
+#' 
+#' @return 
+#' 
+#' A list of \code{DiffCoEx} module objects
+#' 
+#' @seealso
+#' 
+#' \code{\link{diffcoex}}
+#' 
+#' @export
+diffcoex_split_module_by_color <- function(diffcoex_module){
+  module_list <- list()
+  color_vector <- diffcoex_module$color_vector
+  for (color in diffcoex_module$module_colors){
+    module_genes <- unname(color_vector[which(names(color_vector) == color)])
+    module_list[[color]] <- construct_diffcoex_module(module_genes = module_genes,
+                                             module_colors = color,
+                                             color_vector = color_vector,
+                                             settings = diffcoex_module$settings)
+  }
+  return(module_list)
 }

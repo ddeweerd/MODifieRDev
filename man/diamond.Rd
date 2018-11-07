@@ -29,7 +29,7 @@ diamond returns an object of class "MODifieR_module" with subclass "DIAMOnD".
 This object is a named list containing the following components:
 \item{module_genes}{A character vector containing the genes in the final module}
 \item{seed_genes}{Character vector containing genes that have been used as seed genes in the algorithm}
-\item{ignored_genes}{Potential seed genes that have not been used to infer the module}
+\item{ignored_genes}{Potential seed genes that are not in the PPi network}
 \item{added_genes}{A table containing information on all added genes. First column is the name of the gene,
 the second column is the degree of the node (gene). The third column is the number of +1 neighbors 
 and the fourth column is the p-value.}

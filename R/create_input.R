@@ -34,7 +34,7 @@
 #' into genes using \code{collapse_method}}
 #' \item{expression_matrix}{A matrix, the original input expression matrix}
 #' \item{annotation_table}{A data.frame, the original annotation table used to annotate the probes}
-#' \item{group_indici}{A named list containg 2 numeric vectors. The names are the group labels and the values 
+#' \item{group_indici}{A named list containing 2 numeric vectors. The names are the group labels and the values 
 #' are the group indici}
 #' @export
 create_input <- function (expression_matrix, annotation_table, group1_indici, group2_indici, group1_label, group2_label,
@@ -43,10 +43,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
   limma_probe_table <- NULL
-  group_indici <- list("group_1_indici" = group1_indici,
-                       "group_2_indici" = group2_indici)
-  names(group_indici) <- c(group1_label, group2_label)
-  
+
   #Making sure column names for the annotation dataframe are right...
   colnames(annotation_table) <- c("PROBEID", "IDENTIFIER")
   
@@ -84,15 +81,15 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     diff_genes <- stats::na.omit(diff_genes)
     colnames(diff_genes) <- c("gene", "pvalue")
   }
-  modifier_input <- list("diff_genes" = diff_genes,
-                         "limma_probe_table" = limma_probe_table,
-                         "annotated_exprs_matrix" = collapsed_exprs_mat,
-                         "expression_matrix" = expression_matrix,
-                         "annotation_table" = annotation_table,
-                         "group_indici" = group_indici)
-  class(modifier_input) <- c("MODifieR_input", "Expression")
-  return (modifier_input)
-}
+  modifier_input <- construct_input_object(diff_genes = diff_genes, 
+                                           limma_probe_table = limma_probe_table,
+                                           annotated_exprs_matrix = collapsed_exprs_mat,
+                                           expression_matrix = expression_matrix,
+                                           group1_indici = group1_indici,
+                                           group2_indici = group2_indici,
+                                           group1_label = group1_label,
+                                           group2_label = group2_label)
+ }
 #Calculate differentially expressed genes
 differential_expression <- function(group_factor, expression_matrix, probe_table){
   design <- stats::model.matrix(~group_factor)
@@ -116,4 +113,49 @@ create_group_factor <- function(samples, group1_indici, group2_indici){
   pre_factor <- replace(x = pre_factor, list = group2_indici, values = "group2")
   group_factor<- as.factor(pre_factor)
   return(group_factor)
+}
+#' Create a generic input object
+#' @inheritParams create_input
+#' @param diff_genes A 2 two column data.frame where the first column are genes and the second column are p-values
+#' @param data.frame from \code{limma topTable} with added gene annotation
+#' 
+#' @details 
+#' This function allows the creation of a generic input object with the same class as objects created by
+#' \code{\link{create_input}}. This can be useful in the cases where you already have differentially 
+#' expressed genes, an annotated expression matrix or both and want to wrap that into an input object
+#' to use in downstream analysis.
+#' @seealso 
+#' \code{\link{create_input}}
+#' @return
+#' The function returns an object of class "MODifieR_input". The object is a named list containing the
+#' following components:
+#' \item{diff_genes}{A 2 two column data.frame where the first column are genes and the second column unadjusted p-values}
+#' \item{limma_probe_table}{A data.frame from \code{limma topTable} with added gene annotation}
+#' \item{annotated_exprs_matrix}{A matrix where the rows are genes and the columns samples. Probes have been collapsed
+#' into genes using \code{collapse_method}}
+#' \item{expression_matrix}{A matrix, the original input expression matrix}
+#' \item{annotation_table}{A data.frame, the original annotation table used to annotate the probes}
+#' \item{group_indici}{A named list containing 2 numeric vectors. The names are the group labels and the values 
+#' are the group indici}
+construct_input_object <- function(diff_genes = NULL, limma_probe_table = NULL,
+                                   annotated_exprs_matrix = NULL, expression_matrix = NULL, 
+                                   annotation_table = NULL, group1_indici = NULL,
+                                   group2_indici = NULL, group1_label = NULL, 
+                                   group2_label = NULL){
+  
+  group_indici <- list("group_1_indici" = group1_indici,
+                       "group_2_indici" = group2_indici)
+  names(group_indici) <- c(group1_label, group2_label)
+  
+  modifier_input <- list("diff_genes" = diff_genes,
+                         "limma_probe_table" = limma_probe_table,
+                         "annotated_exprs_matrix" = annotated_exprs_matrix,
+                         "expression_matrix" = expression_matrix,
+                         "annotation_table" = annotation_table,
+                         "group_indici" = group_indici)
+  class(modifier_input) <- c("MODifieR_input", "Expression")
+  
+  return (modifier_input)
+  
+  
 }

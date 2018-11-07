@@ -7,7 +7,6 @@
 #' @param probabilityScaleFactor Scale for enriched cliques 
 #' @param frequency_cutoff significance out of number of iterations performed (default = 0.05) 
 #' @param signif_cutoff Cutoff for Fisher exact test for cliques
-#' @param deg_cutoff Cutoff for significant genes
 #' @details 
 #' The correlation clique is a clique-based algorithm using consensus clustering.
 #' The algorithm starts with calculating a correlation score between each interaction in the PPi network.
