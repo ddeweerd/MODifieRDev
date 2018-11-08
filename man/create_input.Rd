@@ -52,7 +52,7 @@ following components:
 into genes using \code{collapse_method}}
 \item{expression_matrix}{A matrix, the original input expression matrix}
 \item{annotation_table}{A data.frame, the original annotation table used to annotate the probes}
-\item{group_indici}{A named list containg 2 numeric vectors. The names are the group labels and the values 
+\item{group_indici}{A named list containing 2 numeric vectors. The names are the group labels and the values 
 are the group indici}
 }
 \description{

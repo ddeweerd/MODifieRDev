@@ -9,7 +9,6 @@ Imports:
     foreach,
     doParallel,
     Rcpp,
-    fdrtool,
     dynamicTreeCut,
     flashClust,
     reticulate,
@@ -19,7 +18,8 @@ Imports:
     AnnotationDbi,
     plyr,
     utils,
-    stats
+    stats,
+    parallel
 Depends:
     R (>= 3.1.0),
     igraph,

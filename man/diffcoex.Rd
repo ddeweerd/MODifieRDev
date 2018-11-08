@@ -17,15 +17,15 @@ For method=="tree" it defaults to 0.99. For method=="hybrid" it
 defaults to 99% of the range between the 5th percentile and the
  maximum of the joining heights on the dendrogram.}
 
-\item{cor_method}{a character string indicating which correlation coefficient (or covariance)}
+\item{cor_method}{a character string indicating which correlation coefficient (or covariance)
+is to be computed. One of "pearson" (default), "kendall", or "spearman": can be abbreviated.}
 
 \item{cluster_method}{the agglomeration method to be used. 
 This should be (an unambiguous abbreviation of) one of "ward", 
 "single", "complete", "average", "mcquitty", "median" or "centroid".
 This applies to hierachical clustering.}
 
-\item{cuttree_method}{Chooses the method to use. Recognized values are "hybrid" and "tree". 
-is to be computed. One of "pearson" (default), "kendall", or "spearman": can be abbreviated.}
+\item{cuttree_method}{Chooses the method to use. Recognized values are "hybrid" and "tree".}
 
 \item{cut_height}{Maximum joining heights that will be considered.}
 

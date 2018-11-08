@@ -21,7 +21,7 @@ correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
 
 \item{signif_cutoff}{Cutoff for Fisher exact test for cliques}
 
-\item{deg_cutoff}{Cutoff for significant genes}
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}

@@ -2,6 +2,7 @@
 #' @import igraph
 #' @import foreach
 #' @import doParallel
+#' @import parallel
 #' @import WGCNA
 #' @import reticulate
 #' @import MODA
@@ -14,22 +15,6 @@
 #' @importFrom dynamicTreeCut printFlush
 #' @importFrom utils combn
 #' @useDynLib MODifieRDev
-
-
-to_set_py <- NULL
-to_graph_py <- NULL
-diamond_core <- NULL
-
-
-.onLoad <- function(libname, pkgname){
-  path <- system.file(package = "MODifieRDev")
-  diamond_module <- reticulate::import_from_path(module = "DIAMOnD_MODifieR_rt", path = path)
-  
-  to_set_py <<- diamond_module$to_set
-  to_graph_py <<- diamond_module$to_graph
-  diamond_core <<- diamond_module$DIAMOnD
-
-}
 
 #'@title Convert the module genes in a MODifieR_input object from official gene symbols to ENTREZ gene IDs
 #' @param MODifieR_module An object of class MODifieR_module
@@ -79,4 +64,3 @@ settings_function <- function(...) {
 extract_module_class <- function(MODifieR_module){
   class(MODifieR_module)[2]
 }
-

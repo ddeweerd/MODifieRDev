@@ -232,7 +232,7 @@ wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted 
   
   return(wgcna_module)
 }
-#' Returns new module objects by color
+#' Returns new WGCNA module objects by color
 #' @inheritParams wgcna_get_all_module_genes
 #' 
 #' @details 
