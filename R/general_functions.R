@@ -14,6 +14,7 @@
 #' @importFrom flashClust flashClust
 #' @importFrom dynamicTreeCut printFlush
 #' @importFrom utils combn
+#' @importFrom graphics plot
 #' @useDynLib MODifieRDev
 
 #'@title Convert the module genes in a MODifieR_input object from official gene symbols to ENTREZ gene IDs
@@ -63,4 +64,18 @@ settings_function <- function(...) {
 #Generic subclass extractor
 extract_module_class <- function(MODifieR_module){
   class(MODifieR_module)[2]
+}
+
+plot.MODifieR_module <-function(MODifieR_module, ppi_network){
+  ppi_graphed <- module_to_igraph(MODifieR_module = MODifieR_module, ppi_network = ppi_network)
+  deg <- degree(ppi_graphed, mode="all")
+  V(ppi_graphed)$size <- deg /10
+  graphics::plot(ppi_graphed, edge.arrow.size=.1, vertex.label.cex=.45)
+}
+
+module_to_igraph <- function(MODifieR_module, ppi_network){
+  genes <- MODifieR_module$module_genes[MODifieR_module$module_genes %in% unique(unname(unlist(ppi_network[,1:2])))]
+  ppi_graphed <- igraph::graph.data.frame(ppi_network)
+  ppi_graphed <- igraph::simplify(ppi_graphed, edge.attr.comb=list(Weight="sum","ignore"))
+  ppi_graphed <- igraph::induced.subgraph(graph = ppi_graphed, vids = genes)
 }

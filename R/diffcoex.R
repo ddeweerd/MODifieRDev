@@ -95,12 +95,12 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
                               color_vector = color_vector)
   #Name this list according to color
   names(module_genes_list) <- colors
-  #Build new diffxoex object
+  #Build new diffcoex object
   
   module_genes <- as.vector(unlist(unname(module_genes_list)))
-  module_colors <- names(module_list)
+  module_colors <- names(module_genes_list)
   
-  new_diffcoex_module <- construct_diffcoex_module(module_list = module_genes_list,
+  new_diffcoex_module <- construct_diffcoex_module(module_genes = module_genes,
                                                    module_colors = module_colors,
                                                    color_vector = color_vector,
                                                    settings = settings)

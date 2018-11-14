@@ -14,7 +14,6 @@ create_input(expression_matrix, annotation_table, group1_indici,
 \item{annotation_table}{A dataframe providing annotation for the probes. The dataframe should have 3 columns: 
 \itemize{
 \item {PROBEID}: The probe id as it is in the expression matrix
-\item {SYMBOL}: The gene symbol (if available) associated with the probe
 \item{IDENTIFIER}: The entrez id (if available) associated with the probe
 }}
 
@@ -46,7 +45,8 @@ Note: if method="ME", "Average" or "function", the output parameters "group2row"
 \value{
 The function returns an object of class "MODifieR_input". The object is a named list containing the
 following components:
-\item{diff_genes}{A 2 two column data.frame where the first column are genes and the second column unadjusted p-values}
+\item{diff_genes}{A 2 two column data.frame where the first column are genes and the second column unadjusted p-values
+obtained by differential expression analysis}
 \item{limma_probe_table}{A data.frame from \code{limma topTable} with added gene annotation}
 \item{annotated_exprs_matrix}{A matrix where the rows are genes and the columns samples. Probes have been collapsed
 into genes using \code{collapse_method}}

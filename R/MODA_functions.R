@@ -1,7 +1,6 @@
 #Adapted code from original MODA package
 WMPH <- function (datExpr, indicatename, cutmethod = c("Density", "Modularity"), power = 10) 
 {
-  #dir.create(file.path("./", foldername), showWarnings = FALSE)
   ADJ1 = abs(cor(datExpr, use = "p"))^power
   dissADJ = 1 - ADJ1
   hierADJ = flashClust::hclust(stats::as.dist(dissADJ), method = "average")

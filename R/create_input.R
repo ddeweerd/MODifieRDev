@@ -6,7 +6,6 @@
 #'@param annotation_table A dataframe providing annotation for the probes. The dataframe should have 3 columns: 
 #' \itemize{
 #' \item {PROBEID}: The probe id as it is in the expression matrix
-#' \item {SYMBOL}: The gene symbol (if available) associated with the probe
 #' \item{IDENTIFIER}: The entrez id (if available) associated with the probe
 #'}
 #'@param group1_indici vector containing indici for samples belonging to group 1 (Column numbers)
@@ -28,7 +27,8 @@
 #' @return
 #' The function returns an object of class "MODifieR_input". The object is a named list containing the
 #' following components:
-#' \item{diff_genes}{A 2 two column data.frame where the first column are genes and the second column unadjusted p-values}
+#' \item{diff_genes}{A 2 two column data.frame where the first column are genes and the second column unadjusted p-values
+#' obtained by differential expression analysis}
 #' \item{limma_probe_table}{A data.frame from \code{limma topTable} with added gene annotation}
 #' \item{annotated_exprs_matrix}{A matrix where the rows are genes and the columns samples. Probes have been collapsed
 #' into genes using \code{collapse_method}}
@@ -117,7 +117,8 @@ create_group_factor <- function(samples, group1_indici, group2_indici){
 #' Create a generic input object
 #' @inheritParams create_input
 #' @param diff_genes A 2 two column data.frame where the first column are genes and the second column are p-values
-#' @param data.frame from \code{limma topTable} with added gene annotation
+#' @param limma_probe_table A data.frame from \code{limma topTable} with added gene annotation
+#' @param annotated_exprs_matrix A matrix where the rows are genes and the columns samples.
 #' 
 #' @details 
 #' This function allows the creation of a generic input object with the same class as objects created by
@@ -137,7 +138,7 @@ create_group_factor <- function(samples, group1_indici, group2_indici){
 #' \item{annotation_table}{A data.frame, the original annotation table used to annotate the probes}
 #' \item{group_indici}{A named list containing 2 numeric vectors. The names are the group labels and the values 
 #' are the group indici}
-construct_input_object <- function(diff_genes = NULL, limma_probe_table = NULL,
+create_custom_input_object <- function(diff_genes = NULL, limma_probe_table = NULL,
                                    annotated_exprs_matrix = NULL, expression_matrix = NULL, 
                                    annotation_table = NULL, group1_indici = NULL,
                                    group2_indici = NULL, group1_label = NULL, 
