@@ -1,0 +1,335 @@
+---
+title: "MODifieRDev"
+author: "Dirk de Weerd"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, eval = TRUE, echo = FALSE, message=FALSE, results='hide'}
+ suppressMessages(library(MODifieRDev))
+```
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = ""
+)
+knitr::opts_chunk$set(package.startup.message = FALSE)
+```
+```{r, eval = TRUE, echo = FALSE, message=FALSE, results='hide'}
+input_class <- c("MODifieR_input", "Expression")
+
+
+
+head_diff_genes <- structure(list(gene = c("1", "10", "100", "1000", "10000", "100009676"
+), pvalue = c(0.976932866477861, 0.347847171880988, 0.0065044563904408, 
+0.329104065723672, 0.115466316403267, 0.433955895521179)), .Names = c("gene", 
+"pvalue"), na.action = structure(20527L, .Names = "20527", class = "omit"), row.names = c(NA, 
+6L), class = "data.frame")
+
+head_limma_table <- structure(list(logFC = c(4455.89841269841, 883.55873015873, 1995.84761904762, 
+845.220634920635, 339.174603174603, 1924.13015873016), AveExpr = c(2263.4, 
+710.8125, 1046.25, 549.20625, 240.1, 1276.3625), t = c(16.218193569236, 
+16.0344692603521, 12.893841971902, 12.8919807201718, 11.961965943234, 
+10.4610456719081), P.Value = c(6.97363464726655e-11, 8.19413749499862e-11, 
+1.72104960554299e-09, 1.72447213222819e-09, 4.80220565401249e-09, 
+2.90257092745431e-08), adj.P.Val = c(2.14305374975446e-06, 2.14305374975446e-06, 
+2.2550490955115e-05, 2.2550490955115e-05, 5.02377942288863e-05, 
+0.000228064005623852), B = c(-0.488932500581053, -0.496196966582733, 
+-0.665191557315334, -0.66532421985713, -0.738246736058062, -0.890719235223792
+), PROBEID = c("204439_at", "213294_at", "214453_s_at", "227609_at", 
+"219352_at", "202086_at"), IDENTIFIER = c("10964", "5610", "10561", 
+"94240", "55008", "4599")), .Names = c("logFC", "AveExpr", "t", 
+"P.Value", "adj.P.Val", "B", "PROBEID", "IDENTIFIER"), row.names = c(NA, 
+6L), class = "data.frame")
+
+head_annotated_exprs <- structure(c(35.6, 1.9, 73.1, 17.1, 105.5, 6.1, 57.4, 2.3, 69.4, 
+13.7, 124.3, 11, 11.9, 1.2, 77.6, 18.7, 113.4, 3.2, 29.7, 1.5, 
+113.3, 4.3, 70.1, 27.1, 64.3, 2, 122.8, 20.9, 147.5, 16.1, 95.7, 
+2.1, 113.9, 26, 136, 40.7, 39.3, 1.8, 78.9, 16.8, 182.6, 13.9, 
+44.2, 2.1, 58.4, 23.1, 343, 19.1, 12.9, 1.4, 83, 26.9, 248.8, 
+11.9, 29, 0.9, 105.3, 8.8, 70.5, 18.1, 41.1, 1.3, 203.6, 3.5, 
+64.6, 30.6, 41.4, 1.4, 144.2, 35.6, 217.1, 22.5, 39.3, 1.4, 122.8, 
+9.6, 113.9, 9.2, 108.9, 1.7, 142.5, 4.3, 180.3, 2.9, 37.7, 28.1, 
+192, 19.8, 93.8, 32.1, 3.8, 1.1, 74.2, 16.6, 154.7, 14.8), .Dim = c(6L, 
+16L), .Dimnames = list(c("1", "10", "100", "1000", "10000", "100009676"
+), c("GSM101962", "GSM101963", "GSM101964", "GSM101965", "GSM101966", 
+"GSM101967", "GSM101968", "GSM101969", "GSM101970", "GSM102710", 
+"GSM102711", "GSM102712", "GSM102713", "GSM102714", "GSM102715", 
+"GSM102716")))
+
+group_indici <- structure(list(Control = 1:9, Patient = 10:16), .Names = c("Control", 
+"Patient"))
+
+ppi_head <- structure(list(entrez1 = c("5341", "23647", "8853", "5921", "50807", 
+"3002"), entrez2 = c("381", "381", "381", "381", "381", "4074"
+), SCORE = c(896, 917, 973, 756, 894, 735)), .Names = c("entrez1", 
+"entrez2", "SCORE"), row.names = c(NA, 6L), class = "data.frame")
+```
+#Introduction
+Cells are organized in a modular fashion, where essential functions are carried out by functional
+modules. Modules can be described as clusters of genes, gene products or metabolites that interact
+together, are co-regulated or physically interacting. Complex diseases rarely arise from a single
+causal factor but rather from multiple factors, with large individual variation. This leads to
+dysregulation of parts of functional modules and thereby gives rise to a disease phenotype. The
+underlying perturbation in parts of the functional modules and the connectivity between them
+makes up a disease module.
+
+To better understand complex diseases it is crucial to identify disease modules. Genes present in the
+module might not have a significant impact on the disease on its own. However, the cumulative
+effect of multiple low penetrance genes could play a major role in the pathogenesis of complex
+diseases. Network-based approaches could be key in detecting these low penetrance genes, which
+could potentially be novel biomarkers or therapeutic targets.
+
+Various disease module inference methods have been proposed earlier, using different approaches.
+Here, MODifieR is presented, an R package that bundles 8 different disease module inference
+methods into a single package. The 8 methods methods can be classified into 3 different algorithmic
+classes: seed-based, clique based and co-expression based methods. MODifieR is available under
+the GNU GPL open source license.
+
+Module inference methods included are:
+
+Clique Sum         
+Correlation Clique
+DIAMoND            
+DiffCoEx          
+MCODE              
+MODA             
+Module Discoverer  
+WGCNA trait-based
+
+
+## How to run
+This is an explanation on how to run the package. It starts with a short description on the core objects
+followed by an explanation on how to use the functions. The package also includes example data enabling
+the user to follow this tutorial.
+
+### Core objects
+
+The package is build on two core objects, an input and an output object.
+
+###### Input object
+
+The first object is an input object for the disease module inference methods, with class `MODifieR_input`. 
+This object can be used for all disease module inference methods. 
+
+The `MODifieR_input` object is a named list and can contain the following components:
+
+`diff_genes` A 2 two column data.frame where the first column are genes and the second column unadjusted p-values
+obtained by differential expression analysis.
+
+`limma_probe_table` A data.frame from `limma topTable` with added gene annotation.
+
+`annotated_exprs_matrix` A matrix where the rows are genes and the columns samples. Probes have been collapsed
+into genes.
+
+`expression_matrix` An expression that has been used as input for the annotated expression matrix.
+
+`annotation_table` A data.frame containing the annotation for the microarray probes. Also part of the input
+
+`group_indici`A named list containing 2 numeric vectors. The names are the group labels, for example "patient" and 
+"control". The values are the indici for each group, so the column indici for the expression matrix for 
+each of the aformentioned groups.
+
+
+The input object contains all necessary input data for the methods.
+Below is a table showing what methods use an expression matrix, Differentially Expressed Genes (DEGs) or both.
+
+|Method             | Annotated expression matrix | DEGs|
+|:------------------|:---------------------------:|:---:|
+|Clique Sum         |                             |   X |
+|Correlation Clique |       X                     |   X |  
+|DIAMoND            |                             |   X |
+|DiffCoEx           |       X                     |     |
+|MCODE              |                             |   X |
+|MODA               |       X                     |     |
+|Module Discoverer  |                             |   X |
+|WGCNA trait-based  |       X                     |     |
+Table 1: Input types taken by inference methods
+
+##### Output object
+
+The second object, with class `MODifieR_module` is an object that is produced by the disease module
+inference methods. They also have a subclass according to the method that produced them.
+
+Like the input object, the module objects are also named lists. Module objects differ between each function that generates them (hence the subclass) but have certain features in common:
+
+- The module object will always contain an element (character vector) called module_genes which are the genes that make up
+the final module
+
+- The module object will always contain a named list called settings which holds the parameters that have been used when generating the object
+
+
+### Creating an input object
+
+In order to run an analysis, an input object has to be created. This can be done in two ways:
+The first is the usual way and involves microarray data and probe annotation.
+The second way is to create a custom object using previously obtained DEGs or expression data
+
+#### Using microarray data
+
+To create an input object with microarray data, the function `create_input` can be used. The function 
+takes several inputs:
+
+- `expression_matrix` A matrix with normalized expression values. The rows are probes and the columns are samples.
+
+- `annotation_table` An two columns dataframe providing annotation for the probes. The first column should contain the probe
+ID, and the second column its corresponding annotation.
+
+- `group1_indici` A vector that should have the indici in the expression matrix for the samples belonging to group 1.
+
+- `group2_indici` Same, but for group 2
+
+- `group1_label` Label to identify group 1, for example "Control" or "Patient"
+
+- `group2_label` Same, but for group 2
+
+- `expression` A boolean value indicating if expression matrix data should be calculated.
+
+- `differential expression` A boolean value indicating if DEGs data should be calculated.
+
+- `method` When collapsing the probes, the collapseRows() method from WGCNA is used. This argument
+determines the collapsing method to use. Please see the WGCNA documentation for more information. Options are:
+    - _MaxMean_         Highest mean value
+    - _MinMean_         Lowest mean valie
+    - _MaxRowVariance_  Highest variance
+    - _absMaxMean_      Highest mean absolute value 
+    - _absMinMean_      Lowest mean absolute value
+    - _ME_              Eigenrow (first principal component)
+
+To serve as an example, example data has been included. There is an example expression matrix 
+from Gene Expression Omnibus (GEO) with accession number GSE4588. This dataset has 16 columns, 
+so 16 samples in total with 9 _systemic lupus erythematosus_ (SLE) patients and 7 healthy controls. 
+The matrix has 52307 rows, meaning 52307 probes. The indici for the healthy controls are 1 to 9, 
+and 10 to 16 make up the SLE patients. The expression matrix can be accesed using `expression_matrix`
+
+We can inspect it using the head function:
+
+```{r, eval=TRUE, echo=TRUE}
+head(expression_matrix)
+```
+
+The annotation for the probes is provided in a data.frame accesible through `probe_annotation`.
+The first column contains the probe ids where the second column holds the corresponding annotation,
+in this case ENTREZ gene identifiers.
+
+Again using head:
+
+```{r, eval=TRUE, echo=TRUE}
+head(probe_annotation)
+```
+Now we can put these things together to create an input object:
+
+```{r, eval=FALSE, echo=TRUE}
+MODifieR_input <- create_input(expression_matrix = expression_matrix,
+                               annotation_table = probe_annotation,
+                               group1_indici = 1:9,
+                               group2_indici = 10:16,
+                               group1_label = "Control",
+                               group2_label = "Patient")
+                              
+```
+When the function has finished, it might take a few minutes, we can inspect the object.
+Let's start with the class:
+```{r, eval=FALSE, echo=TRUE}
+class(MODifieR_input)
+```{r, eval=TRUE, echo=FALSE}
+input_class
+```
+Now we can inspect the DEGs:
+```{r, eval=FALSE, echo=TRUE}
+head(MODifieR_input$diff_genes)
+```{r, eval=TRUE, echo=FALSE}
+head_diff_genes
+```
+The limma_probe_table is the table generated by limma with annotation for the probe added:
+```{r, eval=FALSE, echo=TRUE}
+head(MODifieR_input$limma_probe_table)
+```{r, eval=TRUE, echo=FALSE}
+head_limma_table
+```
+Finally, we can take a look at the groups indici and it's names by looking at the
+group_indici component of the object
+```{r, eval=FALSE, echo=TRUE}
+MODifieR_input$group_indici
+```{r, eval=TRUE, echo=FALSE}
+group_indici
+```
+Now we have set up an input object to use in the disease inference methods!
+
+#### Creating a custom input object
+There is also the possibility to create a custom input object. This can be useful in cases
+where there are already DEGs, an annotated expression or both available. In order to create such
+an object, the function `create_custom_input_object` can be used.
+
+Below is an example on how to use this function. Some of the input data is optional, for
+example limma_probe_table, expression_matrix and annotation_table are not used in any 
+disease module inference method. Instead, they can optionally be used to update or recalculate
+an input object.
+
+```{r, eval=FALSE, echo=TRUE}
+generic_input_object <- create_custom_input_object(diff_genes = NULL, 
+                                                   limma_probe_table = NULL,
+                                                   annotated_exprs_matrix = NULL, 
+                                                   expression_matrix = NULL, 
+                                                   annotation_table = NULL, 
+                                                   group1_indici = NULL,
+                                                   group2_indici = NULL, 
+                                                   group1_label = NULL, 
+                                                   group2_label = NULL)
+```
+Please note that the specific data in the input object that is required differs per 
+inference method, the reader is referred to table 1 in subsection 'Input object' to see 
+what inference methods needs what input data fields. For example, to use the DIAMoND method,
+only the diff_genes input would suffice to run the analysis.
+
+If the inference method requires annotated expression matrix, group indici and
+labels are also required.
+
+### Inference methods
+
+Disease module inference methods that have DEGs as input need a Protein-Protein interaction (PPi) 
+network to overlay the DEGs on. As an example, a small STRING db PPi network has been included.
+This PPi network is from STRING version 7.1 and is filtered for interactions with a confidence score
+higher than 700. This small network only contains 5541 unique genes and 64672 interactions.
+The first column is interactor gene 1, the second column is interactor gene 2 and the third and last column
+gives the STRING confidence score. [*]
+Using head again, we can inspect the first few rows:
+```{r, eval=TRUE, echo=TRUE}
+ppi_head
+```
+
+Since this is only a tutorial on how to run the inference methods, we can change parameters for some inference 
+methods and also make the size of the input object a little smaller to reduce runtime.
+
+First we can lower the number of genes in the annotated expression matrix:
+```{r, eval=FALSE, echo=TRUE}
+MODifieR_input$annotated_exprs_matrix <- MODifieR_input$annotated_exprs_matrix[1:10000, ]
+```
+
+
+
+#### Clique Sum
+
+Clique Sum is an algorithm that used DEGs and a pp
+
+#### Correlation Clique
+
+#### DIAMoND
+
+#### DiffCoEx
+
+#### MCODE
+
+#### MODA
+
+#### Module Discoverer
+
+#### WGCNA trait-based
+

@@ -31,3 +31,6 @@ LazyData: true
 RoxygenNote: 6.1.0
 LinkingTo: Rcpp
 SystemRequirements: Python > 3, Anaconda
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

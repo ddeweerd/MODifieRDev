@@ -7,7 +7,7 @@
 wgcna_set_module_size(size, wgcna_module)
 }
 \arguments{
-\item{size}{The}
+\item{size}{The desired size of the resulting module}
 
 \item{wgcna_module}{Module object that has been produced by \code{wgcna} function}
 }
@@ -16,9 +16,8 @@ Returns a wgcna module close to \code{size}
 }
 \details{
 The function starts with the co-expression module (color) with the lowest 
- p-value and gradually adds more co-expression modules until the size threshold
- has been crossed. Consequently, the resulting module will always be of length at
- least \code{size} 
+ p-value and gradually adds more co-expression modules until the module will be 
+ as close as possible to size \code{size} 
  
  @return 
  

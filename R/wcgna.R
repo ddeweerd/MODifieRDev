@@ -1,10 +1,10 @@
 #Module object constructor
-wgcna_module_constructor <- function(module_genes, probe_info_table, 
+wgcna_module_constructor <- function(module_genes, info_table, 
                                      module_cor_and_p_value, powerEstimate,
                                      module_colors, settings){
   
   new_wgcna_module <- list("module_genes" =  module_genes,
-                           "info_table" = probe_info_table,
+                           "info_table" = info_table,
                            "correlation_to_trait_table" = module_cor_and_p_value,
                            "softthreshold_value" = powerEstimate,
                            "module_colors" = module_colors,
@@ -126,7 +126,7 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
   
   module_genes <- colnames(datExpr)[which(moduleColors %in% significant_module_colors)]
   
-  probe_info_table <- cbind(colnames(datExpr), moduleLabels, moduleColors)
+  info_table <- cbind(colnames(datExpr), moduleLabels, moduleColors)
   
   module_cor_and_p_value <- cbind(moduleTraitCor, moduleTraitPvalue, p.adjust(p = moduleTraitPvalue,
                                                                               method = "BH"))
@@ -137,7 +137,7 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
   colnames(module_cor_and_p_value) <- c("Correlation", "p_value", "adjusted_p_value")
   
   new_wgcna_module <- wgcna_module_constructor(module_genes = module_genes,
-                                               probe_info_table = probe_info_table,
+                                               info_table = info_table,
                                                module_cor_and_p_value = module_cor_and_p_value,
                                                powerEstimate = powerEstimate,
                                                module_colors = significant_module_colors,
@@ -166,11 +166,11 @@ wgcna_get_all_module_genes <- function(wgcna_module){
   module_colors <- rownames(wgcna_module$correlation_to_trait_table)
   
   module_genes_per_color <- sapply(X = module_colors, FUN = wgcna_get_module_genes, 
-                                   probe_info_table <- wgcna_module$probe_info_table)
+                                   info_table <- wgcna_module$info_table)
 }
 
-wgcna_get_module_genes <- function(module_color, probe_info_table){
-  probe_info_table[probe_info_table[,3] == module_color ,1 ]
+wgcna_get_module_genes <- function(module_color, info_table){
+  info_table[info_table[,3] == module_color ,1 ]
 }
 #'@title Split WGCNA module in module containing only positive or negative correlation
 #'@param wgcna_module Module object that has been produced by \code{wgcna} function
@@ -199,7 +199,7 @@ wgcna_get_module_genes_by_sign <- function(wgcna_module, mode){
             #and "negative or "n" for negative correlation')
   }
   
-  wgcna_module$module_genes <- wgcna_module$probe_info_table[which(wgcna_module$probe_info_table[ ,3] %in% module_colors), 1]
+  wgcna_module$module_genes <- wgcna_module$info_table[which(wgcna_module$info_table[ ,3] %in% module_colors), 1]
   
   return(wgcna_module)
 }
@@ -228,7 +228,7 @@ wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted 
   wgcna_module$correlation_to_trait_table[ ,col] < pval_cutoff]
   
   wgcna_module$settings$pval_cutoff <- pval_cutoff
-  wgcna_module$module_genes <- wgcna_module$probe_info_table[which(wgcna_module$probe_info_table[ ,3] %in% module_colors), 1]
+  wgcna_module$module_genes <- wgcna_module$info_table[which(wgcna_module$info_table[ ,3] %in% module_colors), 1]
   
   return(wgcna_module)
 }
@@ -251,9 +251,9 @@ wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted 
 wgcna_split_module_by_color <- function(wgcna_module){
   module_colors <- wgcna_module$module_colors
   module_genes <- lapply(X = module_colors, FUN = function(x, module){
-  module$probe_info_table[module$probe_info_table[ ,3] == x, 1]}, module = wgcna_module)
+  module$info_table[module$info_table[ ,3] == x, 1]}, module = wgcna_module)
   
-  probe_info_table <- wgcna_module$probe_info_table
+  info_table <- wgcna_module$info_table
   correlation_to_trait_table <- wgcna_module$correlation_to_trait_table
   softthreshold_value <- wgcna_module$softthreshold_value
   settings <- wgcna_module$settings
@@ -262,7 +262,7 @@ wgcna_split_module_by_color <- function(wgcna_module){
   
   for (color in 1:length(module_colors)){
     new_wgcna_modules[[color]] <- wgcna_module_constructor(module_genes = module_genes[[color]], 
-                                                           probe_info_table = probe_info_table, 
+                                                           info_table = info_table, 
                                                            module_cor_and_p_value = correlation_to_trait_table, 
                                                            powerEstimate = softthreshold_value, 
                                                            module_colors = module_colors[color], 
@@ -273,13 +273,12 @@ wgcna_split_module_by_color <- function(wgcna_module){
 #' Returns a wgcna module close to \code{size}
 #' 
 #' @inheritParams wgcna_get_all_module_genes
-#' @param size The 
+#' @param size The desired size of the resulting module
 #' 
 #' @details 
 #'  The function starts with the co-expression module (color) with the lowest 
-#'  p-value and gradually adds more co-expression modules until the size threshold
-#'  has been crossed. Consequently, the resulting module will always be of length at
-#'  least \code{size} 
+#'  p-value and gradually adds more co-expression modules until the module will be 
+#'  as close as possible to size \code{size} 
 #'  
 #'  @return 
 #'  
@@ -291,18 +290,18 @@ wgcna_split_module_by_color <- function(wgcna_module){
 #' 
 #' @export
 wgcna_set_module_size <- function(size, wgcna_module){
-  counter <- 0
-  module_colors <- NULL
-  while (size > 0){
-    counter <- counter + 1
-    current_color <- lengths(wgcna_get_all_module_genes(wgcna_module))[(order(wgcna_module$correlation_to_trait_table[,2]))][counter]
-    size <- size - current_color
-    module_colors[counter] <- names(current_color)
-    
-  }
-  new_wgcna_module <-      wgcna_module_constructor(module_genes = wgcna_module$probe_info_table
-                                                    [which(wgcna_module$probe_info_table[ ,3] %in% module_colors), 1], 
-                                                    probe_info_table = wgcna_module$probe_info_table, 
+  #Get length of all modules
+  module_lengths <- lengths(wgcna_get_all_module_genes(wgcna_module))
+  #Order them according to adjusted p-value
+  module_lengths <- module_lengths[order(wgcna_module$correlation_to_trait_table[, 3])]
+  #Get the index of the last color to add to make the module size as close to "module_size"
+  color_index <- which.min(abs(sapply(X = 1:length(module_lengths), FUN = function(x){
+    size - sum(module_lengths[1:x])
+  })))
+  module_colors <- names(module_lengths)[1:color_index]
+  new_wgcna_module <-       wgcna_module_constructor(module_genes = wgcna_module$info_table
+                                                    [which(wgcna_module$info_table[ ,3] %in% module_colors), 1], 
+                                                    info_table = wgcna_module$info_table, 
                                                     module_cor_and_p_value = wgcna_module$correlation_to_trait_table, 
                                                     powerEstimate = wgcna_module$softthreshold_value, 
                                                     module_colors = module_colors, 

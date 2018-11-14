@@ -87,12 +87,10 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   #than the frequency cutoff (default 0.5, so present in 50% of all iterations) 
   module_genes <- names(tabled_frequencies[tabled_frequencies >= frequency_cutoff])
   
-  new_correlation_clique_module <- list("module_genes" = module_genes,
-                                        "frequency_table" = tabled_frequencies,
-                                        "settings" = settings)
-  
-  class( new_correlation_clique_module) <- c("MODifieR_module", "Correlation_clique")
-  
+  new_correlation_clique_module <- construct_correlation_module(module_genes = module_genes,
+                                                                frequency_table = tabled_frequencies,
+                                                                settings = settings)
+ 
   return( new_correlation_clique_module)
 }
 
@@ -167,5 +165,66 @@ graph_score <- function(adjecency_list){
   z1 <- igraph::simplify(z)
   
   return(z1)
+}
+#' correlation_adjust_cutoff
+#' @inheritParams correlation_clique
+#' @param wgcna_module Module object that has been produced by \code{correlation_clique}
+#'  function
+#' @details 
+#' This function allows to adjust the frequency cutoff for a \code{correlation_clique} module object
+#' @return 
+#'  \code{correlation_clique} module object 
+#' @seealso 
+#' 
+#' \code{\link{correlation_clique}}
+#' 
+#' @export
+correlation_adjust_cutoff <- function(frequency_cutoff, correlation_module){
+  
+  frequency_table <- correlation_module$frequency_table
+  
+  module_genes <- names(frequency_table[frequency_table >= frequency_cutoff])
+  
+  correlation_module$settings$frequency_cutoff <- frequency_cutoff
+  
+  new_correlation_clique_module <- construct_correlation_module(module_genes = module_genes,
+                                                                frequency_table = frequency_table,
+                                                                settings = correlation_module$settings)
+  return( new_correlation_clique_module)
+  
+}
+#' correlation_adjust_cutoff
+#' @inheritParams correlation_adjust_cutoff
+#' @param size Module object that has been produced by \code{correlation_clique}
+#'  function
+#' @details 
+#' The function will find the the frequency cutoff for that will result
+#' in a \code{correlation_clique} module object closest to \code{size}
+#' @return 
+#'  \code{correlation_clique} module object 
+#' @seealso 
+#' 
+#' \code{\link{correlation_clique}}
+#' 
+#' @export
+correlation_set_module_size <- function(size, correlation_module){
+  frequency_cutoff <- as.numeric(names(which.min(abs(size - table(correlation_module$frequency_table)))))
+  
+  new_correlation_clique_module <- correlation_adjust_cutoff(frequency_cutoff = frequency_cutoff,
+                                                             correlation_module = correlation_module)
+  
+  return (new_correlation_clique_module)
+}
+
+construct_correlation_module <- function(module_genes, frequency_table, settings){
+  
+  new_correlation_clique_module <- list("module_genes" = module_genes,
+                                        "frequency_table" = frequency_table,
+                                        "settings" = settings)
+  
+  class( new_correlation_clique_module) <- c("MODifieR_module", "Correlation_clique")
+  
+  return( new_correlation_clique_module)
+  
 }
 
