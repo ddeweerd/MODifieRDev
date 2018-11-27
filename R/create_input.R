@@ -81,7 +81,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     diff_genes <- stats::na.omit(diff_genes)
     colnames(diff_genes) <- c("gene", "pvalue")
   }
-  modifier_input <- construct_input_object(diff_genes = diff_genes, 
+  modifier_input <- create_custom_input_object(diff_genes = diff_genes, 
                                            limma_probe_table = limma_probe_table,
                                            annotated_exprs_matrix = collapsed_exprs_mat,
                                            expression_matrix = expression_matrix,

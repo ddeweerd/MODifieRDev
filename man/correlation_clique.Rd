@@ -13,7 +13,8 @@ correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
 
 \item{ppi_network}{A PPi network as a 2 column dataframe}
 
-\item{frequency_cutoff}{significance out of number of iterations performed (default = 0.05)}
+\item{frequency_cutoff}{Fraction of the number of times a gene should be present in it 
+iterations. Default is 0.5, meaning 50 procent of all iterations}
 
 \item{probabilityScaleFactor}{Scale for enriched cliques}
 

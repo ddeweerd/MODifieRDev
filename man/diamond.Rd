@@ -5,7 +5,7 @@
 \title{DIAMOnD module}
 \usage{
 diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
-  n_output_genes = 200, seed_weight = 10, include_seed = TRUE,
+  n_output_genes = 200, seed_weight = 10, include_seed = FALSE,
   dataset_name = NULL)
 }
 \arguments{
@@ -39,8 +39,8 @@ and the fourth column is the p-value.}
 A seed gene based algorithm to identify disease module from differentially expressed genes
 }
 \details{
-A slightly modified version of the original DIAMOnD python script is called from within R. the exchange of 
-data is handled by temporary files. The only change to the orginal algorithm is the option to include the seed genes
+A slightly modified version of the original DIAMOnD python script is called from within R.
+The only change to the orginal algorithm is the option to include the seed genes
 to the module. There are also function to add or remove the seed genes from the output object, namely:
 \code{\link{add_diamond_seed_genes}} and \code{\link{remove_diamond_seed_genes}}
 For a detailed description of how the algorithm works, please see the paper referenced below.

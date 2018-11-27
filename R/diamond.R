@@ -7,8 +7,8 @@
 #' @param seed_weight Numeric additional parameter to assign weight for the seed genes 
 #' @param include_seed Logical TRUE/FALSE for inclusion of seed genes in the output module 
 #' @details
-#' A slightly modified version of the original DIAMOnD python script is called from within R. the exchange of 
-#' data is handled by temporary files. The only change to the orginal algorithm is the option to include the seed genes
+#' A slightly modified version of the original DIAMOnD python script is called from within R.
+#' The only change to the orginal algorithm is the option to include the seed genes
 #' to the module. There are also function to add or remove the seed genes from the output object, namely:
 #' \code{\link{add_diamond_seed_genes}} and \code{\link{remove_diamond_seed_genes}}
 #' For a detailed description of how the algorithm works, please see the paper referenced below.
@@ -29,7 +29,7 @@
 #' Biology, 11(4), 1–21. \url{https://doi.org/10.1371/journal.pcbi.1004120}}
 #' @export
 diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
-                               include_seed = TRUE, dataset_name = NULL){
+                               include_seed = FALSE, dataset_name = NULL){
   # Retrieve settings
   default_args <- formals()
   user_args <- as.list(match.call(expand.dots = T)[-1])
@@ -45,7 +45,7 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
   diamond_genes <- unique(stats::na.omit(diamond_genes$gene)) 
   #Convert to python objects
   diamond_set <- to_set_py(diamond_genes)
-  ppi_graph <- to_graph_py(as.matrix(ppi_network))
+  ppi_graph <- to_graph_py(as.matrix(ppi_network), nx$Graph())
   #Run python scri[t]
   raw_module_py <- diamond_core(ppi_graph, diamond_set, as.integer(n_output_genes), as.integer(seed_weight))
   #Extract data

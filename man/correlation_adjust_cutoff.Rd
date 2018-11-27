@@ -7,10 +7,10 @@
 correlation_adjust_cutoff(frequency_cutoff, correlation_module)
 }
 \arguments{
-\item{frequency_cutoff}{significance out of number of iterations performed (default = 0.05)}
+\item{frequency_cutoff}{Fraction of the number of times a gene should be present in it 
+iterations. Default is 0.5, meaning 50 procent of all iterations}
 
-\item{wgcna_module}{Module object that has been produced by \code{correlation_clique}
-function}
+\item{correlation_module}{Module object that has been produced by \code{correlation_clique}  function}
 }
 \value{
 \code{correlation_clique} module object

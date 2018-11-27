@@ -2,19 +2,21 @@
 % Please edit documentation in R/correlation_clique.R
 \name{correlation_set_module_size}
 \alias{correlation_set_module_size}
-\title{correlation_adjust_cutoff}
+\title{correlation_set_module_size}
 \usage{
 correlation_set_module_size(size, correlation_module)
 }
 \arguments{
 \item{size}{Module object that has been produced by \code{correlation_clique}
 function}
+
+\item{correlation_module}{Module object that has been produced by \code{correlation_clique}  function}
 }
 \value{
 \code{correlation_clique} module object
 }
 \description{
-correlation_adjust_cutoff
+Returns a correlation_clique module closest to \code{size}
 }
 \details{
 The function will find the the frequency cutoff for that will result

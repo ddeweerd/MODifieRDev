@@ -1,7 +1,7 @@
 ---
 title: "MODifieRDev"
 author: "Dirk de Weerd"
-date: "`r Sys.Date()`"
+date: "2018-11-27"
 output:
   prettydoc::html_pretty:
     theme: architect
@@ -15,67 +15,10 @@ bibliography: MODifieR_bibliography.bib
 link-citations: TRUE
 
 ---
-```{r, eval = TRUE, echo = FALSE, message=FALSE, results='hide'}
- suppressMessages(library(MODifieRDev))
-```
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = ""
-)
-knitr::opts_chunk$set(package.startup.message = FALSE)
-```
-```{r, eval = TRUE, echo = FALSE, message=FALSE, results='hide'}
-input_class <- c("MODifieR_input", "Expression")
 
 
 
-head_diff_genes <- structure(list(gene = c("1", "10", "100", "1000", "10000", "100009676"
-), pvalue = c(0.976932866477861, 0.347847171880988, 0.0065044563904408, 
-0.329104065723672, 0.115466316403267, 0.433955895521179)), .Names = c("gene", 
-"pvalue"), na.action = structure(20527L, .Names = "20527", class = "omit"), row.names = c(NA, 
-6L), class = "data.frame")
 
-head_limma_table <- structure(list(logFC = c(4455.89841269841, 883.55873015873, 1995.84761904762, 
-845.220634920635, 339.174603174603, 1924.13015873016), AveExpr = c(2263.4, 
-710.8125, 1046.25, 549.20625, 240.1, 1276.3625), t = c(16.218193569236, 
-16.0344692603521, 12.893841971902, 12.8919807201718, 11.961965943234, 
-10.4610456719081), P.Value = c(6.97363464726655e-11, 8.19413749499862e-11, 
-1.72104960554299e-09, 1.72447213222819e-09, 4.80220565401249e-09, 
-2.90257092745431e-08), adj.P.Val = c(2.14305374975446e-06, 2.14305374975446e-06, 
-2.2550490955115e-05, 2.2550490955115e-05, 5.02377942288863e-05, 
-0.000228064005623852), B = c(-0.488932500581053, -0.496196966582733, 
--0.665191557315334, -0.66532421985713, -0.738246736058062, -0.890719235223792
-), PROBEID = c("204439_at", "213294_at", "214453_s_at", "227609_at", 
-"219352_at", "202086_at"), IDENTIFIER = c("10964", "5610", "10561", 
-"94240", "55008", "4599")), .Names = c("logFC", "AveExpr", "t", 
-"P.Value", "adj.P.Val", "B", "PROBEID", "IDENTIFIER"), row.names = c(NA, 
-6L), class = "data.frame")
-
-head_annotated_exprs <- structure(c(35.6, 1.9, 73.1, 17.1, 105.5, 6.1, 57.4, 2.3, 69.4, 
-13.7, 124.3, 11, 11.9, 1.2, 77.6, 18.7, 113.4, 3.2, 29.7, 1.5, 
-113.3, 4.3, 70.1, 27.1, 64.3, 2, 122.8, 20.9, 147.5, 16.1, 95.7, 
-2.1, 113.9, 26, 136, 40.7, 39.3, 1.8, 78.9, 16.8, 182.6, 13.9, 
-44.2, 2.1, 58.4, 23.1, 343, 19.1, 12.9, 1.4, 83, 26.9, 248.8, 
-11.9, 29, 0.9, 105.3, 8.8, 70.5, 18.1, 41.1, 1.3, 203.6, 3.5, 
-64.6, 30.6, 41.4, 1.4, 144.2, 35.6, 217.1, 22.5, 39.3, 1.4, 122.8, 
-9.6, 113.9, 9.2, 108.9, 1.7, 142.5, 4.3, 180.3, 2.9, 37.7, 28.1, 
-192, 19.8, 93.8, 32.1, 3.8, 1.1, 74.2, 16.6, 154.7, 14.8), .Dim = c(6L, 
-16L), .Dimnames = list(c("1", "10", "100", "1000", "10000", "100009676"
-), c("GSM101962", "GSM101963", "GSM101964", "GSM101965", "GSM101966", 
-"GSM101967", "GSM101968", "GSM101969", "GSM101970", "GSM102710", 
-"GSM102711", "GSM102712", "GSM102713", "GSM102714", "GSM102715", 
-"GSM102716")))
-
-group_indici <- structure(list(Control = 1:9, Patient = 10:16), .Names = c("Control", 
-"Patient"))
-
-ppi_head <- structure(list(entrez1 = c("5341", "23647", "8853", "5921", "50807", 
-"3002"), entrez2 = c("381", "381", "381", "381", "381", "4074"
-), SCORE = c(896, 917, 973, 756, 894, 735)), .Names = c("entrez1", 
-"entrez2", "SCORE"), row.names = c(NA, 6L), class = "data.frame")
-```
 #Installation 
 
 MODifierDev requires Python 3 with additional Python libraries scipy, numpy and networkx. They are a standard part of Anaconda
@@ -84,7 +27,8 @@ so installing Anaconda is recommended. It can be downloaded here:
 [Anaconda](https://www.anaconda.com/)
 
 In addition, some R packages are required. They can be acquired with the following code:
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(c("AnnotationDbi",
@@ -108,7 +52,8 @@ install.packages(c("foreach",
 ```
 
 After that, the package can be installed from github:
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 devtools::install_git(url = "https://github.com/ddeweerd/MODifieRDev.git")
 ```
 
@@ -251,8 +196,37 @@ and 10 to 16 make up the SLE patients. The expression matrix can be accesed usin
 
 We can inspect it using the head function:
 
-```{r, eval=TRUE, echo=TRUE}
+
+```r
 head(expression_matrix)
+                GSM101962 GSM101963 GSM101964 GSM101965 GSM101966
+AFFX-BioB-5_at      442.0     442.6     230.8     275.2     540.7
+AFFX-BioB-M_at      620.7     565.5     256.9     299.8     693.7
+AFFX-BioB-3_at      404.7     376.1     175.4     168.2     403.9
+AFFX-BioC-5_at     1298.3    1201.6     742.4     781.2    1485.3
+AFFX-BioC-3_at     1647.5    1566.8     966.2    1059.7    1743.9
+AFFX-BioDn-5_at    2952.5    2819.6    2107.7    2444.5    3265.4
+                GSM101967 GSM101968 GSM101969 GSM101970 GSM102710
+AFFX-BioB-5_at      432.7     476.4     953.9    1397.2     197.0
+AFFX-BioB-M_at      658.5     605.7    1313.7    1863.5     256.8
+AFFX-BioB-3_at      440.5     379.5     889.9    1277.7     159.4
+AFFX-BioC-5_at     1406.0    1301.2    2368.0    3752.2     674.3
+AFFX-BioC-3_at     1720.4    1598.2    2727.0    3771.3     867.4
+AFFX-BioDn-5_at    3150.1    2911.8    5480.8    7806.6    2055.5
+                GSM102711 GSM102712 GSM102713 GSM102714 GSM102715
+AFFX-BioB-5_at      184.2     415.8     499.4    1249.3     380.3
+AFFX-BioB-M_at      237.2     560.7     729.1    1796.1     557.1
+AFFX-BioB-3_at      190.6     359.2     445.2    1194.3     315.8
+AFFX-BioC-5_at      573.9    1368.8    1485.1    3886.1    1300.5
+AFFX-BioC-3_at      841.0    1476.6    1891.9    4485.8    1706.6
+AFFX-BioDn-5_at    1774.7    2927.9    3254.2    8357.6    2781.7
+                GSM102716
+AFFX-BioB-5_at      339.5
+AFFX-BioB-M_at      576.0
+AFFX-BioB-3_at      358.9
+AFFX-BioC-5_at     1262.9
+AFFX-BioC-3_at     1466.3
+AFFX-BioDn-5_at    3058.1
 ```
 
 The annotation for the probes is provided in a data.frame accesible through `probe_annotation`.
@@ -261,12 +235,21 @@ in this case ENTREZ gene identifiers.
 
 Again using head:
 
-```{r, eval=TRUE, echo=TRUE}
+
+```r
 head(probe_annotation)
+          PROBEID ENTREZID
+1  AFFX-BioB-5_at     <NA>
+2  AFFX-BioB-M_at     <NA>
+3  AFFX-BioB-3_at     <NA>
+4  AFFX-BioC-5_at     <NA>
+5  AFFX-BioC-3_at     <NA>
+6 AFFX-BioDn-5_at     <NA>
 ```
 Now we can put these things together to create an input object:
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 MODifieR_input <- create_input(expression_matrix = expression_matrix,
                                annotation_table = probe_annotation,
                                group1_indici = 1:9,
@@ -277,21 +260,48 @@ MODifieR_input <- create_input(expression_matrix = expression_matrix,
 ```
 When the function has finished, it might take a few minutes, we can inspect the object.
 Let's start with the class:
-```{r, eval=TRUE, echo=FALSE}
-input_class
+
+```
+[1] "MODifieR_input" "Expression"    
 ```
 Now we can inspect the DEGs:
-```{r, eval=TRUE, echo=FALSE}
-head_diff_genes
+
+```
+       gene      pvalue
+1         1 0.976932866
+2        10 0.347847172
+3       100 0.006504456
+4      1000 0.329104066
+5     10000 0.115466316
+6 100009676 0.433955896
 ```
 The limma_probe_table is the table generated by limma with annotation for the probe added:
-```{r, eval=TRUE, echo=FALSE}
-head_limma_table
+
+```
+      logFC   AveExpr        t      P.Value    adj.P.Val          B
+1 4455.8984 2263.4000 16.21819 6.973635e-11 2.143054e-06 -0.4889325
+2  883.5587  710.8125 16.03447 8.194137e-11 2.143054e-06 -0.4961970
+3 1995.8476 1046.2500 12.89384 1.721050e-09 2.255049e-05 -0.6651916
+4  845.2206  549.2062 12.89198 1.724472e-09 2.255049e-05 -0.6653242
+5  339.1746  240.1000 11.96197 4.802206e-09 5.023779e-05 -0.7382467
+6 1924.1302 1276.3625 10.46105 2.902571e-08 2.280640e-04 -0.8907192
+      PROBEID IDENTIFIER
+1   204439_at      10964
+2   213294_at       5610
+3 214453_s_at      10561
+4   227609_at      94240
+5   219352_at      55008
+6   202086_at       4599
 ```
 Finally, we can take a look at the groups indici and it's names by looking at the
 group_indici component of the object
-```{r, eval=TRUE, echo=FALSE}
-group_indici
+
+```
+$Control
+[1] 1 2 3 4 5 6 7 8 9
+
+$Patient
+[1] 10 11 12 13 14 15 16
 ```
 Now we have set up an input object to use in the disease inference methods!
 
@@ -305,7 +315,8 @@ example limma_probe_table, expression_matrix and annotation_table are not used i
 disease module inference method. Instead, they can optionally be used to update or recalculate
 an input object.
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 generic_input_object <- create_custom_input_object(diff_genes = NULL, 
                                                    limma_probe_table = NULL,
                                                    annotated_exprs_matrix = NULL, 
@@ -333,15 +344,24 @@ higher than 700. This small network only contains 5541 unique genes and 64672 in
 The first column is interactor gene 1, the second column is interactor gene 2 and the third and last column
 gives the STRING confidence score. [@Jensen2007]
 Using head again, we can inspect the first few rows:
-```{r, eval=TRUE, echo=TRUE}
+
+```r
 ppi_head
+  entrez1 entrez2 SCORE
+1    5341     381   896
+2   23647     381   917
+3    8853     381   973
+4    5921     381   756
+5   50807     381   894
+6    3002    4074   735
 ```
 
 Since this is a tutorial on how to run the inference methods, we can change parameters for some inference 
 methods and also make the size of the input object a little smaller to reduce runtime.
 
 Also, we can lower the number of genes in the annotated expression matrix:
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 MODifieR_input$annotated_exprs_matrix <- MODifieR_input$annotated_exprs_matrix[1:10000, ]
 ```
 
@@ -355,7 +375,8 @@ Clique Sum in implementation of the clique-based disease module inference method
 In MODifieR, the function can be called using `clique_sum()`
 
 In the example the number of iterations is reduced to 1000 (from 10000) to speed up the tutorial
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 clique_sum_module <- clique_sum(MODifieR_input = MODifieR_input, 
                                 ppi_network = ppi_network, 
                                 n_iterations = 1000)
@@ -383,7 +404,8 @@ The final disease module will consist of genes that have been present in at leas
 The function can be called using `correlation_clique()`
 
 In the example code, the number of iterations has been reduced to 10 (from 50) to speed up the analysis
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 correlation_clique_module <- correlation_clique(MODifieR_input = MODifieR_input, 
                                                 ppi_network = ppi_network, 
                                                 iteration = 10)
@@ -396,7 +418,8 @@ The first one, `correlation_adjust_cutoff`, allows to adjust the `frequency_cuto
 meaning the gene has to be present in at least 50 percent of iterations. In this example it is
 set to 0.2, so 20 percent of iterations.
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 correlation_clique_module <- correlation_adjust_cutoff(frequency_cutoff = 0.2, 
                              correlation_module = correlation_clique_module)
 ```
@@ -404,7 +427,8 @@ correlation_clique_module <- correlation_adjust_cutoff(frequency_cutoff = 0.2,
 The second post-processing function is `correlation_set_module_size`. This function is intented to return a module
 where the number of module genes is closest to `size`. In the example, we set the desired size to 10.  
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 correlation_clique_module <- correlation_set_module_size(size = 10, 
                              correlation_module = correlation_clique_module)
 ```
@@ -415,7 +439,8 @@ A slightly modified version of the original DIAMOnD python script [@Ghiassian201
 The only change to the orginal algorithm is the option to include the seed genes to the module.
 
 In MODifieR, the function can be called using `diamond()`
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 diamond_module <- diamond(MODifieR_input = MODifieR_input, 
                           ppi_network = ppi_network)
 ```
@@ -425,7 +450,8 @@ diamond_module <- diamond(MODifieR_input = MODifieR_input,
 Post-processing DIAMOnD modules entails either to remove or add the seed genes. To do this, there are 2 related functions,
 `add_diamond_seed_genes` and `remove_diamond_seed_genes`
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 diamond_module <- diamond_add_seed_genes(diamond_module = diamond_module)
 
 diamond_module <- diamond_remove_seed_genes(diamond_module = diamond_module)
@@ -438,7 +464,8 @@ which builds on the commonly used Weighted Gene Coexpression Network Analysis (W
 framework for coexpression analysis. [@Tesson2010]
 
 In MODifieR, the function can be called using `diffcoex()`
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 diffcoex_module <- diffcoex(MODifieR_input = MODifieR_input)
 ```
 
@@ -449,7 +476,8 @@ composed of multiple colors. The function `diffcoex_split_module_by_color`
 allows to split each of these colors into separate MODifieR_module objects. 
 The return object is a list of MODifieR module objects.
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 diffcoex_module_list <- diffcoex_split_module_by_color(diffcoex_module = diffcoex_module)
 ```
 
@@ -460,7 +488,8 @@ A clique based algorithm to identify disease modules from differentially express
 Much of the code and documentation has been taken from the now defunct package "ProNet"
 
 In MODifieR, the function can be called using `mod_mcode()`
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 mcode_module_list <- mod_mcode(MODifieR_input = MODifieR_input, 
                           ppi_network = ppi_network)
 ```
@@ -468,7 +497,8 @@ mcode_module_list <- mod_mcode(MODifieR_input = MODifieR_input,
 The return type of MCODE is a list (of MCODE modules), as it generally returns multiple modules sorted by 
 decreasing score. Here, we take out it the first one:
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 mcode_module <- mcode_module_list[[1]]
 ```
 
@@ -487,7 +517,8 @@ that has the minimal Jaccard index complemented by co-expression modules that ha
 below this minimal + `specificTheta`.
 
 In MODifieR, the function can be called using `moda()`
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 moda_module <- moda(MODifieR_input = MODifieR_input, 
                     group_of_interest = 2)
 ```
@@ -497,7 +528,8 @@ moda_module <- moda(MODifieR_input = MODifieR_input,
 After the MODA analysis is complete, the `specificTheta` parameter can be adjusted with the function
 `moda_change_specific_threshold`. In the example it is set to 0.05 (default is 0.1)
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 moda_module <- moda_change_specific_threshold(moda_module = moda_module, 
                                               specificTheta = 0.05)
 ```
@@ -508,7 +540,8 @@ This is an implementation of the single seed Module Discoverer algorithm. The co
 from the orignal code by Vlaic et al. [@Vlaic2018] For details, please see the paper referenced.
 
 In MODifieR, the function can be called using `modulediscoverer()`
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 module_discoverer_module <- modulediscoverer(MODifieR_input = MODifieR_input, 
                                              ppi_network = ppi_network, 
                                              permutations = 1000, 
@@ -525,7 +558,8 @@ The algorithm infers co-expression modules from combined expression dataset from
 Co-expression modules are then correlated to trait (group 1 ~ group 2).
 
 In MODifieR, the function can be called using `wgcna()`
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 wgnca_module <- wgcna(MODifieR_input = MODifieR_input)
 ```
 
@@ -536,7 +570,8 @@ There are 4 functions available to post-process WGCNA module objects.
 The first one, `wgcna_adjust_significance`, allows to adjust the p-value for inclusion of co-expression modules into the final disease
 module. The boolean parameter `use_unadjusted` denotes if the adjusted (FDR correction) or unadjusted p-value 
 is to be used. 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 wgnca_module <- wgcna_adjust_significance(pval_cutoff = 0.1, 
                                           wgcna_module = wgnca_module,
                                           use_unadjusted = FALSE)
@@ -546,7 +581,8 @@ With the second function `wgcna_get_modules_genes_by_sign` retuns a module objec
 positively or negatively correlated to the trait. To get only colors positively correlated to trait in the resulting module,
 the `mode` parameter can be set to "p". To only get negatively correlated colors, use "n".
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 wgnca_module <- wgcna_get_module_genes_by_sign(wgcna_module = wgnca_module, 
                                                mode = "p")
 ```
@@ -556,14 +592,16 @@ composed of multiple colors. The function `wgcna_split_module_by_color` allows t
 colors into separate MODifieR_module objects. Only colors significantly associated to the trait will be used.
 The return object is a list of MODifieR module objects.
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 wgnca_module <- (wgcna_module = wgnca_module)
 ```
 
 The second post-processing function is `wgcna_set_module_size`. This function is intented to return a module
 where the number of module genes is closest to `size`. In the example, we set the desired size to 200. 
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 wgnca_module <- wgcna_set_module_size(size = 200,
                                       wgcna_module = wgnca_module)
 ```
@@ -579,7 +617,8 @@ a gene has to be present in at least 3 of the individual modules.
 
 To start deriving a consensus module, it is convenient to wrap all the previously acquired modules into a list:
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 module_list <- list(clique_sum_module, 
                     correlation_clique_module, 
                     diamond_module, diffcoex_module, 
@@ -591,14 +630,16 @@ module_list <- list(clique_sum_module,
 
 Now the maximal number of modules that share at least one gene can be retrieved:
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 max_frequency <- get_max_frequency(module_list)
 ```
 
 The maximum in this particular example turns out to be 5. This value can be used to retrieve all consensus modules, from a minimum
 presence of 1 (union of modules) up to 5:
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 consensus_modules <- lapply(X = 1:max_frequency, FUN = create_module_set, 
                             module_list = module_list)
 ```
@@ -606,7 +647,8 @@ consensus_modules <- lapply(X = 1:max_frequency, FUN = create_module_set,
 A list of length 5 with `Module_set` objects is returned. In this tutorial the fourth element in the list,
 so the consensus module where genes are present in at least 4 individual methods will be inspected.  
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 consensus_module4 <- consensus_modules[[4]]
 ```
 
@@ -626,7 +668,8 @@ The resulting module object can now be used for further analysis.
 
 In this example the module genes from consensus_module4 are written to a file:
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 write.table(x = consensus_module4$module_genes, 
             file = "consensus4_genes.txt", 
             quote = F, 
@@ -636,7 +679,7 @@ write.table(x = consensus_module4$module_genes,
 
 And uploaded into [String](https://string-db.org). This resulted in Figure 1 and Table 2.
 
-![Figure 1: Plot from https://string-db.org using the module genes from consensus_module4 as input](figures/string4.jpg)
+![Figure 1: Plot from https://string-db.org using the module genes from consensus_module4 as input](figures/string4.png)
 
 
 |pathway ID|pathway description                     |observed gene count|	false discovery rate|
@@ -665,7 +708,8 @@ be used in an exploratory fashion when inferring modules.
 
 Plotting consensus_module4 again with the example PPi included in MODifieRDev:
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 plot(consensus_module4$module_genes, ppi_network = ppi_network)
 ```
 
@@ -674,7 +718,8 @@ plot(consensus_module4$module_genes, ppi_network = ppi_network)
 The plot is not as nice as the plot from string-db.org. The built-in plot function can be used 
 
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 plot(consensus_module4$module_genes, ppi_network = ppi_network)
 ```
 
