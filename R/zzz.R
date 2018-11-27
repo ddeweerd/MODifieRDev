@@ -9,7 +9,7 @@ scipy <- NULL
 .onLoad <- function(libname, pkgname){
   nx <<- reticulate::import(module = "networkx", as = "nx", delay_load = T)
   np <<- reticulate::import(module = "numpy", as = "np", delay_load = T)
-  scipy <- reticulate::import(module = "scipy", delay_load = T)
+  scipy <<- reticulate::import(module = "scipy", delay_load = T)
   
   
   path <- system.file(package = "MODifieRDev")

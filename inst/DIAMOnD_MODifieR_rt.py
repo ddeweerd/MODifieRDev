@@ -1,38 +1,12 @@
-import time
-import networkx as nx
-import numpy as np
-import copy
-import scipy.stats
-from collections import defaultdict
-import csv
-import sys
+#import time
+#import networkx as nx
+#import numpy as np
+#import copy
+#import scipy.stats
+#from collections import defaultdict
+#import csv
+#import sys
 
-'''
-# =============================================================================
-def print_usage():
-
-    print (' ')
-    print ('        usage: ./DIAMOnD network_file seed_file n alpha(optional) outfile_name (optional)')
-    print ('        -----------------------------------------------------------------')
-    print ('        network_file : The edgelist must be provided as any delimiter-separated')
-    print ('                       table. Make sure the delimiter does not exit in gene IDs')
-    print ('                       and is consistent across the file.' )
-    print ('                       The first two columns of the table will be')
-    print ('                       interpreted as an interaction gene1 <==> gene2')
-    print ('        seed_file    : table containing the seed genes (if table contains')
-    print ('                       more than one column they must be tab-separated;')
-    print ('                       the first column will be used only)')
-    print ('        n            : desired number of DIAMOnD genes, 200 is a reasonable')
-    print ('                       starting point.')
-    print ('        alpha        : an integer representing weight of the seeds,default')
-    print ('                       value is set to 1')
-    print ('        outfile_name : results will be saved under this file name')
-    print ('                       by default the outfile_name is set to "first_n_added_nodes_weight_alpha.txt"')
-    print (' ')
-
-
-# =============================================================================
-'''
 def check_input_style(input_list):
     try:
         network_edgelist_file = input_list[1]
@@ -63,71 +37,14 @@ def check_input_style(input_list):
             sys.exit(0)
             return
     return network_edgelist_file,seeds_file,max_number_of_added_nodes,alpha,outfile_name
-'''
-# =============================================================================
-def read_input(network_file,seed_file):
-    """
-    Reads the network and the list of seed genes from external files.
 
-    * The edgelist must be provided as a tab-separated table. The
-    first two columns of the table will be interpreted as an
-    interaction gene1 <==> gene2
-
-    * The seed genes mus be provided as a table. If the table has more
-    than one column, they must be tab-separated. The first column will
-    be used only.
-
-    * Lines that start with '#' will be ignored in both cases
-    """
-
-    sniffer = csv.Sniffer()
-    line_delimiter = None
-    for line in open(network_file,'r'):
-        if line[0]=='#':
-            continue
-        else:
-            dialect = sniffer.sniff(line)
-            line_delimiter = dialect.delimiter
-	        break
-    if line_delimiter == None:
-        print ('network_file format not correct')
-        sys.exit(0)
-
-
-    # read the network:
-    G = nx.Graph()
-    for line in open(network_file,'r'):
-        # lines starting with '#' will be ignored
-        if line[0]=='#':
-            continue
-        # The first two columns in the line will be interpreted as an
-        # interaction gene1 <=> gene2
-        #line_data   = line.strip().split('\t')
-        line_data = line.strip().split(line_delimiter)
-        node1 = line_data[0]
-        node2 = line_data[1]
-        G.add_edge(node1,node2)
-
-    # read the seed genes:
-    seed_genes = set()
-    for line in open(seed_file,'r'):
-        # lines starting with '#' will be ignored
-        if line[0]=='#':
-            continue
-        # the first column in the line will be interpreted as a seed
-        # gene:
-        line_data = line.strip().split('\t')
-        seed_gene = line_data[0]
-        seed_genes.add(seed_gene)
-
-    return G,seed_genes
-'''
 
 # ================================================================================
 def compute_all_gamma_ln(N):
     """
     precomputes all logarithmic gammas
     """
+    import scipy.stats
     gamma_ln = {}
     for i in range(1,N+1):
         gamma_ln[i] = scipy.special.gammaln(i)
@@ -145,6 +62,7 @@ def logchoose(n, k, gamma_ln):
 
 # =============================================================================
 def gauss_hypergeom(x, r, b, n, gamma_ln):
+    import numpy as np
     return np.exp(logchoose(r, x, gamma_ln) +
                   logchoose(b, n-x, gamma_ln) -
                   logchoose(r+b, n, gamma_ln))
@@ -188,6 +106,7 @@ def get_neighbors_and_degrees(G):
 # Reduce number of calculations
 # =============================================================================
 def reduce_not_in_cluster_nodes(all_degrees,neighbors,G,not_in_cluster,cluster_nodes,alpha):
+    from collections import defaultdict
     reduced_not_in_cluster = {}
     kb2k = defaultdict(dict)
     for node in not_in_cluster:
@@ -380,55 +299,26 @@ def DIAMOnD(G_original,seed_genes,max_number_of_added_nodes,alpha,outfile = None
     disease_genes = seed_genes & all_genes_in_network
     ignored_genes = seed_genes.difference(all_genes_in_network)
 
-    #if len(disease_genes) != len(seed_genes):
-        #print "DIAMOnD(): ignoring %s of %s seed genes that are not in the network" %(
-            #len(seed_genes - all_genes_in_network), len(seed_genes))
     # 2. agglomeration algorithm.
     added_nodes = diamond_iteration_of_first_X_nodes(G_original,
                                                      disease_genes,
                                                      max_number_of_added_nodes,alpha)
-    # 3. saving the results #Changed to fit the format of PASCAL
-    #with open(outfile,'a') as fout:
-        #print>>fout,'\t'.join(['DIAMOnD']) + '\t' + '\t', #'#rank','DIAMOnD_node'])
-        #rank = 0
-    #for DIAMOnD_node_info in added_nodes:
-        #rank += 1
-        #DIAMOnD_node = DIAMOnD_node_info[0]
-        #p = float(DIAMOnD_node_info[3])
-            #print>>fout,'\t'.join(map(str,([DIAMOnD_node]))) + '\t',
-        #print map(str,([DIAMOnD_node]))
-
+  #nx
 
     nodes_name = [str(item[0]) for item in added_nodes]
     nodes_degree = [str(item[1]) for item in added_nodes]
     nodes_n_neighbors = [str(item[2]) for item in added_nodes]
     nodes_p = [str(item[3]) for item in added_nodes]
-    #print (', '.join(disease_genes))
-    #print (', '.join(ignored_genes))
-    #print (', '.join(nodes_name))
-    #print (', '.join(nodes_degree))
-    #print (', '.join(nodes_n_neighbors))
-    #print (', '.join(nodes_p))
 
-	#print>>fout,'\n',
-
-    #final_result = list[added_nodes, disease_genes, ignored_genes]
 
     return [added_nodes, list(disease_genes), list(ignored_genes)]
 
-
-# ===========================================================================
-#
-# "Hey Ho, Let's go!" -- The Ramones (1976)
-#
-# ===========================================================================
 
 def to_set(list_r):
 	pyset = set(list_r)
 	return pyset
 
-def to_graph(array_r):
-	G = nx.Graph()
+def to_graph(array_r, G):
 	for row in array_r:
 		node1 = row[0]
 		node2 = row[1]

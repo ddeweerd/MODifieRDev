@@ -5,9 +5,12 @@
 #' @inheritParams clique_sum
 #' @param iteration Number of iterations to be performed
 #' @param probabilityScaleFactor Scale for enriched cliques 
-#' @param frequency_cutoff significance out of number of iterations performed (default = 0.05) 
+#' @param frequency_cutoff Fraction of the number of times a gene should be present in it 
+#' iterations. Default is 0.5, meaning 50 procent of all iterations 
 #' @param signif_cutoff Cutoff for Fisher exact test for cliques
+#' 
 #' @details 
+#' 
 #' The correlation clique is a clique-based algorithm using consensus clustering.
 #' The algorithm starts with calculating a correlation score between each interaction in the PPi network.
 #' The correlation score is obtained by subtracting the Pearson correlation p-value:
@@ -23,7 +26,8 @@
 #' the union of significant cliques is the disease module for this iteration
 #' The final disease module will consist of genes that have been present in at least \code{frequency_cutoff} iterations
 #' 
-#' @return correlation_clique returns an object of class "MODifieR_module" with subclass "Correlation_clique". 
+#' @return 
+#' correlation_clique returns an object of class "MODifieR_module" with subclass "Correlation_clique". 
 #' This object is a named list containing the following components:
 #' \item{module_genes}{A character vector containing the genes in the final module}
 #' \item{frequency_table}{A table containing the fraction of times the genes were present in an iteration module}
@@ -167,12 +171,15 @@ graph_score <- function(adjecency_list){
   return(z1)
 }
 #' correlation_adjust_cutoff
+#' 
 #' @inheritParams correlation_clique
-#' @param wgcna_module Module object that has been produced by \code{correlation_clique}
-#'  function
+#' @param correlation_module Module object that has been produced by \code{correlation_clique}  function
 #' @details 
+#' 
 #' This function allows to adjust the frequency cutoff for a \code{correlation_clique} module object
 #' @return 
+#' 
+#' 
 #'  \code{correlation_clique} module object 
 #' @seealso 
 #' 
@@ -193,7 +200,11 @@ correlation_adjust_cutoff <- function(frequency_cutoff, correlation_module){
   return( new_correlation_clique_module)
   
 }
-#' correlation_adjust_cutoff
+
+#' correlation_set_module_size
+#' 
+#' Returns a correlation_clique module closest to \code{size}
+#' 
 #' @inheritParams correlation_adjust_cutoff
 #' @param size Module object that has been produced by \code{correlation_clique}
 #'  function

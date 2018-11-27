@@ -82,7 +82,7 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
   
   powers <- c(c(1:10), seq(from = 12, to=20, by=2))
   
-  sft <- pickSoftThreshold(t(datExpr), powerVector = powers, verbose = 0)
+  sft <- WGCNA::pickSoftThreshold(t(datExpr), powerVector = powers, verbose = 0)
   
   powerEstimate <- sft$powerEstimate
   #Values taken from:
@@ -229,6 +229,7 @@ wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted 
   
   wgcna_module$settings$pval_cutoff <- pval_cutoff
   wgcna_module$module_genes <- wgcna_module$info_table[which(wgcna_module$info_table[ ,3] %in% module_colors), 1]
+  wgcna_module$module_colors <- module_colors
   
   return(wgcna_module)
 }
@@ -270,7 +271,7 @@ wgcna_split_module_by_color <- function(wgcna_module){
   }
   return(new_wgcna_modules)
 }
-#' Returns a wgcna module close to \code{size}
+#' Returns a wgcna module closest to \code{size}
 #' 
 #' @inheritParams wgcna_get_all_module_genes
 #' @param size The desired size of the resulting module

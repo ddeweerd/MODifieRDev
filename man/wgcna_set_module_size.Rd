@@ -2,7 +2,7 @@
 % Please edit documentation in R/wcgna.R
 \name{wgcna_set_module_size}
 \alias{wgcna_set_module_size}
-\title{Returns a wgcna module close to \code{size}}
+\title{Returns a wgcna module closest to \code{size}}
 \usage{
 wgcna_set_module_size(size, wgcna_module)
 }
@@ -12,7 +12,7 @@ wgcna_set_module_size(size, wgcna_module)
 \item{wgcna_module}{Module object that has been produced by \code{wgcna} function}
 }
 \description{
-Returns a wgcna module close to \code{size}
+Returns a wgcna module closest to \code{size}
 }
 \details{
 The function starts with the co-expression module (color) with the lowest 
