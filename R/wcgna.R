@@ -161,7 +161,6 @@ wgcna_get_trait_data <- function(MODifieR_input){
 #'@seealso 
 #'\code{\link{wgcna}}
 #'
-#'@export
 wgcna_get_all_module_genes <- function(wgcna_module){
   module_colors <- rownames(wgcna_module$correlation_to_trait_table)
   
@@ -238,7 +237,7 @@ wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted 
 #' 
 #' @details 
 #' The  \code{wgcna} module object is split into a series of \code{wgcna} objects by color.
-#' Eevery significant color in the module will be its own \code{wgcna} module object
+#' Every significant color in the module will be its own \code{wgcna} module object
 #' 
 #' @return 
 #' 
