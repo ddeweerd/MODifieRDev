@@ -10,7 +10,7 @@
 #' A slightly modified version of the original DIAMOnD python script is called from within R.
 #' The only change to the orginal algorithm is the option to include the seed genes
 #' to the module. There are also function to add or remove the seed genes from the output object, namely:
-#' \code{\link{add_diamond_seed_genes}} and \code{\link{remove_diamond_seed_genes}}
+#' \code{\link{diamond_add_seed_genes}} and \code{\link{diamond_remove_seed_genes}}
 #' For a detailed description of how the algorithm works, please see the paper referenced below.
 #' @return 
 #' diamond returns an object of class "MODifieR_module" with subclass "DIAMOnD". 
@@ -82,7 +82,7 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
 #' @seealso 
 #' \code{\link{diamond}}
 #' @export
-remove_diamond_seed_genes <- function(diamond_module){
+diamond_remove_seed_genes <- function(diamond_module){
   diamond_module$module_genes <- setdiff(diamond_module$module_genes, diamond_module$seed_genes)
   diamond_module$settings$include_seed <- F
   return(diamond_module)
@@ -97,7 +97,7 @@ remove_diamond_seed_genes <- function(diamond_module){
 #' \code{\link{diamond}}
 #' @export
 #' @export
-add_diamond_seed_genes <- function(diamond_module){
+diamond_add_seed_genes <- function(diamond_module){
   diamond_module$module_genes <- unique(c(diamond_module$module_genes, diamond_module$seed_genes))
   diamond_module$settings$include_seed <- T
   return(diamond_module)
