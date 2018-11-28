@@ -56,7 +56,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     
     annotation_table_expression <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
     
-    annotation_table_expression <- stats::na.omit(annotation_table)
+    annotation_table_expression <- stats::na.omit(annotation_table_expression)
     
     collapsed_data <-WGCNA::collapseRows(datET = expression_matrix,
                                          rowGroup =  annotation_table_expression$IDENTIFIER,
