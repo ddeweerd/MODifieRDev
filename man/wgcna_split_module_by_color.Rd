@@ -17,7 +17,7 @@ Returns new WGCNA module objects by color
 }
 \details{
 The  \code{wgcna} module object is split into a series of \code{wgcna} objects by color.
-Eevery significant color in the module will be its own \code{wgcna} module object
+Every significant color in the module will be its own \code{wgcna} module object
 }
 \seealso{
 \code{\link{wgcna}}
