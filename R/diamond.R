@@ -45,6 +45,8 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
   diamond_genes <- unique(stats::na.omit(diamond_genes$gene)) 
   #Convert to python objects
   diamond_set <- to_set_py(diamond_genes)
+  ppi_network <- as.matrix(ppi_network)
+  storage.mode(ppi_network) <- "character"
   ppi_graph <- to_graph_py(as.matrix(ppi_network), nx$Graph())
   #Run python scri[t]
   raw_module_py <- diamond_core(ppi_graph, diamond_set, as.integer(n_output_genes), as.integer(seed_weight))
@@ -88,7 +90,7 @@ diamond_remove_seed_genes <- function(diamond_module){
   return(diamond_module)
 }
 #' Add seed genes from a DIAMOnD MODifieR_module
-#' @inheritParams remove_diamond_seed_genes
+#' @inheritParams diamond_remove_seed_genes
 #' @details 
 #' Adds seed genes from a DIAMOnD module
 #' @return
