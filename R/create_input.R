@@ -46,7 +46,8 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
 
   #Making sure column names for the annotation dataframe are right...
   colnames(annotation_table) <- c("PROBEID", "IDENTIFIER")
-  
+  #And of the right class
+  annotation_table$IDENTIFIER <- as.character(annotation_table$IDENTIFIER)
   #Should expression data be generated? 
   if (expression == T){
     
@@ -80,6 +81,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     
     diff_genes <- stats::na.omit(diff_genes)
     colnames(diff_genes) <- c("gene", "pvalue")
+    
   }
   modifier_input <- create_custom_input_object(diff_genes = diff_genes, 
                                            limma_probe_table = limma_probe_table,
