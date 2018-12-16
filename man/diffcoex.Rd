@@ -7,7 +7,8 @@
 diffcoex(MODifieR_input, beta = 6, cor_method = "spearman",
   cluster_method = "average", cuttree_method = "hybrid",
   cut_height = 0.996, deepSplit = 0, pamRespectsDendro = F,
-  minClusterSize = 20, cutHeight = 0.2, dataset_name = NULL)
+  minClusterSize = 20, cutHeight = 0.2, pval_cutoff,
+  dataset_name = NULL)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
@@ -44,6 +45,8 @@ that belong to the same branch that the objects or small clusters being assigned
 \item{cutHeight}{Maximum joining heights that will be considered. For \code{method=="tree"} it
 defaults to 0.99. For \code{method=="hybrid"} it defaults to 99\% of the range between the 5th
 percentile and the maximum of the joining heights on the dendrogram.}
+
+\item{pval_cutoff}{The p-value cutoff to be used for significant co-expression modules (colors)}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}

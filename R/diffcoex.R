@@ -5,6 +5,7 @@
 #' @inheritParams flashClust::flashClust
 #' @inheritParams dynamicTreeCut::cutreeDynamic
 #' @inheritParams WGCNA::mergeCloseModules
+#' @inheritParams wgcna
 #' @param cut_height Maximum joining heights that will be considered. 
 #' @param cluster_method the agglomeration method to be used. 
 #' This should be (an unambiguous abbreviation of) one of "ward", 
@@ -38,7 +39,8 @@
 diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
                      cluster_method = "average", cuttree_method = "hybrid",
                      cut_height = 0.996, deepSplit = 0, pamRespectsDendro = F,
-                     minClusterSize = 20, cutHeight = 0.2, dataset_name = NULL){
+                     minClusterSize = 20, cutHeight = 0.2, 
+                     pval_cutoff = 0.05, dataset_name = NULL){
   
   # Retrieve settings
   default_args <- formals()
@@ -56,8 +58,6 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
   AdjMatC2<-sign(stats::cor(dataset2, method = cor_method))*(stats::cor(dataset2, method = cor_method))^2
   diag(AdjMatC1)<-0
   diag(AdjMatC2)<-0
-  
-  WGCNA::collectGarbage()
   
   dissTOMC1C2 <- WGCNA::TOMdist((abs(AdjMatC1-AdjMatC2)/2)^(beta/2))
   WGCNA::collectGarbage()
@@ -95,13 +95,18 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
                               color_vector = color_vector)
   #Name this list according to color
   names(module_genes_list) <- colors
-  #Build new diffcoex object
   
-  module_genes <- as.vector(unlist(unname(module_genes_list)))
-  module_colors <- names(module_genes_list)
+  module_p_values <- sapply(X = colors, FUN = diffcoex_get_p_values, dataset1 = dataset1, 
+                            dataset2 = dataset2, 
+                            group1_indici = MODifieR_input$group_indici[[1]], 
+                            color_vector = color_vector)
+  
+  module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values < pval_cutoff)])))
+  module_colors <- names(module_genes_list[which(module_p_values < pval_cutoff)])
   
   new_diffcoex_module <- construct_diffcoex_module(module_genes = module_genes,
                                                    module_colors = module_colors,
+                                                   module_p_values = module_p_values,
                                                    color_vector = color_vector,
                                                    settings = settings)
   
@@ -113,11 +118,13 @@ aggregate_colors <- function(color, genes, color_vector){
   genes[which(names(color_vector) == color)]
 }
 #Module constructor function
-construct_diffcoex_module <- function(module_genes, module_colors, color_vector, settings){
+construct_diffcoex_module <- function(module_genes, module_colors, module_p_values,
+                                      color_vector, settings){
 
   
   new_diffcoex_module <- list("module_genes" =  module_genes,
                               "module_colors" = module_colors,
+                              "module_p_values" = module_p_values,
                               "color_vector" =  color_vector,
                               "settings" = settings)
   
@@ -152,4 +159,59 @@ diffcoex_split_module_by_color <- function(diffcoex_module){
                                              settings = diffcoex_module$settings)
   }
   return(module_list)
+}
+
+diffcoex_get_p_values <- function(color, dataset1, dataset2, group1_indici, color_vector){
+  
+  scaled_combined_dataset <- rbind(scale(dataset1),scale(dataset2))
+  
+  permute_modules(color1 = color, color2 = color, 
+                  dataset = scaled_combined_dataset, n_samples = length(group1_indici), 
+                  color_vector = color_vector, sample_labels = group1_indici)
+}
+
+permute_modules <- function(color1, color2, dataset, n_samples, color_vector, sample_labels){
+  
+  module_score <- module_dispersion(color1 = color1, color2 = color2, dataset = dataset, 
+                                    n_samples = n_samples, color_vector = color_vector, 
+                                    sample_labels = sample_labels)
+  
+  null_distribution <- replicate(n = 1000, expr = module_dispersion(color1 = color1, 
+                                                                    color2 = color2, 
+                                                                    dataset = dataset, 
+                                                                    n_samples = n_samples, 
+                                                                    color_vector = color_vector))
+  
+  emp_pvalue <- sum(null_distribution >= module_score) / 1000
+  
+  return(emp_pvalue)
+}
+
+module_dispersion <- function(color1, color2, dataset, n_samples, color_vector, sample_labels = NULL){
+  if (is.null(sample_labels)){
+    sample_labels <- sample(size = n_samples, x = nrow(dataset))
+  }
+  
+  if (color1 == color2){
+    
+    module1 <- dataset[sample_labels, unname(color_vector[names(color_vector) == color1])]
+    module2 <- dataset[-sample_labels, unname(color_vector[names(color_vector) == color2])]
+    
+    difCor <- (cor(module1, method = cor_method) - cor(module2, method = cor_method)) ^2
+    n <- ncol(module1)
+    return  ((1/((n^2 -n)/2) * (sum(difCor)/2))^(.5))
+  }else{
+    module1 <- dataset[sample_labels, unname(color_vector[names(color_vector) == color1])]
+    module2 <- dataset[-sample_labels, unname(color_vector[names(color_vector) == color1])]
+    module3 <- dataset[sample_labels, unname(color_vector[names(color_vector) == color2])]
+    module4 <- dataset[-sample_labels, unname(color_vector[names(color_vector) == color2])]
+    
+    difCor <-(cor(module1,module3, method = cor_method) - cor(module2, module4, method = cor_method))^2
+    n1 <- length(unname(color_vector[names(color_vector) == color1]))
+    n2 <- length(unname(color_vector[names(color_vector) == color2]))
+    
+    return((1/((n1*n2)) * (sum(difCor)))^(.5))
+    
+  }
+  
 }

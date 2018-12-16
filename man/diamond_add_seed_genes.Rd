@@ -6,6 +6,9 @@
 \usage{
 diamond_add_seed_genes(diamond_module)
 }
+\arguments{
+\item{diamond_module}{A \code{MODifieR_input} object created by \code{\link{diamond}}}
+}
 \value{
 An object of class "MODifieR_module" with subclass "DIAMOnD"
 }
