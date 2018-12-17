@@ -60,7 +60,7 @@ wgcna_module_constructor <- function(module_genes, info_table,
 #' @export
 wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
                         mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05, corType = "bicor",
-                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 1,
+                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1,
                         dataset_name = deparse(substitute(MODifieR_input))){
   # Retrieve settings
   default_args <- formals()
@@ -90,16 +90,16 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
   #https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/faq.html
   if(is.na(powerEstimate)){
     if (nSamples < 20){
-      powerEstimate <- 6
+      powerEstimate <- 9
     }
     if (nSamples >= 20 && nSamples < 30){
-      powerEstimate <- 7
-    }
-    if (nSamples >= 30 && nSamples < 40){
       powerEstimate <- 8
     }
+    if (nSamples >= 30 && nSamples < 40){
+      powerEstimate <- 7
+    }
     if (nSamples >= 40){
-      powerEstimate <- 9
+      powerEstimate <- 6
     }
   }
   net <- blockwiseModules(datExpr, power = powerEstimate,
