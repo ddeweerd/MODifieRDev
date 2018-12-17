@@ -99,7 +99,7 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
   module_p_values <- sapply(X = colors, FUN = diffcoex_get_p_values, dataset1 = dataset1, 
                             dataset2 = dataset2, 
                             group1_indici = MODifieR_input$group_indici[[1]], 
-                            color_vector = color_vector)
+                            color_vector = color_vector, cor_method = cor_method)
   
   module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values < pval_cutoff)])))
   module_colors <- names(module_genes_list[which(module_p_values < pval_cutoff)])
@@ -161,33 +161,34 @@ diffcoex_split_module_by_color <- function(diffcoex_module){
   return(module_list)
 }
 
-diffcoex_get_p_values <- function(color, dataset1, dataset2, group1_indici, color_vector){
+diffcoex_get_p_values <- function(color, dataset1, dataset2, group1_indici, color_vector, cor_method){
   
   scaled_combined_dataset <- rbind(scale(dataset1),scale(dataset2))
   
   permute_modules(color1 = color, color2 = color, 
                   dataset = scaled_combined_dataset, n_samples = length(group1_indici), 
-                  color_vector = color_vector, sample_labels = group1_indici)
+                  color_vector = color_vector, sample_labels = group1_indici, cor_method = cor_method)
 }
 
-permute_modules <- function(color1, color2, dataset, n_samples, color_vector, sample_labels){
+permute_modules <- function(color1, color2, dataset, n_samples, color_vector, sample_labels, cor_method){
   
   module_score <- module_dispersion(color1 = color1, color2 = color2, dataset = dataset, 
                                     n_samples = n_samples, color_vector = color_vector, 
-                                    sample_labels = sample_labels)
+                                    sample_labels = sample_labels, cor_method = cor_method)
   
   null_distribution <- replicate(n = 1000, expr = module_dispersion(color1 = color1, 
                                                                     color2 = color2, 
                                                                     dataset = dataset, 
                                                                     n_samples = n_samples, 
-                                                                    color_vector = color_vector))
+                                                                    color_vector = color_vector,
+                                                                    cor_method = cor_method))
   
   emp_pvalue <- sum(null_distribution >= module_score) / 1000
   
   return(emp_pvalue)
 }
 
-module_dispersion <- function(color1, color2, dataset, n_samples, color_vector, sample_labels = NULL){
+module_dispersion <- function(color1, color2, dataset, n_samples, color_vector, sample_labels = NULL, cor_method){
   if (is.null(sample_labels)){
     sample_labels <- sample(size = n_samples, x = nrow(dataset))
   }
