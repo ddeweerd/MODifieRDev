@@ -6,7 +6,8 @@
 \usage{
 wgcna(MODifieR_input, minModuleSize = 30, deepSplit = 2,
   pamRespectsDendro = F, mergeCutHeight = 0.1, numericLabels = T,
-  pval_cutoff = 0.05, saveTOMs = T,
+  pval_cutoff = 0.05, corType = "bicor", maxBlockSize = 5000,
+  TOMType = "signed", saveTOMs = T, maxPOutliers = 1,
   dataset_name = deparse(substitute(MODifieR_input)))
 }
 \arguments{
@@ -32,8 +33,30 @@ numbers (\code{TRUE})? }
 
 \item{pval_cutoff}{The p-value cutoff to be used for significant co-expression modules (colors)}
 
+\item{corType}{character string specifying the correlation to be used. Allowed values are (unique
+abbreviations of) \code{"pearson"} and \code{"bicor"}, corresponding to Pearson and bidweight
+midcorrelation, respectively. Missing values are handled using the \code{pairwise.complete.obs} option. }
+
+\item{maxBlockSize}{integer giving maximum block size for module detection. Ignored if \code{blocks}
+above is non-NULL. Otherwise, if the number of genes in \code{datExpr} exceeds \code{maxBlockSize}, genes
+will be pre-clustered into blocks whose size should not exceed \code{maxBlockSize}. }
+
+\item{TOMType}{ one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If \code{"none"}, adjacency
+will be used for clustering. If \code{"unsigned"}, the standard TOM will be used (more generally, TOM
+function will receive the adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
+correlations between neighbors. }
+
 \item{saveTOMs}{ logical: should the consensus topological overlap matrices for each block be saved
 and returned?  }
+
+\item{maxPOutliers}{ only used for \code{corType=="bicor"}. Specifies the maximum percentile of data 
+that can be considered outliers on either 
+side of the median separately. For each side of the median, if
+higher percentile than \code{maxPOutliers} is considered an outlier by the weight function based on
+\code{9*mad(x)}, the width of the weight function is increased such that the percentile of outliers on
+that side of the median equals \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
+all weight function broadening; using \code{maxPOutliers=0} will give results that are quite similar (but
+not equal to) Pearson correlation. }
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}

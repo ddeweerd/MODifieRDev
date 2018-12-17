@@ -59,8 +59,9 @@ wgcna_module_constructor <- function(module_genes, info_table,
 #' ournal of Statistical Software, 46(11), 1-17. URL \url{http://www.jstatsoft.org/v46/i11/}}
 #' @export
 wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
-                        mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05,
-                        saveTOMs = T, dataset_name = deparse(substitute(MODifieR_input))){
+                        mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05, corType = "bicor",
+                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 1,
+                        dataset_name = deparse(substitute(MODifieR_input))){
   # Retrieve settings
   default_args <- formals()
   user_args <- as.list(match.call(expand.dots = T)[-1])
@@ -102,8 +103,9 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
     }
   }
   net <- blockwiseModules(datExpr, power = powerEstimate,
-                          TOMType = "unsigned", minModuleSize = minModuleSize,
-                          mergeCutHeight = mergeCutHeight,
+                          TOMType = TOMType, minModuleSize = minModuleSize,
+                          mergeCutHeight = mergeCutHeight, corType = corType,
+                          maxBlockSize = maxBlockSize, maxPOutliers = maxPOutliers,
                           numericLabels = numericLabels, pamRespectsDendro = pamRespectsDendro,
                           saveTOMs = TRUE,  saveTOMFileBase = dataset_name,
                           verbose = 0)
