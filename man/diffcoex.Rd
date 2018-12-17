@@ -7,7 +7,7 @@
 diffcoex(MODifieR_input, beta = 6, cor_method = "spearman",
   cluster_method = "average", cuttree_method = "hybrid",
   cut_height = 0.996, deepSplit = 0, pamRespectsDendro = F,
-  minClusterSize = 20, cutHeight = 0.2, pval_cutoff,
+  minClusterSize = 20, cutHeight = 0.2, pval_cutoff = 0.05,
   dataset_name = NULL)
 }
 \arguments{
