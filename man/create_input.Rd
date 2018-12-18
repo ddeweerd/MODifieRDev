@@ -6,7 +6,8 @@
 \usage{
 create_input(expression_matrix, annotation_table, group1_indici,
   group2_indici, group1_label, group2_label, expression = T,
-  differential_expression = T, method = "MaxMean")
+  differential_expression = T, method = "MaxMean",
+  filter_expression = T)
 }
 \arguments{
 \item{expression_matrix}{Normalized expression matrix where the samples are columns and probes are rows}
@@ -41,6 +42,8 @@ exactly 2 corresponding rows or when connectivityBasedCollapsing=FALSE. These ar
 "methodFunction").
 Note: if method="ME", "Average" or "function", the output parameters "group2row" and "selectedRow" are not informative.
 }
+
+\item{filter_expression}{boolean, remove 50 percent of the genes with lowest variance?}
 }
 \value{
 The function returns an object of class "MODifieR_input". The object is a named list containing the

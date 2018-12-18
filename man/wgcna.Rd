@@ -7,7 +7,7 @@
 wgcna(MODifieR_input, minModuleSize = 30, deepSplit = 2,
   pamRespectsDendro = F, mergeCutHeight = 0.1, numericLabels = T,
   pval_cutoff = 0.05, corType = "bicor", maxBlockSize = 5000,
-  TOMType = "signed", saveTOMs = T, maxPOutliers = 1,
+  TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1,
   dataset_name = deparse(substitute(MODifieR_input)))
 }
 \arguments{

@@ -8,6 +8,7 @@
 #' @param frequency_cutoff Fraction of the number of times a gene should be present in it 
 #' iterations. Default is 0.5, meaning 50 procent of all iterations 
 #' @param signif_cutoff Cutoff for Fisher exact test for cliques
+#' @param multiple_cores parallelize iterations using number of cores on system -1?
 #' 
 #' @details 
 #' 
@@ -37,7 +38,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
                                 frequency_cutoff = .5, 
                                 probabilityScaleFactor = 0.6,
                                 iteration = 50, signif_cutoff = 0.01, 
-                                deg_cutoff = 0.05,
+                                deg_cutoff = 0.05, multiple_cores = F,
                                 dataset_name = NULL){
   
   # Retrieve settings
@@ -73,7 +74,19 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   n_unsignif <- nrow(pValueMatrix)
   
 
-  module_list <- list() 
+  module_list <- list()
+  if (multiple_cores){
+    module_list <- foreach(i=1:iteration , .combine = list , .export = ls(.GlobalEnv)) %dopar% {
+      #Compare computed scores to random scores
+      to_pass <- pval_score > runif(n = length(pval_score)) * 1
+      #Get a graphed object for the edges that have a higher score than random (to_pass vector)
+      graphed_adjeceny <- graph_score(adjecency_list = cbind(springConnection[,1:2], to_pass))
+      #Get maximal cliques from the graphed object
+      cliques <- igraph::max_cliques(graph = graphed_adjeceny, min = 2)
+      #Infer modules using the maximal cliques
+      module_list <- infer_module(cliques = cliques, signifgenes = signifgenes, n_unsignif = n_unsignif, signif_cutoff = signif_cutoff )
+    }
+  }else{
   #For every iteration:
   for (i in 1:iteration){
     #Compare computed scores to random scores 
@@ -84,6 +97,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
     cliques <- igraph::max_cliques(graph = graphed_adjeceny, min = 2)
     #Infer modules using the maximal cliques
     module_list[[i]] <- infer_module(cliques = cliques, signifgenes = signifgenes, n_unsignif = n_unsignif, signif_cutoff = signif_cutoff )
+  }
   }
   #Get the frequency of each gene that has been present in a module, expressed in fraction
   tabled_frequencies <- table(unlist(module_list)) / iteration

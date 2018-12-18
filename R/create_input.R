@@ -14,6 +14,7 @@
 #'@param group2_label Label for each group 2, for example "patient" or "control"
 #'@param expression boolean, calculate expression values?
 #'@param differential_expression boolean, calculate differentially expressed data?
+#'@param filter_expression boolean, remove 50 percent of the genes with lowest variance?
 #' @inheritParams WGCNA::collapseRows
 #' @details 
 #' The function creates an input object to be used in all disease module inference methods. Differentially
@@ -38,11 +39,15 @@
 #' are the group indici}
 #' @export
 create_input <- function (expression_matrix, annotation_table, group1_indici, group2_indici, group1_label, group2_label,
-                          expression = T,  differential_expression= T, method = "MaxMean"){
+                          expression = T,  differential_expression= T, method = "MaxMean", filter_expression = T){
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
   limma_probe_table <- NULL
+  if (filter_expression){
+    exp_matrix_var <- apply(expression_matrix, 1, function(x) stats::var(x, na.rm = TRUE))
+    expression_matrix <- expression_matrix[exp_matrix_var >= stats::quantile(exp_matrix_var, c(.50)), ]
+  }
 
   #Making sure column names for the annotation dataframe are right...
   colnames(annotation_table) <- c("PROBEID", "IDENTIFIER")
@@ -59,7 +64,7 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
     
     annotation_table_expression <- stats::na.omit(annotation_table_expression)
     
-    collapsed_data <-WGCNA::collapseRows(datET = expression_matrix,
+    collapsed_data <- WGCNA::collapseRows(datET = expression_matrix,
                                          rowGroup =  annotation_table_expression$IDENTIFIER,
                                          rowID =  annotation_table_expression$PROBEID, method = method)
     

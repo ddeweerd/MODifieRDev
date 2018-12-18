@@ -9,7 +9,7 @@
 #' @import AnnotationDbi
 #' @importFrom plyr ddply summarise
 #' @importFrom stats as.dist fisher.test hclust median na.omit p.adjust phyper pnorm
-#' @importFrom stats prcomp pt qt quantile runif
+#' @importFrom stats prcomp pt qt quantile runif var
 #' @importFrom Rcpp sourceCpp
 #' @importFrom flashClust flashClust
 #' @importFrom dynamicTreeCut printFlush
