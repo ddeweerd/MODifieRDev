@@ -6,7 +6,7 @@
 \usage{
 correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
   probabilityScaleFactor = 0.6, iteration = 50, signif_cutoff = 0.01,
-  deg_cutoff = 0.05, dataset_name = NULL)
+  deg_cutoff = 0.05, multiple_cores = F, dataset_name = NULL)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
@@ -23,6 +23,8 @@ iterations. Default is 0.5, meaning 50 procent of all iterations}
 \item{signif_cutoff}{Cutoff for Fisher exact test for cliques}
 
 \item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
+
+\item{multiple_cores}{parallelize iterations using number of cores on system -1?}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}

@@ -61,7 +61,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
                                                                     size = length(degs),
                                                                     replace = FALSE), simplify = F)
 
-  cl = parallel::makeCluster(3) # initialize the cluster with 3 cores.
+  cl = parallel::makeCluster(detectCores()-1) # initialize the cluster with x cores.
   doParallel::registerDoParallel(cl)
 
   parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
