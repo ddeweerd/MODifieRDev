@@ -15,6 +15,7 @@
 #' @importFrom dynamicTreeCut printFlush
 #' @importFrom utils combn
 #' @importFrom graphics plot
+#' @importFrom stackoverflow match.call.defaults
 #' @useDynLib MODifieRDev
 
 #'@title Convert the module genes in a MODifieR_input object from official gene symbols to ENTREZ gene IDs
@@ -56,10 +57,15 @@ summary.MODifieR_module <- function(MODifieR_module){
  length(MODifieR_module$module_genes)
 }
 
-settings_function <- function(...) {
-  func_args <- sapply(match.call(expand.dots=TRUE)[-1], deparse)
-  func_args <- gsub(pattern = "\"", replacement = "", x = func_args)
-  return(func_args)
+
+settings_function <- function(...){
+  evaluated_args <- list(...)
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args){
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == argument)]]
+  }
+  return(settings)
 }
 #Generic subclass extractor
 extract_module_class <- function(MODifieR_module){

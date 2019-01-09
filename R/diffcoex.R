@@ -43,9 +43,7 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
                      pval_cutoff = 0.05, dataset_name = NULL){
   
   # Retrieve settings
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
+  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name

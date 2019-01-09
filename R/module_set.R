@@ -22,16 +22,15 @@
 create_module_set <- function(min_frequency, module_list){
   
   # Retrieve settings
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
+  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
   
   module_gene_list <- sapply(X = module_list, FUN = function(x)x$module_genes)
   
   if (is.null(names(module_list))){
     names(module_gene_list) <- sapply(X = module_list, FUN = function(x){class(x)[2]})
   }else{
-    names(module_list)[sapply(names(module_list), function(x)x=="")] <- sapply(X = module_list[sapply(names(module_list), function(x)x=="")] , FUN = function(x){class(x)[2]})
+    names(module_list)[sapply(names(module_list), function(x)x=="")] <- 
+      sapply(X = module_list[sapply(names(module_list), function(x)x=="")] , FUN = function(x){class(x)[2]})
     names(module_gene_list) <- names(module_list)
   }
   
@@ -42,7 +41,8 @@ create_module_set <- function(min_frequency, module_list){
   if (sum(tabled_names[tabled_names > 1]) != 0){
     for (i in 1:length(duplicated_names)){
       message(duplicated_names[i], " is non-unique, appending number to ", duplicated_names[i])
-      names(module_gene_list)[grep(pattern = duplicated_names[i], x = names(module_gene_list))] <- paste0(names(module_gene_list)[grep(pattern = duplicated_names[i], x = names(module_gene_list))], 1:tabled_names[tabled_names > 1][i])
+      names(module_gene_list)[grep(pattern = duplicated_names[i], x = names(module_gene_list))] <- 
+        paste0(names(module_gene_list)[grep(pattern = duplicated_names[i], x = names(module_gene_list))], 1:tabled_names[tabled_names > 1][i])
     }
   }
   
@@ -84,7 +84,7 @@ construct_module_set <- function(module_genes, module_gene_list, gene_frequency,
 
 table_gene_by_method <- function(genes, module_gene_list){
   gene_frequencies <- lapply(genes, FUN = get_gene_presence, module_gene_list = module_gene_list)
-  gene_table <- table(sapply(X = gene_frequencies, FUN = paste, collapse = " "))
+  gene_table <- get_gene_table(gene_frequencies = gene_frequencies)
   return(list("gene_frequencies" = gene_frequencies, "module_frequency" = gene_table))
 }
 
@@ -101,4 +101,34 @@ get_gene_presence <- function(gene, module_gene_list){
 #' @export
 get_max_frequency <- function(module_list){
   max(table(unlist(sapply(module_list, function(x)x$module_genes))))
+}
+
+get_gene_table <- function(gene_frequencies){
+  max_combinations <- max(lengths(gene_frequencies))
+  names_combinations <- unique(unlist(gene_frequencies))
+  
+  results <- lapply(X = 2:max_combinations, FUN = get_gene_frequencies, 
+                    names_combinations = names_combinations, 
+                    gene_frequencies = gene_frequencies)
+  
+  results <- unlist(results)
+  
+  results <- results[results  > 0 ]
+  
+  return (results)
+}
+get_gene_frequencies <- function(m, names_combinations, gene_frequencies){
+  combination_table <- get_combinations(m = m, x = names_combinations)
+  frequencies <- apply(X = combination_table, MARGIN = 2, get_intersections, gene_frequencies = gene_frequencies)
+  names(frequencies) <- apply(combination_table, MARGIN = 2, FUN = paste, collapse = " ")
+  
+  return (frequencies)
+}
+
+get_combinations <- function(m, x){
+  combn(x = x, m = m)
+}
+
+get_intersections <- function(combo, gene_frequencies){
+  sum(sapply(X = gene_frequencies, FUN = function(x){sum(combo %in% x) == length(combo)}))
 }

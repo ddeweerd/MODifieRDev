@@ -27,9 +27,7 @@
 clique_sum <- function(MODifieR_input, ppi_network, simplify_graph = T, n_iterations = 10000, clique_significance = 0.05,
                        deg_cutoff = 0.05, min_clique_size = 5, min_deg_in_clique = 3, dataset_name = NULL){
   # Retrieve settings
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
+  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name

@@ -5,6 +5,8 @@ nx <- NULL
 np <- NULL
 scipy <- NULL
 
+unevaluated_args <- c("MODifieR_input", "ppi_network", "module_list", 
+                      "expression_matrix", "annotation_table")
 
 .onLoad <- function(libname, pkgname){
   nx <<- reticulate::import(module = "networkx", as = "nx", delay_load = T)

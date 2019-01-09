@@ -33,10 +33,9 @@
 #' @export
 mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, haircut = F, fluff = F,
                   fdt = 0.8, loops = T, deg_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL){
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
-
+  #Retrieve settings
+  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
+  
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }

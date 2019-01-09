@@ -31,9 +31,7 @@
 diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
                                include_seed = FALSE, dataset_name = NULL){
   # Retrieve settings
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
+  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name

@@ -44,9 +44,7 @@ moda <- function(MODifieR_input,
                    specificTheta = 0.1, conservedTheta = 0.1,
                    dataset_name = NULL, group_of_interest){
   # Retrieve settings
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
+  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name

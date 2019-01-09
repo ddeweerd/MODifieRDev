@@ -7,7 +7,8 @@
 create_custom_input_object(diff_genes = NULL, limma_probe_table = NULL,
   annotated_exprs_matrix = NULL, expression_matrix = NULL,
   annotation_table = NULL, group1_indici = NULL,
-  group2_indici = NULL, group1_label = NULL, group2_label = NULL)
+  group2_indici = NULL, group1_label = NULL, group2_label = NULL,
+  settings = NULL)
 }
 \arguments{
 \item{diff_genes}{A 2 two column data.frame where the first column are genes and the second column are p-values}
@@ -31,6 +32,8 @@ create_custom_input_object(diff_genes = NULL, limma_probe_table = NULL,
 \item{group1_label}{Label for each group 1, for example "patient" or "control"}
 
 \item{group2_label}{Label for each group 2, for example "patient" or "control"}
+
+\item{settings}{Settings used to generate the object. Used only internally by package.}
 }
 \value{
 The function returns an object of class "MODifieR_input". The object is a named list containing the
