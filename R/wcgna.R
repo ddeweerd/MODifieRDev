@@ -17,7 +17,7 @@ wgcna_module_constructor <- function(module_genes, info_table,
 
 #' An implementation of WGCNA to correlate coexpression modules to disease
 #'
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_exact
 #' @inheritParams WGCNA::blockwiseModules
 #' @param pval_cutoff The p-value cutoff to be used for significant co-expression modules (colors)
 #' 
@@ -60,10 +60,17 @@ wgcna_module_constructor <- function(module_genes, info_table,
 #' @export
 wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
                         mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05, corType = "bicor",
-                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1,
+                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1, deg_cutoff = 0.05,
                         dataset_name = deparse(substitute(MODifieR_input))){
+ 
   # Retrieve settings
-  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
@@ -78,27 +85,8 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
   nGenes <- ncol(datExpr)
   nSamples <- nrow(datExpr)
   
-  powers <- c(c(1:10), seq(from = 12, to=20, by=2))
+  powerEstimate <- get_softthreshold_value(datExpr = datExpr, nSamples = nSamples)
   
-  sft <- WGCNA::pickSoftThreshold(t(datExpr), powerVector = powers, verbose = 0)
-  
-  powerEstimate <- sft$powerEstimate
-  #Values taken from:
-  #https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/faq.html
-  if(is.na(powerEstimate)){
-    if (nSamples < 20){
-      powerEstimate <- 9
-    }
-    if (nSamples >= 20 && nSamples < 30){
-      powerEstimate <- 8
-    }
-    if (nSamples >= 30 && nSamples < 40){
-      powerEstimate <- 7
-    }
-    if (nSamples >= 40){
-      powerEstimate <- 6
-    }
-  }
   net <- blockwiseModules(datExpr, power = powerEstimate,
                           TOMType = TOMType, minModuleSize = minModuleSize,
                           mergeCutHeight = mergeCutHeight, corType = corType,
@@ -142,6 +130,11 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
                                                module_colors = significant_module_colors,
                                                settings = settings)
   
+  modules_genes_list <- wgcna_get_all_module_genes(new_wgcna_module)
+  fisher_exact_p_values <- lapply(X = modules_genes_list, FUN = color_module_exact_test, 
+                                  MODifieR_input = MODifieR_input, deg_cutoff = deg_cutoff)
+  fisher_exact_p_values <- do.call(rbind, fisher_exact_p_values)
+  new_wgcna_module$correlation_to_trait_table <- cbind(new_wgcna_module$correlation_to_trait_table, fisher_exact_p_values)
   return(new_wgcna_module)
 }
 
@@ -203,7 +196,7 @@ wgcna_get_module_genes_by_sign <- function(wgcna_module, mode){
 }
 
 #' wgcna_adjust_significance
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_permutation
 #' @inheritParams wgcna_get_all_module_genes
 #' @inheritParams wgcna
 #' @param use_unadjusted Boolean value to signify if the adjusted (TRUE) or unadjusted (FALSE)
@@ -308,4 +301,32 @@ wgcna_set_module_size <- function(size, wgcna_module){
   
   return(new_wgcna_module)
   
+}
+
+
+get_softthreshold_value <- function(datExpr, nSamples = nSamples){
+  powers <- c(c(1:10), seq(from = 12, to=20, by=2))
+  
+  allowWGCNAThreads()
+  
+  sft <- WGCNA::pickSoftThreshold(t(datExpr), powerVector = powers, verbose = 0)
+  
+  powerEstimate <- sft$powerEstimate
+  #Values taken from:
+  #https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/faq.html
+  if(is.na(powerEstimate)){
+    if (nSamples < 20){
+      powerEstimate <- 9
+    }
+    if (nSamples >= 20 && nSamples < 30){
+      powerEstimate <- 8
+    }
+    if (nSamples >= 30 && nSamples < 40){
+      powerEstimate <- 7
+    }
+    if (nSamples >= 40){
+      powerEstimate <- 6
+    }
+  }
+  return(powerEstimate)
 }

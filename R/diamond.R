@@ -2,7 +2,8 @@
 #' 
 #' A seed gene based algorithm to identify disease module from differentially expressed genes
 #' 
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_exact
+#' @inheritParams build_clique_db
 #' @param n_output_genes maximum number of genes to be included in the final module 
 #' @param seed_weight Numeric additional parameter to assign weight for the seed genes 
 #' @param include_seed Logical TRUE/FALSE for inclusion of seed genes in the output module 
@@ -30,9 +31,15 @@
 #' @export
 diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
                                include_seed = FALSE, dataset_name = NULL){
-  # Retrieve settings
-  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
   
+  # Retrieve settings
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }

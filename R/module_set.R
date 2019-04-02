@@ -22,7 +22,14 @@
 create_module_set <- function(min_frequency, module_list){
   
   # Retrieve settings
-  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
+  
   
   module_gene_list <- sapply(X = module_list, FUN = function(x)x$module_genes)
   

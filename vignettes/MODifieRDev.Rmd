@@ -78,7 +78,7 @@ ppi_head <- structure(list(entrez1 = c("5341", "23647", "8853", "5921", "50807",
 ```
 #Installation 
 
-MODifierDev requires Python 3 with additional Python libraries scipy, numpy and networkx. They are a standard part of Anaconda
+MODifierDev requires Python 3 with additional Python libraries scipy, sqlite3, numpy and networkx. They are a standard part of Anaconda
 so installing Anaconda is recommended. It can be downloaded here:
 
 [Anaconda](https://www.anaconda.com/)
@@ -105,6 +105,7 @@ install.packages(c("foreach",
                    "parallel", 
                    "igraph", 
                    "WGCNA",
+                   "RSQLite"
                    "stackoverflow"))
 ```
 
@@ -352,15 +353,52 @@ functions, they will be shortly discussed in separate subsections of the inferen
 
 ### Clique Sum
 
-Clique Sum in implementation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012]
-In MODifieR, the function can be called using `clique_sum()`
+There are two different versions of the Clique Sum algorithm implemented, `clique_sum_exact` and `clique_sum_permutation`, that differ in the method to determine if a clique is significantly enriched with DEGs. Obtaining cliques is done in a separate function, `build_clique_db`, that creates an SQLite database for the cliques. This is because obtaining cliques is a computationally intersive process, may clog the memory when using a large network and is static for each network. 
 
-In the example the number of iterations is reduced to 1000 (from 10000) to speed up the tutorial
+Both versions take in the filename of this database instead of a PPi network.
+
+#### build_clique_db
+
+This function is used to create a clique database. `db_folder` is the folder where database will be stored and `db_name` is the name of the database. .sqlite will be appended to the database name.
+
 ```{r, eval=FALSE, echo=TRUE}
-clique_sum_module <- clique_sum(MODifieR_input = MODifieR_input, 
-                                ppi_network = ppi_network, 
-                                n_iterations = 1000)
+build_clique_db(ppi_network = ppi_network, 
+                db_folder = "/folder/name", 
+                db_name = "example")
 ```
+
+#### clique_sum_exact
+
+clique_sum_permutation is an implementation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012]
+
+Enrichment of cliques is determined by a one-sided Fisher exact test.
+
+
+In MODifieR, the function can be called using `clique_sum_exact()` and using the filename of the database created in the function `build_clique_db` as input for the db parameter.
+
+
+
+```{r, eval=FALSE, echo=TRUE}
+clique_sum_exact_module <- clique_sum_exact(MODifieR_input = MODifieR_input, 
+                                db = "folder/name/example.sqlite")
+```
+
+#### clique_sum_permutation
+
+clique_sum_permutation is a variation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012], [@Gustafsson2014]
+
+Enrichment of cliques is determined by comparing the sum of the -log 10 p-values for all genes in the clique and comparing that to a null distribution of cliques composed of random genes of the same size.
+
+
+In MODifieR, the function can be called using `clique_sum_permutation()` and using the filename of the database created in the function `build_clique_db` as input for the db parameter.
+
+
+
+```{r, eval=FALSE, echo=TRUE}
+clique_sum_permutation_module <- clique_sum_permutation(MODifieR_input = MODifieR_input, 
+                                db = "db_name = "example"")
+```
+
 
 ### Correlation Clique
 
@@ -370,13 +408,11 @@ The correlation score is obtained by subtracting the Pearson correlation p-value
 $correlation score = 1 - Pearson\: p\: value$
 
 Subsequently, the correlation score is multiplied by 
-the correlation confidence and scaled with the scale factor to get the edge score:
-$edge score = \sqrt{(correlation score * confidence score  )} * scale\:factor$
+the correlation confidence.
+$edge score = \sqrt{(correlation score * confidence score  )} $
 
 When the edge scores are calculated the iterative part of the algorithm commences:
-All edge scores are compared to random variables from the uniform distribution between (0,1)
-only interactions where the edge score is higher than the random variable are used to construct
-a new PPi network. Then, maximal cliques are inferred from this new network.
+All edge scores are scaled to so that the mean of all edge scores is equal to the `fraction_of_iteration` parameter. Next, the newly scaled scores are compared to random variables from the uniform distribution between (0,1) and only interactions where the edge score is higher than the random variable are used to construct a new PPi network. Because the scores are scaled to `fraction_of_iteration`, this is the average fraction of interactions used for this new network. Then, maximal cliques are inferred from this new network.
 The cliques are tested for significant enrichment of DEGs by Fisher's exact test and
 the union of significant cliques is the disease module for this iteration.
 The final disease module will consist of genes that have been present in at least `frequency cutoff` iterations

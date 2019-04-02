@@ -7,7 +7,8 @@
 #' 
 #' Much of the code an documentation has been taken from the now defunct package "ProNet"
 #' 
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_exact
+#' @inheritParams build_clique_db
 #' @param hierarchy This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.
 #' @param vwp Vertex weight percentage. Default value is 0.5.
 #' @param haircut	Boolean value, whether to remove singly-connected nodes from clusters (TRUE) or not (FALSE).
@@ -33,8 +34,15 @@
 #' @export
 mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, haircut = F, fluff = F,
                   fdt = 0.8, loops = T, deg_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL){
-  #Retrieve settings
-  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
+ 
+  # Retrieve settings
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name

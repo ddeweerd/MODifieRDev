@@ -3,7 +3,8 @@
 #' A clique based algorithm by Vlaic et al. to produce disease module from Differentially Expressed Genes
 #'
 #'
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_exact
+#' @inheritParams build_clique_db
 #' @param repeats Number of times the algorithm is repeated
 #' @param permutations  Number of permutations to perform to identify the community structure
 #' @param clique_cutoff cutoff pvalue for significant cliques
@@ -30,7 +31,13 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
                              clique_cutoff = 0.01, dataset_name = NULL){
 
   # Retrieve settings
-  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
@@ -51,7 +58,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
 
   vlist <- cbind("content" = 1:nrow(A), "weight" = rep(1, nrow(A)), "degree" = degrees)
 
-  background <-unique(diffgen[,1])
+  background <- unique(diffgen[,1])
 
   degs <- diffgen$gene[diffgen$p_val < deg_cutoff]
   
@@ -59,7 +66,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
                                                                     size = length(degs),
                                                                     replace = FALSE), simplify = F)
 
-  cl = parallel::makeCluster(detectCores()-1) # initialize the cluster with x cores.
+  cl = parallel::makeCluster(3) # initialize the cluster with x cores.
   doParallel::registerDoParallel(cl)
 
   parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
@@ -75,15 +82,15 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
 
   database_singleSeed <- moduleDiscoverer.createDatabase(results=db_results_singleSeed,
                                                         proteins=proteins)
-
+  print("creating MD object")
   input_singleSeed = moduleDiscoverer.db.create_MD_object(database=database_singleSeed,
                                                           foregrounds=list("NASH"=degs),
-                                                          cores=5, background=background,
+                                                          cores=2, background=background,
                                                           chunks=100,
                                                           randomDataSets=list(degs_random_datasets))
 
   result_singleSeed = moduleDiscoverer.db.testForCliqueEnrichment(database=database_singleSeed,
-                                                                  input=input_singleSeed)
+                                                                  input=input_singleSeed, cores=3)
 
   result_singleSeed.ec = moduleDiscoverer.db.extractEnrichedCliques(database=database_singleSeed,
                                                                     result=result_singleSeed,

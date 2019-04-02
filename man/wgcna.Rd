@@ -8,6 +8,7 @@ wgcna(MODifieR_input, minModuleSize = 30, deepSplit = 2,
   pamRespectsDendro = F, mergeCutHeight = 0.1, numericLabels = T,
   pval_cutoff = 0.05, corType = "bicor", maxBlockSize = 5000,
   TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1,
+  deg_cutoff = 0.05,
   dataset_name = deparse(substitute(MODifieR_input)))
 }
 \arguments{
@@ -57,6 +58,8 @@ higher percentile than \code{maxPOutliers} is considered an outlier by the weigh
 that side of the median equals \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
 all weight function broadening; using \code{maxPOutliers=0} will give results that are quite similar (but
 not equal to) Pearson correlation. }
+
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}

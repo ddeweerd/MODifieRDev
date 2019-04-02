@@ -20,7 +20,8 @@ Imports:
     utils,
     stats,
     parallel,
-    stackoverflow
+    stackoverflow,
+    RSQLite
 Depends:
     R (>= 3.1.0),
     igraph,

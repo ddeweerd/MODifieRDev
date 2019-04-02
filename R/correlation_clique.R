@@ -2,14 +2,16 @@
 #'
 #' A clique based method to find a disease module from correlated gene expression
 #'
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_exact
+#' @inheritParams build_clique_db
 #' @param iteration Number of iterations to be performed
-#' @param probabilityScaleFactor Scale for enriched cliques 
+#' @param fraction_of_interactions Fraction of interactions from the original network that will be used
+#' in each iteration
 #' @param frequency_cutoff Fraction of the number of times a gene should be present in it 
 #' iterations. Default is 0.5, meaning 50 procent of all iterations 
-#' @param signif_cutoff Cutoff for Fisher exact test for cliques
+#' @param clique_significance Cutoff for Fisher exact test for cliques
 #' @param multiple_cores parallelize iterations using number of cores on system -1?
-#' 
+#' @param tempfolder Folder where temporary files are stored
 #' @details 
 #' 
 #' The correlation clique is a clique-based algorithm using consensus clustering.
@@ -35,14 +37,20 @@
 #' \item{settings}{A named list containing the parameters used in generating the object}
 #' @export
 correlation_clique <- function(MODifieR_input, ppi_network,
-                                frequency_cutoff = .5, 
-                                probabilityScaleFactor = 0.6,
-                                iteration = 50, signif_cutoff = 0.01, 
-                                deg_cutoff = 0.05, multiple_cores = F,
-                                dataset_name = NULL){
+                               frequency_cutoff = .5, 
+                               fraction_of_interactions = 0.4,
+                               iteration = 50, clique_significance = 0.01, 
+                               deg_cutoff = 0.05, multiple_cores = F, n_cores = 3, tempfolder = NULL,
+                               dataset_name = NULL){
   
   # Retrieve settings
-  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
@@ -58,7 +66,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   springConnection <- springConnection[overlap,]
   overlap <- springConnection[,2] %in% pValueMatrix[,1] & springConnection[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
   springConnection <- springConnection[overlap,]
-
+  
   springConnection[,3] <- springConnection[,3] / 1000
   #Calculates (1- p value) for all relevant connections in the PPi network, and is stored in column 1.
   #Column 2 will contain the PPi score from the PPi network
@@ -66,36 +74,35 @@ correlation_clique <- function(MODifieR_input, ppi_network,
                              expression_matrix = MODifieR_input$annotated_exprs_matrix),
                        springConnection[,3])
   #Calculates square root of p-value * PPi score. This is then scaled by probabilityScaleFactor. 
-  pval_score <- apply(X = corrPvalues, MARGIN = 1, FUN = function(x){sqrt(x[1] * x[2]) * probabilityScaleFactor})
-  #Get the significant genes
-  signifgenes <- pValueMatrix$gene[pValueMatrix$pvalue < deg_cutoff]
-  n_unsignif <- nrow(pValueMatrix)
+  pval_score <- apply(X = corrPvalues, MARGIN = 1, FUN = function(x){sqrt(x[1] * x[2])})
   
-
+  pval_score <- scale_observations(sf = fraction_of_interactions, scores = pval_score)
+  
+  genes <- dataframe_to_vector(as.data.frame(pValueMatrix))
+  
+  genes <- genes[names(genes) %in% unique(unlist(springConnection[ ,1:2]))]
+  
   module_list <- list()
   if (multiple_cores){
-    module_list <- foreach(i=1:iteration , .combine = list , .export = ls(.GlobalEnv)) %dopar% {
-      #Compare computed scores to random scores
-      to_pass <- pval_score > runif(n = length(pval_score)) * 1
-      #Get a graphed object for the edges that have a higher score than random (to_pass vector)
-      graphed_adjeceny <- graph_score(adjecency_list = cbind(springConnection[,1:2], to_pass))
-      #Get maximal cliques from the graphed object
-      cliques <- igraph::max_cliques(graph = graphed_adjeceny, min = 2)
-      #Infer modules using the maximal cliques
-      module_list <- infer_module(cliques = cliques, signifgenes = signifgenes, n_unsignif = n_unsignif, signif_cutoff = signif_cutoff )
-    }
+    cl <- parallel::makeCluster(n_cores, outfile = "")
+    doParallel::registerDoParallel(cl)
+    parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
+    #module_list <- foreach(i=1:iteration, .combine = list, .export = ls(.GlobalEnv)) %do% {
+    #Compare computed scores to random scores
+    
+    module_list <- parLapply(cl = cl, X = 1:iteration, fun = perform_iterations, pval_score, springConnection, genes, clique_significance, deg_cutoff, tempfolder)
+    parallel::stopCluster(cl) # stop the cluster
+    
+    #}
+    
   }else{
-  #For every iteration:
-  for (i in 1:iteration){
-    #Compare computed scores to random scores 
-    to_pass <- pval_score > runif(n = length(pval_score)) * 1
-    #Get a graphed object for the edges that have a higher score than random (to_pass vector)
-    graphed_adjeceny <- graph_score(adjecency_list = cbind(springConnection[,1:2], to_pass))
-    #Get maximal cliques from the graphed object
-    cliques <- igraph::max_cliques(graph = graphed_adjeceny, min = 2)
-    #Infer modules using the maximal cliques
-    module_list[[i]] <- infer_module(cliques = cliques, signifgenes = signifgenes, n_unsignif = n_unsignif, signif_cutoff = signif_cutoff )
-  }
+    #For every iteration:
+    for (i in 1:iteration){
+      #Compare computed scores to random scores 
+      
+      
+      module_list[[i]] <- perform_iterations(iteration_n = i, pval_score = pval_score, springConnection = springConnection, genes = genes, clique_significance = clique_significance, deg_cutoff = deg_cutoff, tempfolder = tempfolder)
+    }
   }
   #Get the frequency of each gene that has been present in a module, expressed in fraction
   tabled_frequencies <- table(unlist(module_list)) / iteration
@@ -106,50 +113,21 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   new_correlation_clique_module <- construct_correlation_module(module_genes = module_genes,
                                                                 frequency_table = tabled_frequencies,
                                                                 settings = settings)
- 
+  
   return( new_correlation_clique_module)
 }
 
-#Calculate fisher exact test for each clique. Returns a vector with all 
-#genes in significant clique
-infer_module <- function(cliques, signifgenes, n_unsignif, signif_cutoff){
-  #Total number of significant genes
-  n_signif <- length(signifgenes)
-  #Total number of not significant genes
-  n_unsignif <- n_unsignif - n_signif
-  #Clique table, matrix with dimensions: 4 columns, number of cliques = number of rows:
-  #Column 1 Number of significant genes in clique
-  #Column 2 Number of unsignificant genes in clique
-  #Column 3 Number of significant genes NOT in clique
-  #Column 4 Number of unsignficant genes NOT in clique
-  
-  #Columns 1+2 
-  clique_table <- cbind(sapply(X = cliques, FUN = function(x) sum(as.vector(x) %in% signifgenes)), 
-                        sapply(X = cliques, FUN = function(x) sum(!as.vector(x) %in% signifgenes)))
-  #cbind column 3
-  clique_table <- cbind(clique_table, n_signif - clique_table[,1])
-  #Get indici of cliques with at least 1 significant gene
-  #Avoids calculating Fisher exact for cliques with no significant gene
-  cliques_with_signif <- clique_table[ ,1] != 0
 
-  #cbind column 4
-  clique_table <- cbind(clique_table, n_unsignif - clique_table[,2])
+perform_iterations <- function(iteration_n, pval_score, springConnection, genes, clique_significance, deg_cutoff, tempfolder){
+  print(iteration_n)
   
-  #Subset clique table w
-  clique_table <- clique_table[cliques_with_signif,]
-  #Subset cliques
-  cliques <- cliques[cliques_with_signif]
+  to_pass <- pval_score > runif(n = length(pval_score))
   
-  #Get fisher exact test p values for each cliqiue. A, B, C and D are in column 1:4
-  clique_pvals <- apply(X = clique_table, MARGIN = 1, FUN = fisher_pval)
+  clique_file_list <- create_clique_file(adjacency_matrix = springConnection[to_pass, ], genes = genes, tempfolder = tempfolder) 
   
-  #Logical vector, TRUE is significant
-  indici_signif_cliques <- clique_pvals < signif_cutoff
-  #Unlist, unique and vectorize all significant cliques
-  module <- unique(names(unlist(cliques[indici_signif_cliques])))
-  
-  return (module)
-  
+  module_list <- process_clique(clique_file = clique_file_list$tempfile, genes = clique_file_list$tr_genes, 
+                                graphed_ppi = clique_file_list$graphed_ppi, clique_significance = clique_significance,
+                                deg_cutoff = deg_cutoff, name_table = clique_file_list$name_table)
 }
 #Pval Helper function
 fisher_pval <- function(clique_row){
@@ -164,24 +142,7 @@ calculate_correlation <- function(row, expression_matrix){
   
   1 - round(stats::cor.test(x = expression_matrix[x_y[1],], y = expression_matrix[x_y[2],])$p.value, 3)
 }
-#Convert edge list to igraph object, and convert to adjacency matrix. This matrix will be converted to an adjacency graph.
-#As this adjacency matrix will be used to search for maximal cliques, the mode is undirected
-graph_score <- function(adjecency_list){
-  g <- igraph::graph.data.frame(adjecency_list)
-  score_matrix <- as.matrix(igraph::get.adjacency(g , attr = colnames(adjecency_list)[3]))
-  
-  #Remove rows that do not have a score of at least 1 in scoreMatrix
-  rows_to_keep <- rowSums(x = score_matrix) != 0
-  
-  score_matrix <- score_matrix[rows_to_keep, rows_to_keep]
-  #Set lower triangle to 0. 
-  score_matrix[lower.tri(score_matrix)] <- 0
-  
-  z <- igraph::graph.adjacency(adjmatrix = score_matrix, mode = "undirected")
-  z1 <- igraph::simplify(z)
-  
-  return(z1)
-}
+
 #' correlation_adjust_cutoff
 #' 
 #' @inheritParams correlation_clique
@@ -251,3 +212,99 @@ construct_correlation_module <- function(module_genes, frequency_table, settings
   
 }
 
+create_clique_file <- function(adjacency_matrix, genes, tempfolder){
+  print("writing clique")
+  clique_file <- paste0(tempfolder, "/", paste(sample(x = LETTERS, size = 10), collapse = ""), ".txt")
+  
+  g <- igraph::simplify(igraph::graph.data.frame(adjacency_matrix, directed = F))
+  
+  genes <- genes[names(genes) %in% V(g)$name]
+  name_table <- cbind(V(g)$name, as.character(as.numeric(V(g)-1)))
+  
+  names(genes) <- sapply(X = names(genes), FUN = entrez_to_index, name_table = name_table)
+  
+  igraph::max_cliques(graph = g, file = clique_file)
+  print("finished writing clique file")
+  return(list(tempfile = clique_file, graphed_ppi = g, name_table = name_table, tr_genes = genes))
+}
+
+
+process_clique <- function(clique_file, genes, graphed_ppi, clique_significance, deg_cutoff, name_table) {
+  print("start processing clique file")
+  
+  deg_genes <- genes[genes < deg_cutoff]
+  
+  non_deg_genes <- genes[genes >= deg_cutoff]
+  cutoff_per_size <- vector(mode = "numeric")
+  con <- file(clique_file, "r")
+  significant_cliques <- NULL
+  deg_names <- names(deg_genes)
+  while (TRUE) {
+    line <- readLines(con, n = 100000)
+    if ( length(line) == 0 ) {
+      break
+    }
+    clique_genes <- sapply(X = line, FUN = strsplit, split = " ")
+    
+    system.time(size_and_deg <- (unname(sapply(X = clique_genes, FUN = function(x) c(length(x), sum(x %in% deg_names))))))
+    
+    clique_sizes <- unique(size_and_deg[1,])
+    
+    if (sum(is.na(cutoff_per_size[clique_sizes]) > 0)){
+      indici <- clique_sizes[which(is.na(cutoff_per_size[clique_sizes]))]
+      cutoff_per_size[indici] <- sapply(X = indici, FUN = get_clique_cutoffs, 
+                                        deg_names = deg_names, 
+                                        non_deg_genes = non_deg_genes,
+                                        genes = genes,
+                                        clique_significance)
+    }
+    
+    significant_vector <- apply(X = size_and_deg, MARGIN = 2, FUN = check_significance, cutoff_per_size = cutoff_per_size)
+    
+    significant_cliques <- unique(c(significant_cliques, unlist(clique_genes[significant_vector])))
+  }
+  
+  print(significant_cliques)[1:10]
+  
+  significant_cliques <- unname(unique(unlist(sapply(X = significant_cliques, 
+                                                     FUN = index_to_entrez, 
+                                                     name_table = name_table))))
+  
+  
+  close(con)
+  
+  file.remove(clique_file)
+  print("finished processing clique file")
+  return (unique(significant_cliques))
+  
+}
+
+entrez_to_index <- function(entrez_id, name_table){
+  name_table[which(name_table[,1] == entrez_id), 2 ]
+}
+index_to_entrez <- function(gene_index, name_table){
+  name_table[which(name_table[,2] == gene_index), 1 ]
+}
+
+get_clique_cutoffs <- function(clique_size, deg_names, non_deg_genes, genes, clique_significance){
+  
+  create_fisher_tables(clique_size = clique_size, 
+                       total_n_genes = length(genes), 
+                       n_sig = length(deg_names), 
+                       unsig = length(non_deg_genes)) %>% 
+    evaluate_table(fisher_table = ., 
+                   clique_significance = clique_significance, 
+                   min_deg_in_clique = 1)
+}
+
+check_significance <- function(clique, cutoff_per_size){
+  if (clique[2] >= cutoff_per_size[clique[1]]){
+    return (TRUE)
+  }else{
+    return(FALSE)
+  }
+}
+
+scale_observations <- function(sf, scores){
+  scores * (length(scores) * sf) / sum(scores)
+}

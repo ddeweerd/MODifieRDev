@@ -11,7 +11,7 @@ diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{ppi_network}{A PPi network as a 2 column dataframe}
+\item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 
 \item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 

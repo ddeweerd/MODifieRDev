@@ -44,7 +44,13 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
                           use_adjusted = T){
   
   # Retrieve settings
-  settings <- do.call(what = "settings_function", as.list(stackoverflow::match.call.defaults()[-1]))
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
@@ -202,7 +208,7 @@ collapse_probes <- function(expression_matrix, annotation_table, method){
 }
 #' Recalculate DEGs 
 #' @inheritParams create_input
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_permutation
 #' 
 #' @details 
 #' Recalculate DEGs to either use adjusted or unadjusted p values 
@@ -225,7 +231,7 @@ recalculate_diff_genes <- function(MODifieR_input, use_adjusted){
 }
 #' Recalculate collapsing probes to genes
 #' @inheritParams create_input
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_permutation
 #' 
 #' @details 
 #' Recalculate the collapsing of probes to genes using on the \code{method} options
