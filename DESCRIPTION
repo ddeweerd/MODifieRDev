@@ -1,7 +1,7 @@
 Package: MODifieRDev
 Type: Package
 Title: MODifieRDev
-Version: 0.1.2
+Version: 0.1.3
 Author: Dirk de Weerd
 Maintainer: Dirk de Weerd <dirkdeweerd.work@gmail.com>
 Description: An implementation of a set of disease module inference methods bundled in one package.
