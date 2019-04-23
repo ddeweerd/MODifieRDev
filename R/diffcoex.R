@@ -125,7 +125,7 @@ diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
   fisher_exact_p_values <- do.call(rbind, fisher_exact_p_values)
   
   module_p_values <- cbind(module_p_values, fisher_exact_p_values)
-  module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values < pval_cutoff)])))
+  module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values[ ,1] < pval_cutoff)])))
   module_colors <- names(module_genes_list[which(module_p_values < pval_cutoff)])
   
   new_diffcoex_module <- construct_diffcoex_module(module_genes = module_genes,
