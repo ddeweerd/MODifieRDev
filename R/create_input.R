@@ -151,6 +151,7 @@ create_group_factor <- function(samples, group1_indici, group2_indici){
 #' \item{annotation_table}{A data.frame, the original annotation table used to annotate the probes}
 #' \item{group_indici}{A named list containing 2 numeric vectors. The names are the group labels and the values 
 #' are the group indici}
+#' @export
 create_custom_input_object <- function(diff_genes = NULL, limma_probe_table = NULL,
                                    annotated_exprs_matrix = NULL, expression_matrix = NULL, 
                                    annotation_table = NULL, group1_indici = NULL,

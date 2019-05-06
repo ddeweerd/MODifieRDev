@@ -40,7 +40,7 @@ diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
                      cluster_method = "average", cuttree_method = "hybrid",
                      cut_height = 0.996, deepSplit = 0, pamRespectsDendro = F,
                      minClusterSize = 20, cutHeight = 0.2, 
-                     pval_cutoff = 0.05, dataset_name = NULL, deg_cutoff = 0.05){
+                     pval_cutoff = 0.05, dataset_name = NULL){
   
   # Retrieve settings
   evaluated_args <- c(as.list(environment()))
@@ -119,12 +119,6 @@ diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
   
   rownames(null_distributions) <- colors
   
-  fisher_exact_p_values <- lapply(X = module_genes_list, FUN = color_module_exact_test, 
-                                  MODifieR_input = MODifieR_input, deg_cutoff = deg_cutoff)
-  
-  fisher_exact_p_values <- do.call(rbind, fisher_exact_p_values)
-  
-  module_p_values <- cbind(module_p_values, fisher_exact_p_values)
   module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values[ ,1] < pval_cutoff)])))
   module_colors <- names(module_genes_list[which(module_p_values < pval_cutoff)])
   

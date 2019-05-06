@@ -60,7 +60,7 @@ wgcna_module_constructor <- function(module_genes, info_table,
 #' @export
 wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
                         mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05, corType = "bicor",
-                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1, deg_cutoff = 0.05,
+                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1, 
                         dataset_name = deparse(substitute(MODifieR_input))){
  
   # Retrieve settings
@@ -131,10 +131,7 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
                                                settings = settings)
   
   modules_genes_list <- wgcna_get_all_module_genes(new_wgcna_module)
-  fisher_exact_p_values <- lapply(X = modules_genes_list, FUN = color_module_exact_test, 
-                                  MODifieR_input = MODifieR_input, deg_cutoff = deg_cutoff)
-  fisher_exact_p_values <- do.call(rbind, fisher_exact_p_values)
-  new_wgcna_module$correlation_to_trait_table <- cbind(new_wgcna_module$correlation_to_trait_table, fisher_exact_p_values)
+  
   return(new_wgcna_module)
 }
 
