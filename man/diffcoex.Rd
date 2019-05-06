@@ -4,11 +4,11 @@
 \alias{diffcoex}
 \title{DiffCoEx}
 \usage{
-diffcoex(MODifieR_input, beta = 6, cor_method = "spearman",
+diffcoex(MODifieR_input, beta = NULL, cor_method = "spearman",
   cluster_method = "average", cuttree_method = "hybrid",
   cut_height = 0.996, deepSplit = 0, pamRespectsDendro = F,
   minClusterSize = 20, cutHeight = 0.2, pval_cutoff = 0.05,
-  dataset_name = NULL)
+  dataset_name = NULL, deg_cutoff = 0.05)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
@@ -50,6 +50,8 @@ percentile and the maximum of the joining heights on the dendrogram.}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}
+
+\item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 }
 \value{
 diffcoex returns an object of class "MODifieR_module" with subclass "DiffCoEx". 

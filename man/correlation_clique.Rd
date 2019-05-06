@@ -5,26 +5,32 @@
 \title{Clique_correlation}
 \usage{
 correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
-  probabilityScaleFactor = 0.6, iteration = 50, signif_cutoff = 0.01,
-  deg_cutoff = 0.05, multiple_cores = F, dataset_name = NULL)
+  fraction_of_interactions = 0.4, iteration = 50,
+  clique_significance = 0.01, deg_cutoff = 0.05, multiple_cores = F,
+  n_cores = 3, tempfolder = NULL, dataset_name = NULL)
 }
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{ppi_network}{A PPi network as a 2 column dataframe}
+\item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 
 \item{frequency_cutoff}{Fraction of the number of times a gene should be present in it 
 iterations. Default is 0.5, meaning 50 procent of all iterations}
 
-\item{probabilityScaleFactor}{Scale for enriched cliques}
+\item{fraction_of_interactions}{Fraction of interactions from the original network that will be used
+in each iteration}
 
 \item{iteration}{Number of iterations to be performed}
 
-\item{signif_cutoff}{Cutoff for Fisher exact test for cliques}
+\item{clique_significance}{Cutoff for Fisher exact test for cliques}
 
 \item{deg_cutoff}{p-value cutoff for differentialy expressed genes}
 
 \item{multiple_cores}{parallelize iterations using number of cores on system -1?}
+
+\item{n_cores}{Number of cores to use if parallel processing}
+
+\item{tempfolder}{Folder where temporary files are stored}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}

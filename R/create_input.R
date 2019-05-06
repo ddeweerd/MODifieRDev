@@ -15,6 +15,7 @@
 #'@param expression boolean, calculate expression values?
 #'@param differential_expression boolean, calculate differentially expressed data?
 #'@param filter_expression boolean, remove 50 percent of the genes with lowest variance?
+#'@param use_adjusted boolean, use adjusted p value for differential expression analysis?
 #' @inheritParams WGCNA::collapseRows
 #' @details 
 #' The function creates an input object to be used in all disease module inference methods. Differentially
@@ -39,7 +40,17 @@
 #' are the group indici}
 #' @export
 create_input <- function (expression_matrix, annotation_table, group1_indici, group2_indici, group1_label, group2_label,
-                          expression = T,  differential_expression= T, method = "MaxMean", filter_expression = T){
+                          expression = T,  differential_expression= T, method = "MaxMean", filter_expression = T,
+                          use_adjusted = T){
+  
+  # Retrieve settings
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
@@ -55,24 +66,15 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
   annotation_table$IDENTIFIER <- as.character(annotation_table$IDENTIFIER)
   #Should expression data be generated? 
   if (expression == T){
-    
-    freq_probes <- table(annotation_table$PROBEID)
-    
-    probe_names <- names(freq_probes[freq_probes == 1])
-    
-    annotation_table_expression <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
-    
-    annotation_table_expression <- stats::na.omit(annotation_table_expression)
-    
-    collapsed_data <- WGCNA::collapseRows(datET = expression_matrix,
-                                         rowGroup =  annotation_table_expression$IDENTIFIER,
-                                         rowID =  annotation_table_expression$PROBEID, method = method)
-    
-    collapsed_exprs_mat <- collapsed_data$datETcollapsed
+    collapsed_exprs_mat <- collapse_probes(expression_matrix = expression_matrix, 
+                                           annotation_table = annotation_table, 
+                                           method = method)
   }
   #Same for expression data
   if (differential_expression == T){
     P.Value = NULL
+    adj.P.Val = NULL
+    
     group_factor <- create_group_factor(samples = colnames(expression_matrix),
                                         group1_indici = group1_indici,
                                         group2_indici = group2_indici)
@@ -81,9 +83,8 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
                                                expression_matrix = expression_matrix,
                                                probe_table = annotation_table)
     
-    diff_genes <- plyr::ddply(.data = , limma_probe_table,
-                             .variables = "IDENTIFIER", .fun = plyr::summarise, pvalue = min(P.Value))
-    
+    diff_genes <- summarize_probes(limma_probe_table = limma_probe_table, use_adjusted = use_adjusted)
+ 
     diff_genes <- stats::na.omit(diff_genes)
     colnames(diff_genes) <- c("gene", "pvalue")
     
@@ -92,10 +93,14 @@ create_input <- function (expression_matrix, annotation_table, group1_indici, gr
                                            limma_probe_table = limma_probe_table,
                                            annotated_exprs_matrix = collapsed_exprs_mat,
                                            expression_matrix = expression_matrix,
+                                           annotation_table = annotation_table,
                                            group1_indici = group1_indici,
                                            group2_indici = group2_indici,
                                            group1_label = group1_label,
-                                           group2_label = group2_label)
+                                           group2_label = group2_label,
+                                           settings)
+  
+  return (modifier_input)
  }
 #Calculate differentially expressed genes
 differential_expression <- function(group_factor, expression_matrix, probe_table){
@@ -126,6 +131,7 @@ create_group_factor <- function(samples, group1_indici, group2_indici){
 #' @param diff_genes A 2 two column data.frame where the first column are genes and the second column are p-values
 #' @param limma_probe_table A data.frame from \code{limma topTable} with added gene annotation
 #' @param annotated_exprs_matrix A matrix where the rows are genes and the columns samples.
+#' @param settings Settings used to generate the object. Used only internally by package.
 #' 
 #' @details 
 #' This function allows the creation of a generic input object with the same class as objects created by
@@ -145,11 +151,12 @@ create_group_factor <- function(samples, group1_indici, group2_indici){
 #' \item{annotation_table}{A data.frame, the original annotation table used to annotate the probes}
 #' \item{group_indici}{A named list containing 2 numeric vectors. The names are the group labels and the values 
 #' are the group indici}
+#' @export
 create_custom_input_object <- function(diff_genes = NULL, limma_probe_table = NULL,
                                    annotated_exprs_matrix = NULL, expression_matrix = NULL, 
                                    annotation_table = NULL, group1_indici = NULL,
                                    group2_indici = NULL, group1_label = NULL, 
-                                   group2_label = NULL){
+                                   group2_label = NULL, settings = NULL){
   
   group_indici <- list("group_1_indici" = group1_indici,
                        "group_2_indici" = group2_indici)
@@ -160,10 +167,90 @@ create_custom_input_object <- function(diff_genes = NULL, limma_probe_table = NU
                          "annotated_exprs_matrix" = annotated_exprs_matrix,
                          "expression_matrix" = expression_matrix,
                          "annotation_table" = annotation_table,
-                         "group_indici" = group_indici)
+                         "group_indici" = group_indici,
+                         "settings" = settings)
   class(modifier_input) <- c("MODifieR_input", "Expression")
   
   return (modifier_input)
   
   
+}
+
+summarize_probes <- function(limma_probe_table, use_adjusted){
+  adj.P.Val <- NULL
+  P.Value <- NULL
+  if (use_adjusted){
+    diff_genes <- plyr::ddply(.data = , limma_probe_table,
+                              .variables = "IDENTIFIER", .fun = plyr::summarise, pvalue = min(adj.P.Val))
+  }else{
+    diff_genes <- plyr::ddply(.data = , limma_probe_table,
+                              .variables = "IDENTIFIER", .fun = plyr::summarise, pvalue = min(P.Value))
+  }
+  return (diff_genes)
+}
+
+collapse_probes <- function(expression_matrix, annotation_table, method){
+  
+  freq_probes <- table(annotation_table$PROBEID)
+  
+  probe_names <- names(freq_probes[freq_probes == 1])
+  
+  annotation_table_expression <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
+  
+  annotation_table_expression <- stats::na.omit(annotation_table_expression)
+  
+  collapsed_data <- WGCNA::collapseRows(datET = expression_matrix,
+                                        rowGroup =  annotation_table_expression$IDENTIFIER,
+                                        rowID =  annotation_table_expression$PROBEID, method = method)
+  
+  collapsed_exprs_mat <- collapsed_data$datETcollapsed
+  
+  return (collapsed_exprs_mat)
+}
+#' Recalculate DEGs 
+#' @inheritParams create_input
+#' @inheritParams clique_sum_permutation
+#' 
+#' @details 
+#' Recalculate DEGs to either use adjusted or unadjusted p values 
+#' 
+#' @return 
+#' 
+#' MODifieR_input object
+#' 
+#' @seealso
+#' 
+#' \code{\link{create_input}}
+#' 
+#' @export
+recalculate_diff_genes <- function(MODifieR_input, use_adjusted){
+  MODifieR_input$diff_genes <- summarize_probes(limma_probe_table = MODifieR_input$limma_probe_table, 
+                                                use_adjusted = use_adjusted)
+  MODifieR_input$settings$use_adjusted <- use_adjusted
+  
+  return(MODifieR_input)
+}
+#' Recalculate collapsing probes to genes
+#' @inheritParams create_input
+#' @inheritParams clique_sum_permutation
+#' 
+#' @details 
+#' Recalculate the collapsing of probes to genes using on the \code{method} options
+#' 
+#' @return 
+#' 
+#' MODifieR_input object
+#' 
+#' @seealso
+#' 
+#' \code{\link{create_input}}
+#' 
+#' @export
+recalculate_expression <- function(MODifieR_input, method){
+  MODifieR_input$annotated_exprs_matrix <- collapse_probes(expression_matrix = MODifieR_input$expression_matrix, 
+                                                           annotation_table = MODifieR_input$annotation_table, 
+                                                           method = method)
+  MODifieR_input$settings$method <- method
+  MODifieR_input$settings$expression <- TRUE
+  return(MODifieR_input)
 }

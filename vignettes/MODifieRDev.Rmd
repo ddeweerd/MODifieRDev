@@ -78,7 +78,7 @@ ppi_head <- structure(list(entrez1 = c("5341", "23647", "8853", "5921", "50807",
 ```
 #Installation 
 
-MODifierDev requires Python 3 with additional Python libraries scipy, numpy and networkx. They are a standard part of Anaconda
+MODifierDev requires Python 3 with additional Python libraries scipy, sqlite3, numpy and networkx. They are a standard part of Anaconda
 so installing Anaconda is recommended. It can be downloaded here:
 
 [Anaconda](https://www.anaconda.com/)
@@ -104,7 +104,9 @@ install.packages(c("foreach",
                    "plyr", 
                    "parallel", 
                    "igraph", 
-                   "WGCNA"))
+                   "WGCNA",
+                   "RSQLite",
+                   "stackoverflow"))
 ```
 
 After that, the package can be installed from github:
@@ -125,7 +127,7 @@ To better understand complex diseases it is crucial to identify disease modules.
 module might not have a significant impact on the disease on its own. However, the cumulative
 effect of multiple low penetrance genes could play a major role in the pathogenesis of complex
 diseases. Network-based approaches could be key in detecting these low penetrance genes, which
-could potentially be novel biomarkers or therapeutic targets.
+could potentially be novel bio markers or therapeutic targets.
 
 Various disease module inference methods have been proposed earlier, using different approaches.
 Here, MODifieR is presented, an R package that bundles 8 different disease module inference
@@ -175,7 +177,7 @@ into genes.
 
 `group_indici`A named list containing 2 numeric vectors. The names are the group labels, for example "patient" and 
 "control". The values are the indici for each group, so the column indici for the expression matrix for 
-each of the aformentioned groups.
+each of the aforementioned groups.
 
 
 The input object contains all necessary input data for the methods.
@@ -230,24 +232,24 @@ ID, and the second column its corresponding annotation.
 
 - `group2_label` Same, but for group 2
 
-- `expression` A boolean value indicating if expression matrix data should be calculated.
+- `expression` A Boolean value indicating if expression matrix data should be calculated.
 
-- `differential expression` A boolean value indicating if DEGs data should be calculated.
+- `differential expression` A Boolean value indicating if DEGs data should be calculated.
 
 - `method` When collapsing the probes, the collapseRows() method from WGCNA is used. This argument
 determines the collapsing method to use. Please see the WGCNA documentation for more information. Options are:
     - _MaxMean_         Highest mean value
-    - _MinMean_         Lowest mean valie
+    - _MinMean_         Lowest mean value
     - _MaxRowVariance_  Highest variance
     - _absMaxMean_      Highest mean absolute value 
     - _absMinMean_      Lowest mean absolute value
     - _ME_              Eigenrow (first principal component)
 
 To serve as an example, example data has been included. There is an example expression matrix 
-from Gene Expression Omnibus (GEO) with accession number GSE4588. This dataset has 16 columns, 
+from Gene Expression Omnibus (GEO) with accession number GSE4588. This data set has 16 columns, 
 so 16 samples in total with 9 _systemic lupus erythematosus_ (SLE) patients and 7 healthy controls. 
 The matrix has 52307 rows, meaning 52307 probes. The indici for the healthy controls are 1 to 9, 
-and 10 to 16 make up the SLE patients. The expression matrix can be accesed using `expression_matrix`
+and 10 to 16 make up the SLE patients. The expression matrix can be accessed using `expression_matrix`
 
 We can inspect it using the head function:
 
@@ -255,7 +257,7 @@ We can inspect it using the head function:
 head(expression_matrix)
 ```
 
-The annotation for the probes is provided in a data.frame accesible through `probe_annotation`.
+The annotation for the probes is provided in a data.frame accessible through `probe_annotation`.
 The first column contains the probe ids where the second column holds the corresponding annotation,
 in this case ENTREZ gene identifiers.
 
@@ -338,7 +340,7 @@ ppi_head
 ```
 
 Since this is a tutorial on how to run the inference methods, we can change parameters for some inference 
-methods and also make the size of the input object a little smaller to reduce runtime.
+methods and also make the size of the input object a little smaller to reduce run time.
 
 Also, we can lower the number of genes in the annotated expression matrix:
 ```{r, eval=FALSE, echo=TRUE}
@@ -351,15 +353,52 @@ functions, they will be shortly discussed in separate subsections of the inferen
 
 ### Clique Sum
 
-Clique Sum in implementation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012]
-In MODifieR, the function can be called using `clique_sum()`
+There are two different versions of the Clique Sum algorithm implemented, `clique_sum_exact` and `clique_sum_permutation`, that differ in the method to determine if a clique is significantly enriched with DEGs. Obtaining cliques is done in a separate function, `build_clique_db`, that creates an SQLite database for the cliques. This is because obtaining cliques is a computationally intensive process, may clog the memory when using a large network and is static for each network. 
 
-In the example the number of iterations is reduced to 1000 (from 10000) to speed up the tutorial
+Both versions take in the file name of this database instead of a PPi network.
+
+#### build_clique_db
+
+This function is used to create a clique database. `db_folder` is the folder where database will be stored and `db_name` is the name of the database. .sqlite will be appended to the database name.
+
 ```{r, eval=FALSE, echo=TRUE}
-clique_sum_module <- clique_sum(MODifieR_input = MODifieR_input, 
-                                ppi_network = ppi_network, 
-                                n_iterations = 1000)
+build_clique_db(ppi_network = ppi_network, 
+                db_folder = "/folder/name/", 
+                db_name = "example")
 ```
+
+#### clique_sum_exact
+
+clique_sum_permutation is an implementation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012]
+
+Enrichment of cliques is determined by a one-sided Fisher exact test.
+
+
+In MODifieR, the function can be called using `clique_sum_exact()` and using the file name of the database created in the function `build_clique_db` as input for the db parameter.
+
+
+
+```{r, eval=FALSE, echo=TRUE}
+clique_sum_exact_module <- clique_sum_exact(MODifieR_input = MODifieR_input, 
+                                db = "folder/name/example.sqlite")
+```
+
+#### clique_sum_permutation
+
+clique_sum_permutation is a variation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012], [@Gustafsson2014]
+
+Enrichment of cliques is determined by comparing the sum of the -log 10 p-values for all genes in the clique and comparing that to a null distribution of cliques composed of random genes of the same size.
+
+
+In MODifieR, the function can be called using `clique_sum_permutation()` and using the file name of the database created in the function `build_clique_db` as input for the db parameter.
+
+
+
+```{r, eval=FALSE, echo=TRUE}
+clique_sum_permutation_module <- clique_sum_permutation(MODifieR_input = MODifieR_input, 
+                                 db = "folder/name/example.sqlite")
+```
+
 
 ### Correlation Clique
 
@@ -369,13 +408,11 @@ The correlation score is obtained by subtracting the Pearson correlation p-value
 $correlation score = 1 - Pearson\: p\: value$
 
 Subsequently, the correlation score is multiplied by 
-the correlation confidence and scaled with the scale factor to get the edge score:
-$edge score = \sqrt{(correlation score * confidence score  )} * scale\:factor$
+the correlation confidence.
+$edge score = \sqrt{(correlation score * confidence score  )} $
 
 When the edge scores are calculated the iterative part of the algorithm commences:
-All edge scores are compared to random variables from the uniform distribution between (0,1)
-only interactions where the edge score is higher than the random variable are used to construct
-a new PPi network. Then, maximal cliques are inferred from this new network.
+All edge scores are scaled to so that the mean of all edge scores is equal to the `fraction_of_iteration` parameter. Next, the newly scaled scores are compared to random variables from the uniform distribution between (0,1) and only interactions where the edge score is higher than the random variable are used to construct a new PPi network. Because the scores are scaled to `fraction_of_iteration`, this is the average fraction of interactions used for this new network. Then, maximal cliques are inferred from this new network.
 The cliques are tested for significant enrichment of DEGs by Fisher's exact test and
 the union of significant cliques is the disease module for this iteration.
 The final disease module will consist of genes that have been present in at least `frequency cutoff` iterations
@@ -401,7 +438,7 @@ correlation_clique_module <- correlation_adjust_cutoff(frequency_cutoff = 0.2,
                              correlation_module = correlation_clique_module)
 ```
 
-The second post-processing function is `correlation_set_module_size`. This function is intented to return a module
+The second post-processing function is `correlation_set_module_size`. This function is intended to return a module
 where the number of module genes is closest to `size`. In the example, we set the desired size to 10.  
 
 ```{r, eval=FALSE, echo=TRUE}
@@ -412,7 +449,7 @@ correlation_clique_module <- correlation_set_module_size(size = 10,
 ### DIAMoND
 
 A slightly modified version of the original DIAMOnD python script [@Ghiassian2015] is called from within R.
-The only change to the orginal algorithm is the option to include the seed genes to the module.
+The only change to the original algorithm is the option to include the seed genes to the module.
 
 In MODifieR, the function can be called using `diamond()`
 ```{r, eval=FALSE, echo=TRUE}
@@ -434,8 +471,8 @@ diamond_module <- diamond_remove_seed_genes(diamond_module = diamond_module)
 ### DiffCoEx
 
 DiffCoEx is a method for identifying correlation pattern changes, 
-which builds on the commonly used Weighted Gene Coexpression Network Analysis (WGCNA) 
-framework for coexpression analysis. [@Tesson2010]
+which builds on the commonly used Weighted Gene Co expression Network Analysis (WGCNA) 
+framework for co expression analysis. [@Tesson2010]
 
 In MODifieR, the function can be called using `diffcoex()`
 ```{r, eval=FALSE, echo=TRUE}
@@ -505,7 +542,7 @@ moda_module <- moda_change_specific_threshold(moda_module = moda_module,
 ### Module Discoverer
 
 This is an implementation of the single seed Module Discoverer algorithm. The code has been adapted 
-from the orignal code by Vlaic et al. [@Vlaic2018] For details, please see the paper referenced.
+from the original code by Vlaic et al. [@Vlaic2018] For details, please see the paper referenced.
 
 In MODifieR, the function can be called using `modulediscoverer()`
 ```{r, eval=FALSE, echo=TRUE}
@@ -521,7 +558,7 @@ Wgcna is an implementation of WGCNA [@WGCNA2008], [@WGCNA2012] that associates
 co-expression modules (denoted by color) to a trait. 
 Co-expression modules with an adjusted p-value < pval_cutoff will make up the final disease module.
 
-The algorithm infers co-expression modules from combined expression dataset from both group1 and group2. 
+The algorithm infers co-expression modules from combined expression data set from both group1 and group2. 
 Co-expression modules are then correlated to trait (group 1 ~ group 2).
 
 In MODifieR, the function can be called using `wgcna()`
@@ -534,7 +571,7 @@ wgnca_module <- wgcna(MODifieR_input = MODifieR_input)
 There are 4 functions available to post-process WGCNA module objects.
 
 The first one, `wgcna_adjust_significance`, allows to adjust the p-value for inclusion of co-expression modules into the final disease
-module. The boolean parameter `use_unadjusted` denotes if the adjusted (FDR correction) or unadjusted p-value 
+module. The Boolean parameter `use_unadjusted` denotes if the adjusted (FDR correction) or unadjusted p-value 
 is to be used. 
 ```{r, eval=FALSE, echo=TRUE}
 wgnca_module <- wgcna_adjust_significance(pval_cutoff = 0.1, 
@@ -542,7 +579,7 @@ wgnca_module <- wgcna_adjust_significance(pval_cutoff = 0.1,
                                           use_unadjusted = FALSE)
 ```
 
-With the second function `wgcna_get_modules_genes_by_sign` retuns a module object that either consists of co-expression colors
+With the second function `wgcna_get_modules_genes_by_sign` returns a module object that either consists of co-expression colors
 positively or negatively correlated to the trait. To get only colors positively correlated to trait in the resulting module,
 the `mode` parameter can be set to "p". To only get negatively correlated colors, use "n".
 
@@ -560,7 +597,7 @@ The return object is a list of MODifieR module objects.
 wgnca_module <- (wgcna_module = wgnca_module)
 ```
 
-The second post-processing function is `wgcna_set_module_size`. This function is intented to return a module
+The second post-processing function is `wgcna_set_module_size`. This function is intended to return a module
 where the number of module genes is closest to `size`. In the example, we set the desired size to 200. 
 
 ```{r, eval=FALSE, echo=TRUE}

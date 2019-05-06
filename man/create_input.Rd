@@ -7,7 +7,7 @@
 create_input(expression_matrix, annotation_table, group1_indici,
   group2_indici, group1_label, group2_label, expression = T,
   differential_expression = T, method = "MaxMean",
-  filter_expression = T)
+  filter_expression = T, use_adjusted = T)
 }
 \arguments{
 \item{expression_matrix}{Normalized expression matrix where the samples are columns and probes are rows}
@@ -44,6 +44,8 @@ Note: if method="ME", "Average" or "function", the output parameters "group2row"
 }
 
 \item{filter_expression}{boolean, remove 50 percent of the genes with lowest variance?}
+
+\item{use_adjusted}{boolean, use adjusted p value for differential expression analysis?}
 }
 \value{
 The function returns an object of class "MODifieR_input". The object is a named list containing the

@@ -11,7 +11,7 @@ mod_mcode(MODifieR_input, ppi_network, hierarchy = 1, vwp = 0.5,
 \arguments{
 \item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
 
-\item{ppi_network}{A PPi network as a 2 column dataframe}
+\item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 
 \item{hierarchy}{This parameter indicates how many hierarchy are included in the network, currently it can be \code{0}, \code{1} or \code{2}. Default value is \code{1}.}
 

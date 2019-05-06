@@ -7,6 +7,7 @@
 #' @import reticulate
 #' @import MODA
 #' @import AnnotationDbi
+#' @import RSQLite
 #' @importFrom plyr ddply summarise
 #' @importFrom stats as.dist fisher.test hclust median na.omit p.adjust phyper pnorm
 #' @importFrom stats prcomp pt qt quantile runif var
@@ -15,6 +16,7 @@
 #' @importFrom dynamicTreeCut printFlush
 #' @importFrom utils combn
 #' @importFrom graphics plot
+#' @importFrom stackoverflow match.call.defaults
 #' @useDynLib MODifieRDev
 
 #'@title Convert the module genes in a MODifieR_input object from official gene symbols to ENTREZ gene IDs
@@ -56,10 +58,22 @@ summary.MODifieR_module <- function(MODifieR_module){
  length(MODifieR_module$module_genes)
 }
 
-settings_function <- function(...) {
-  func_args <- sapply(match.call(expand.dots=TRUE)[-1], deparse)
-  func_args <- gsub(pattern = "\"", replacement = "", x = func_args)
-  return(func_args)
+
+get_diffgene_cutoff <- function(gene_fraction, MODifieR_module){
+  sort(MODifieR_module$diff_genes$pvalue)[round(length(MODifieR_module$diff_genes$gene) * gene_fraction)]
+}
+
+
+
+settings_function <- function(...){
+  evaluated_args <- c(as.list(environment()), list(...))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
+  return(settings)
 }
 #Generic subclass extractor
 extract_module_class <- function(MODifieR_module){
@@ -79,3 +93,17 @@ module_to_igraph <- function(MODifieR_module, ppi_network){
   ppi_graphed <- igraph::simplify(ppi_graphed, edge.attr.comb=list(Weight="sum","ignore"))
   ppi_graphed <- igraph::induced.subgraph(graph = ppi_graphed, vids = genes)
 }
+
+summary.MODifieR_input <- function(MODifieR_input){
+  MODifieR_input$diff_genes
+  
+  significance_levels <- c(0.05, 0.01, 0.001, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10)
+  
+  n_of_genes <- sapply(X = significance_levels, FUN = function(x)sum(MODifieR_input$diff_genes$pvalue < x))
+  
+  names(n_of_genes) <- significance_levels
+  
+  return(list(significant_genes = n_of_genes))
+  
+}
+

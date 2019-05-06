@@ -409,13 +409,7 @@ moduleDiscoverer.db.create_MD_object <- function(foregrounds=NULL, background=NU
 
   }
 
-  runCores = cores
-  if(parallel::detectCores()<=cores){
-     runCores = parallel::detectCores() - 1
-  }
-  cl <- parallel::makeCluster(runCores)
-  registerDoParallel(cl)
-
+ 
   relevantCliques <- rep(-1, total)
 
   processCliques <- function(x){
@@ -432,7 +426,17 @@ moduleDiscoverer.db.create_MD_object <- function(foregrounds=NULL, background=NU
     if(end>total){
       end=total
     }
-    select[counter:end] <- foreach(clique = database$uniqueCliqueId[counter:end], .combine = 'c') %dopar% {
+    
+    runCores = cores
+    if(parallel::detectCores()<=cores){
+      runCores = parallel::detectCores() - 1
+    }
+    cl <- parallel::makeCluster(runCores, outfile = "")
+    doParallel::registerDoParallel(cl)
+    parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
+    
+    
+    select[counter:end] <- foreach(clique = database$uniqueCliqueId[counter:end], .combine = 'c', .packages = "MODifieRDev") %dopar% {
       return(processCliques(clique))
     }
     counter <- counter+chunks
@@ -509,8 +513,8 @@ moduleDiscoverer.db.testForCliqueEnrichment <- function(database=NULL, input=NUL
   }
   cl <- parallel::makeCluster(runCores)
   registerDoParallel(cl)
-
-
+  
+  parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
   sets.n <- ceiling(length(relevantCliques)/chunks)
   sets <- list()
   for(i in 1:sets.n){
@@ -711,7 +715,7 @@ moduleDiscoverer.module.createModule <- function(result=NULL, module.name="Modul
     }
     cl <- parallel::makeCluster(runCores)
     registerDoParallel(cl)
-    
+    parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
     getEdges <- function(clique){
       return(t(combn(clique, m=2)))
     }

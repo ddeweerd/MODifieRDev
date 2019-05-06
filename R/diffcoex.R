@@ -1,7 +1,7 @@
 #' DiffCoEx
 #' 
 #' An implementation of the DiffCoEx co-expression based algorithm
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_exact
 #' @inheritParams flashClust::flashClust
 #' @inheritParams dynamicTreeCut::cutreeDynamic
 #' @inheritParams WGCNA::mergeCloseModules
@@ -36,24 +36,33 @@
 #' 
 #' @export
 
-diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
+diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
                      cluster_method = "average", cuttree_method = "hybrid",
                      cut_height = 0.996, deepSplit = 0, pamRespectsDendro = F,
                      minClusterSize = 20, cutHeight = 0.2, 
                      pval_cutoff = 0.05, dataset_name = NULL){
   
   # Retrieve settings
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
+  if (is.null(beta)){
+    beta <- get_softthreshold_value(datExpr = t(MODifieR_input$annotated_exprs_matrix), 
+                                    nSamples = ncol(MODifieR_input$annotated_exprs_matrix))
+    settings$beta <- beta
+  }
   #Get relevant input data from input object 
   dataset1 <- t(MODifieR_input$annotated_exprs_matrix[,MODifieR_input$group_indici[[1]]])
   dataset2 <- t(MODifieR_input$annotated_exprs_matrix[,MODifieR_input$group_indici[[2]]])
-
+  
   AdjMatC1<-sign(stats::cor(dataset1, method = cor_method))*(stats::cor(dataset1, method = cor_method))^2
   AdjMatC2<-sign(stats::cor(dataset2, method = cor_method))*(stats::cor(dataset2, method = cor_method))^2
   diag(AdjMatC1)<-0
@@ -79,8 +88,8 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
   
   #the next step merges clusters which are close (see WGCNA package documentation)
   colorh1C1C2 <- WGCNA::mergeCloseModules(rbind(dataset1,dataset2),
-                                   dynamicColorsHybridC1C2,
-                                   cutHeight=cutHeight)$color
+                                          dynamicColorsHybridC1C2,
+                                          cutHeight=cutHeight)$color
   
   color_vector <- rownames(MODifieR_input$annotated_exprs_matrix)
   
@@ -96,18 +105,28 @@ diffcoex <- function(MODifieR_input, beta = 6, cor_method = "spearman",
   #Name this list according to color
   names(module_genes_list) <- colors
   
-  module_p_values <- sapply(X = colors, FUN = diffcoex_get_p_values, dataset1 = dataset1, 
+  pval_null_distr <- lapply(X = colors, FUN = diffcoex_get_p_values, dataset1 = dataset1, 
                             dataset2 = dataset2, 
                             group1_indici = MODifieR_input$group_indici[[1]], 
                             color_vector = color_vector, cor_method = cor_method)
   
-  module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values < pval_cutoff)])))
+  module_p_values <- cbind(sapply(X = pval_null_distr, function(x){x$emp_pvalue}),
+                           sapply(X = pval_null_distr, function(x){x$z_score}))
+  
+  null_distributions <- t(sapply(X = pval_null_distr, function(x)x$null_distribution))
+  
+  colnames(module_p_values) <- c("p_values", "z_scores")
+  
+  rownames(null_distributions) <- colors
+  
+  module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values[ ,1] < pval_cutoff)])))
   module_colors <- names(module_genes_list[which(module_p_values < pval_cutoff)])
   
   new_diffcoex_module <- construct_diffcoex_module(module_genes = module_genes,
                                                    module_colors = module_colors,
                                                    module_p_values = module_p_values,
                                                    color_vector = color_vector,
+                                                   null_distributions = null_distributions,
                                                    settings = settings)
   
   return (new_diffcoex_module)
@@ -119,13 +138,14 @@ aggregate_colors <- function(color, genes, color_vector){
 }
 #Module constructor function
 construct_diffcoex_module <- function(module_genes, module_colors, module_p_values,
-                                      color_vector, settings){
-
+                                      color_vector, null_distributions, settings){
+  
   
   new_diffcoex_module <- list("module_genes" =  module_genes,
                               "module_colors" = module_colors,
                               "module_p_values" = module_p_values,
                               "color_vector" =  color_vector,
+                              "null_distributions" = null_distributions,
                               "settings" = settings)
   
   class(new_diffcoex_module) <- c("MODifieR_module", "DiffCoEx")
@@ -154,9 +174,10 @@ diffcoex_split_module_by_color <- function(diffcoex_module){
   for (color in diffcoex_module$module_colors){
     module_genes <- unname(color_vector[which(names(color_vector) == color)])
     module_list[[color]] <- construct_diffcoex_module(module_genes = module_genes,
-                                             module_colors = color,
-                                             color_vector = color_vector,
-                                             settings = diffcoex_module$settings)
+                                                      module_colors = color,
+                                                      color_vector = color_vector,
+                                                      module_p_values = diffcoex_module$module_p_values,
+                                                      settings = diffcoex_module$settings)
   }
   return(module_list)
 }
@@ -165,9 +186,11 @@ diffcoex_get_p_values <- function(color, dataset1, dataset2, group1_indici, colo
   
   scaled_combined_dataset <- rbind(scale(dataset1),scale(dataset2))
   
-  permute_modules(color1 = color, color2 = color, 
-                  dataset = scaled_combined_dataset, n_samples = length(group1_indici), 
-                  color_vector = color_vector, sample_labels = group1_indici, cor_method = cor_method)
+  pval_null_distr <- permute_modules(color1 = color, color2 = color, 
+                                     dataset = scaled_combined_dataset, n_samples = length(group1_indici), 
+                                     color_vector = color_vector, sample_labels = group1_indici, cor_method = cor_method)
+  
+  return(pval_null_distr)
 }
 
 permute_modules <- function(color1, color2, dataset, n_samples, color_vector, sample_labels, cor_method){
@@ -185,7 +208,9 @@ permute_modules <- function(color1, color2, dataset, n_samples, color_vector, sa
   
   emp_pvalue <- sum(null_distribution >= module_score) / 1000
   
-  return(emp_pvalue)
+  z_score <- (module_score - mean(null_distribution)) / sd(null_distribution)
+  
+  return(list("emp_pvalue" = emp_pvalue, "z_score" = z_score, "null_distribution" =  null_distribution))
 }
 
 module_dispersion <- function(color1, color2, dataset, n_samples, color_vector, sample_labels = NULL, cor_method){
@@ -215,4 +240,26 @@ module_dispersion <- function(color1, color2, dataset, n_samples, color_vector, 
     
   }
   
+}
+
+color_module_exact_test <- function(color_module, MODifieR_input, deg_cutoff){
+  all_genes <- intersect(MODifieR_input$diff_genes$gene, 
+                         rownames(MODifieR_input$annotated_exprs_matrix))
+  diff_genes <- MODifieR_input$diff_genes[MODifieR_input$diff_genes$gene %in% all_genes, ]
+  
+  deg_genes <- diff_genes$gene[diff_genes$pvalue < deg_cutoff]
+  non_deg_genes <- diff_genes$gene[diff_genes$pvalue >= deg_cutoff]
+  
+  color_module <- intersect(all_genes, color_module)
+  co_expression_enrichment <- c(
+    sum(color_module %in% deg_genes),
+    sum(color_module %in% non_deg_genes),
+    length(deg_genes) - sum(color_module %in% deg_genes),
+    length(non_deg_genes) - sum(color_module %in% non_deg_genes))
+  
+  expected_degs <- (length(deg_genes) / length(all_genes)) * length(color_module)
+  observed_degs <- sum(color_module %in% deg_genes)
+  
+  return(c("Fisher_pval" = module_exact_test <- MODifieRDev:::fisher_pval(co_expression_enrichment), 
+           "expected_DEGs" = expected_degs, "Observed_DEGs" = observed_degs))
 }

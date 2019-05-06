@@ -21,7 +21,7 @@ link-citations: TRUE
 
 #Installation 
 
-MODifierDev requires Python 3 with additional Python libraries scipy, numpy and networkx. They are a standard part of Anaconda
+MODifierDev requires Python 3 with additional Python libraries scipy, numpy, sqlite3 and networkx. They are a standard part of Anaconda
 so installing Anaconda is recommended. It can be downloaded here:
 
 [Anaconda](https://www.anaconda.com/)
@@ -47,7 +47,9 @@ install.packages(c("foreach",
                    "reticulate", 
                    "plyr", 
                    "parallel", 
-                   "igraph", 
+                   "igraph",
+                   "stackoverflow",
+                   "RSQLite",
                    "WGCNA"))
 ```
 
@@ -371,15 +373,43 @@ functions, they will be shortly discussed in separate subsections of the inferen
 
 ### Clique Sum
 
-Clique Sum in implementation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012]
-In MODifieR, the function can be called using `clique_sum()`
+There are two different versions of the Clique Sum algorithm implemented, `clique_sum_exact` and `clique_sum_permutation`, that differ in the method to determine if a clique is significantly enriched with DEGs. Obtaining cliques is done in a separate function, `create_clique_db`, that creates a SQLite database for the cliques. This is because obtaining cliques is a computationally intersive process, may clog the memory when using a large network and is static for each network. 
 
-In the example the number of iterations is reduced to 1000 (from 10000) to speed up the tutorial
+Both versions take in the filename of this database instead of a PPi network.
+
+#### create_clique_db
+
+
+#### clique_sum_exact
+
+clique_sum_permutation is an implementation of the clique-based disease module inference method proposed by Barrenäs et al. [@Barrenas2012]
+
+Enrichment of cliques is determined by a one-sided Fisher exact test.
+
+
+In MODifieR, the function can be called using `clique_sum_exact()`
+
+
 
 ```r
-clique_sum_module <- clique_sum(MODifieR_input = MODifieR_input, 
-                                ppi_network = ppi_network, 
-                                n_iterations = 1000)
+clique_sum_exact_module <- clique_sum_exact(MODifieR_input = MODifieR_input, 
+                                db = "clique_db.sqlite")
+```
+
+#### clique_sum_permutation
+
+clique_sum_permutation is an implementation of the clique-based disease module inference method proposed by Barrenäs et al. [@Gustafsson2014]
+
+Enrichment of cliques is determined by comparing the sum of the -log 10 p-values for all genes in the clique and comparing that to a null distribution of cliques composed of random genes of the same size.
+
+
+In MODifieR, the function can be called using `clique_sum_permutation()`
+
+
+
+```r
+clique_sum_permutation_module <- clique_sum_permutation(MODifieR_input = MODifieR_input, 
+                                db = "clique_db.sqlite")
 ```
 
 ### Correlation Clique

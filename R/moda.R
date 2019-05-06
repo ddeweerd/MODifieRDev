@@ -1,7 +1,7 @@
 #' MODA
 #'
 #' An implementation of MODA co-expression based algorithm.
-#' @inheritParams clique_sum
+#' @inheritParams clique_sum_permutation
 #' @inheritParams MODA::CompareAllNets
 #' @inheritParams MODA::WeightedModulePartitionHierarchical
 #' @param group_of_interest Numerical value denoting which group contains the condition of interest (1 or 2) 
@@ -43,10 +43,15 @@ moda <- function(MODifieR_input,
                    cutmethod = "Density",
                    specificTheta = 0.1, conservedTheta = 0.1,
                    dataset_name = NULL, group_of_interest){
+ 
   # Retrieve settings
-  default_args <- formals()
-  user_args <- as.list(match.call(expand.dots = T)[-1])
-  settings <- c(user_args, default_args[!names(default_args) %in% names(user_args)])
+  evaluated_args <- c(as.list(environment()))
+  settings <- as.list(stackoverflow::match.call.defaults()[-1])
+  replace_args <- names(settings)[!names(settings) %in% unevaluated_args]
+  for (argument in replace_args) {
+    settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
+                                                                              argument)]]
+  }
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
