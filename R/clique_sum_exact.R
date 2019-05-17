@@ -2,7 +2,6 @@
 #'
 #' An implementation of the clique-based disease module inference method proposed by Barrenäs et al. 
 #' @inheritParams clique_sum_permutation
-#' @param MODifieR_input A MODifieR input object produced by \code{\link{create_input}} function
 #' @param db A clique database created by \code{\link{build_clique_db}} 
 #' @param clique_significance p-value for cliques to be considered significant
 #' @param deg_cutoff  p-value cutoff for differentialy expressed genes
@@ -25,6 +24,8 @@
 #' \cite{Barrenäs F, Chavali S, Alves AC, et al. Highly interconnected genes in 
 #' disease-specific networks are enriched for disease-associated polymorphisms. 
 #' Genome Biology. 2012;13(6):R46. doi:10.1186/gb-2012-13-6-r46.}
+#' 
+#' @author Dirk de Weerd
 #' @export
 clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
                              deg_cutoff = 0.05, min_clique_size = 5, min_deg_in_clique = 3, 
@@ -90,7 +91,7 @@ clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
     module_genes <- NULL
   }else{
     if (multiple_cores == T){
-      cl <- parallel::makeCluster(n_cores, outfile = "")
+      cl <- parallel::makeCluster(n_cores)
       doParallel::registerDoParallel(cl)
       parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
       module_genes <- foreach(i = 1:length(chunk_table),.combine = 'append', .packages = "MODifieRDev" ) %dopar% {

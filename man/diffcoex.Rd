@@ -11,7 +11,7 @@ diffcoex(MODifieR_input, beta = NULL, cor_method = "spearman",
   dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{beta}{User-defined soft thresholding power
 For method=="tree" it defaults to 0.99. For method=="hybrid" it 

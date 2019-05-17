@@ -23,4 +23,7 @@ Array annotation data (chip hgu133plus2). R package version 3.2.3.}
 
 \code{\link{ppi_network}}
 }
+\author{
+Dirk de Weerd
+}
 \keyword{datasets}

@@ -18,6 +18,9 @@
 #' and the names are the gene names}
 #' \item{gene_by_method}{A table containing the gene frequencies by combination of methods}
 #' \item{settings}{A named list containing the parameters used in generating the object}
+#' 
+#' @author Dirk de Weerd
+#' 
 #'@export
 create_module_set <- function(min_frequency, module_list){
   

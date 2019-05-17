@@ -22,3 +22,6 @@ Every significant color in the module will be its own \code{wgcna} module object
 \seealso{
 \code{\link{wgcna}}
 }
+\author{
+Dirk de Weerd
+}

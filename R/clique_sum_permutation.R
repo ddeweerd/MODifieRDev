@@ -3,7 +3,7 @@
 #' An implementation of the clique-based disease module inference method proposed by Gustafsson et al. 
 #'
 #' @inheritParams clique_sum_exact
-#' @param MODifieR_input A MODifieR input object produced by \code{\link{create_input}} function
+#' @param MODifieR_input A MODifieR input object produced by one of the \code{create_input} functions
 #' @param n_iterations Number of iterations to be performed for the permutation based p-value
 #' @param clique_significance p-value for cliques to be considered significant
 #' @param min_clique_size Minimal size for cliques 
@@ -23,6 +23,8 @@
 #' \cite{Gustafsson, M., Edström, M., Gawel, D., Nestor, C. E., Wang, H., Zhang, H., … Benson, M. (2014). 
 #' Integrated genomic and prospective clinical studies show the importance of modular pleiotropy for disease susceptibility, 
 #' diagnosis and treatment. Genome Medicine, 6(2), 17. https://doi.org/10.1186/gm534}
+#' 
+#' @author Dirk de Weerd
 #' @export
 clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, clique_significance = 0.01, 
                                    min_clique_size = 5,  multiple_cores = T, n_cores = 4, dataset_name = NULL){
@@ -80,7 +82,7 @@ clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, cli
     module_genes = NULL
   }else{
     if (multiple_cores == T){
-      cl <- parallel::makeCluster(n_cores, outfile = "")
+      cl <- parallel::makeCluster(n_cores)
       doParallel::registerDoParallel(cl)
       parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
       

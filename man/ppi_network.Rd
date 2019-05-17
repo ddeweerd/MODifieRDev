@@ -25,4 +25,7 @@ column 1 contains the first gene, column 2 the second. The third column is the c
 
 \code{\link{expression_matrix}}
 }
+\author{
+Dirk de Weerd
+}
 \keyword{datasets}

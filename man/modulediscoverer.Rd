@@ -9,7 +9,7 @@ modulediscoverer(MODifieR_input, ppi_network, permutations = 10000,
   dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 

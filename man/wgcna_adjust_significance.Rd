@@ -26,3 +26,6 @@ This function allows to adjust the significance cutoff for a \code{wgcna} module
 \seealso{
 \code{\link{wgcna}}
 }
+\author{
+Dirk de Weerd
+}

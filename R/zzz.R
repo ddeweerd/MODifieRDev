@@ -8,7 +8,7 @@ scipy <- NULL
 sqlite <- NULL
 
 unevaluated_args <- c("MODifieR_input", "ppi_network", "module_list", 
-                      "expression_matrix", "annotation_table")
+                      "expression_matrix", "annotation_table", "count_matrix")
 
 .onLoad <- function(libname, pkgname){
   nx <<- reticulate::import(module = "networkx", as = "nx", delay_load = T)

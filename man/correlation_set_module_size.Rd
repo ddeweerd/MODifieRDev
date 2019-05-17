@@ -25,3 +25,6 @@ in a \code{correlation_clique} module object closest to \code{size}
 \seealso{
 \code{\link{correlation_clique}}
 }
+\author{
+Dirk de Weerd
+}

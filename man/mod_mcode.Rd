@@ -9,7 +9,7 @@ mod_mcode(MODifieR_input, ppi_network, hierarchy = 1, vwp = 0.5,
   deg_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 
@@ -52,4 +52,7 @@ large protein interaction networks. BMC Bioinformatics, 4(1), 2. \url{https://do
 }
 \seealso{
 \url{https://github.com/cran/ProNet}
+}
+\author{
+DIrk de Weerd
 }

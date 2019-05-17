@@ -117,7 +117,7 @@ diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
   
   colnames(module_p_values) <- c("p_values", "z_scores")
   
-  rownames(null_distributions) <- colors
+  rownames(module_p_values) <- colors
   
   module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values[ ,1] < pval_cutoff)])))
   module_colors <- names(module_genes_list[which(module_p_values < pval_cutoff)])

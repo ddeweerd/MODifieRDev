@@ -9,7 +9,7 @@ clique_sum_exact(MODifieR_input, db, clique_significance = 0.01,
   multiple_cores = T, n_cores = 4, dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{db}{A clique database created by \code{\link{build_clique_db}}}
 
@@ -47,4 +47,7 @@ Clique_sum_exact finds cliques of at least size \code{min_clique_size} that are
 \cite{Barrenäs F, Chavali S, Alves AC, et al. Highly interconnected genes in 
 disease-specific networks are enriched for disease-associated polymorphisms. 
 Genome Biology. 2012;13(6):R46. doi:10.1186/gb-2012-13-6-r46.}
+}
+\author{
+Dirk de Weerd
 }

@@ -28,6 +28,10 @@
 #' A DIseAse MOdule Detection (DIAMOnD) Algorithm Derived from a Systematic Analysis of 
 #' Connectivity Patterns of Disease Proteins in the Human Interactome. PLoS Computational 
 #' Biology, 11(4), 1–21. \url{https://doi.org/10.1371/journal.pcbi.1004120}}
+#' 
+#' @author Dirk de Weerd
+#' 
+#' 
 #' @export
 diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_genes = 200, seed_weight = 10,
                                include_seed = FALSE, dataset_name = NULL){
@@ -53,7 +57,7 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
   ppi_network <- as.matrix(ppi_network)
   storage.mode(ppi_network) <- "character"
   ppi_graph <- to_graph_py(as.matrix(ppi_network), nx$Graph())
-  #Run python scri[t]
+  #Run python script
   raw_module_py <- diamond_core(ppi_graph, diamond_set, as.integer(n_output_genes), as.integer(seed_weight))
   #Extract data
   raw_module <- raw_module_py[[1]]
@@ -75,7 +79,7 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
                              "added_genes" = added_genes,
                              "settings" = settings)
   
-  class(new_diamond_module) <- c("MODifieR_module", "DIAMOnD")
+  class(new_diamond_module) <- c("MODifieR_module", "DIAMOnD", class(MODifieR_input)[3])
   
   return(new_diamond_module)
 }

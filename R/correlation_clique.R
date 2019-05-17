@@ -35,12 +35,15 @@
 #' \item{module_genes}{A character vector containing the genes in the final module}
 #' \item{frequency_table}{A table containing the fraction of times the genes were present in an iteration module}
 #' \item{settings}{A named list containing the parameters used in generating the object}
+#' 
+#' @author Dirk de Weerd
+#' 
 #' @export
 correlation_clique <- function(MODifieR_input, ppi_network,
                                frequency_cutoff = .5, 
                                fraction_of_interactions = 0.4,
                                iteration = 50, clique_significance = 0.01, 
-                               deg_cutoff = 0.05, multiple_cores = F, n_cores = 3, tempfolder = NULL,
+                               deg_cutoff = 0.05, multiple_cores = F, n_cores = 3, 
                                dataset_name = NULL){
   
   # Retrieve settings
@@ -84,13 +87,13 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   
   module_list <- list()
   if (multiple_cores){
-    cl <- parallel::makeCluster(n_cores, outfile = "")
+    cl <- parallel::makeCluster(n_cores)
     doParallel::registerDoParallel(cl)
     parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
     #module_list <- foreach(i=1:iteration, .combine = list, .export = ls(.GlobalEnv)) %do% {
     #Compare computed scores to random scores
     
-    module_list <- parLapply(cl = cl, X = 1:iteration, fun = perform_iterations, pval_score, springConnection, genes, clique_significance, deg_cutoff, tempfolder)
+    module_list <- parLapply(cl = cl, X = 1:iteration, fun = perform_iterations, pval_score, springConnection, genes, clique_significance, deg_cutoff)
     parallel::stopCluster(cl) # stop the cluster
     
     #}
@@ -101,7 +104,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
       #Compare computed scores to random scores 
       
       
-      module_list[[i]] <- perform_iterations(iteration_n = i, pval_score = pval_score, springConnection = springConnection, genes = genes, clique_significance = clique_significance, deg_cutoff = deg_cutoff, tempfolder = tempfolder)
+      module_list[[i]] <- perform_iterations(iteration_n = i, pval_score = pval_score, springConnection = springConnection, genes = genes, clique_significance = clique_significance, deg_cutoff = deg_cutoff)
     }
   }
   #Get the frequency of each gene that has been present in a module, expressed in fraction
@@ -118,12 +121,11 @@ correlation_clique <- function(MODifieR_input, ppi_network,
 }
 
 
-perform_iterations <- function(iteration_n, pval_score, springConnection, genes, clique_significance, deg_cutoff, tempfolder){
-  print(iteration_n)
+perform_iterations <- function(iteration_n, pval_score, springConnection, genes, clique_significance, deg_cutoff){
   
   to_pass <- pval_score > runif(n = length(pval_score))
   
-  clique_file_list <- create_clique_file(adjacency_matrix = springConnection[to_pass, ], genes = genes, tempfolder = tempfolder) 
+  clique_file_list <- create_clique_file(adjacency_matrix = springConnection[to_pass, ], genes = genes) 
   
   module_list <- process_clique(clique_file = clique_file_list$tempfile, genes = clique_file_list$tr_genes, 
                                 graphed_ppi = clique_file_list$graphed_ppi, clique_significance = clique_significance,
@@ -158,6 +160,8 @@ calculate_correlation <- function(row, expression_matrix){
 #' 
 #' \code{\link{correlation_clique}}
 #' 
+#' @author Dirk de Weerd
+#' 
 #' @export
 correlation_adjust_cutoff <- function(frequency_cutoff, correlation_module){
   
@@ -190,6 +194,8 @@ correlation_adjust_cutoff <- function(frequency_cutoff, correlation_module){
 #' 
 #' \code{\link{correlation_clique}}
 #' 
+#' @author Dirk de Weerd
+#' 
 #' @export
 correlation_set_module_size <- function(size, correlation_module){
   frequency_cutoff <- as.numeric(names(which.min(abs(size - table(correlation_module$frequency_table)))))
@@ -212,9 +218,8 @@ construct_correlation_module <- function(module_genes, frequency_table, settings
   
 }
 
-create_clique_file <- function(adjacency_matrix, genes, tempfolder){
-  print("writing clique")
-  clique_file <- paste0(tempfolder, "/", paste(sample(x = LETTERS, size = 10), collapse = ""), ".txt")
+create_clique_file <- function(adjacency_matrix, genes){
+  clique_file <- tempfile()
   
   g <- igraph::simplify(igraph::graph.data.frame(adjacency_matrix, directed = F))
   
@@ -224,14 +229,13 @@ create_clique_file <- function(adjacency_matrix, genes, tempfolder){
   names(genes) <- sapply(X = names(genes), FUN = entrez_to_index, name_table = name_table)
   
   igraph::max_cliques(graph = g, file = clique_file)
-  print("finished writing clique file")
+
   return(list(tempfile = clique_file, graphed_ppi = g, name_table = name_table, tr_genes = genes))
 }
 
 
 process_clique <- function(clique_file, genes, graphed_ppi, clique_significance, deg_cutoff, name_table) {
-  print("start processing clique file")
-  
+ 
   deg_genes <- genes[genes < deg_cutoff]
   
   non_deg_genes <- genes[genes >= deg_cutoff]
@@ -264,17 +268,15 @@ process_clique <- function(clique_file, genes, graphed_ppi, clique_significance,
     significant_cliques <- unique(c(significant_cliques, unlist(clique_genes[significant_vector])))
   }
   
-  print(significant_cliques)[1:10]
   
   significant_cliques <- unname(unique(unlist(sapply(X = significant_cliques, 
                                                      FUN = index_to_entrez, 
                                                      name_table = name_table))))
   
-  
   close(con)
   
   file.remove(clique_file)
-  print("finished processing clique file")
+  
   return (unique(significant_cliques))
   
 }

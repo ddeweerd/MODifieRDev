@@ -16,3 +16,6 @@ s is the sums of rows in Jaccard index matrix. See supplementary file.}
 \description{
 Change
 }
+\author{
+Dirk de Weerd
+}

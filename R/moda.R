@@ -38,11 +38,14 @@
 #' @references 
 #' \cite{Li D, Brown JB, Orsini L, Pan Z, Hu G, He S (2016). MODA: MODA: 
 #' MOdule Differential Analysis for weighted gene co-expression network. R package version 1.6.0}
+#' 
+#' @author Dirk de Weerd
+#' 
 #' @export
 moda <- function(MODifieR_input,
-                   cutmethod = "Density",
+                   cutmethod = "Density", group_of_interest,
                    specificTheta = 0.1, conservedTheta = 0.1,
-                   dataset_name = NULL, group_of_interest){
+                   dataset_name = NULL){
  
   # Retrieve settings
   evaluated_args <- c(as.list(environment()))
@@ -91,6 +94,8 @@ moda <- function(MODifieR_input,
 #'Change 
 #'@inheritParams MODA::CompareAllNets
 #'@param moda_module  A \code{MODifieR_input} object created by \code{\link{moda}}
+#'
+#'@author Dirk de Weerd
 #'
 #'@export
 moda_change_specific_threshold <- function(moda_module, specificTheta){
