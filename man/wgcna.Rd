@@ -4,14 +4,17 @@
 \alias{wgcna}
 \title{An implementation of WGCNA to correlate coexpression modules to disease}
 \usage{
-wgcna(MODifieR_input, minModuleSize = 30, deepSplit = 2,
-  pamRespectsDendro = F, mergeCutHeight = 0.1, numericLabels = T,
-  pval_cutoff = 0.05, corType = "bicor", maxBlockSize = 5000,
-  TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1,
+wgcna(MODifieR_input, group_of_interest, minModuleSize = 30,
+  deepSplit = 2, pamRespectsDendro = F, mergeCutHeight = 0.1,
+  numericLabels = T, pval_cutoff = 0.05, corType = "bicor",
+  maxBlockSize = 5000, TOMType = "signed", saveTOMs = T,
+  maxPOutliers = 0.1,
   dataset_name = deparse(substitute(MODifieR_input)))
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
+
+\item{group_of_interest}{Numerical value denoting which group contains the condition of interest (1 or 2)}
 
 \item{minModuleSize}{ minimum module size for module detection. See
 \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.  }
@@ -101,4 +104,7 @@ BMC Bioinformatics 2008, 9:559 \url{doi:10.1186/1471-2105-9-559} }
 
 \cite{Peter Langfelder, Steve Horvath (2012). Fast R Functions for Robust Correlations and Hierarchical Clustering. J
 ournal of Statistical Software, 46(11), 1-17. URL \url{http://www.jstatsoft.org/v46/i11/}}
+}
+\author{
+Dirk de Weerd
 }

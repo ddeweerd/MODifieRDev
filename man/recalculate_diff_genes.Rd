@@ -7,7 +7,7 @@
 recalculate_diff_genes(MODifieR_input, use_adjusted)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{use_adjusted}{boolean, use adjusted p value for differential expression analysis?}
 }
@@ -22,4 +22,7 @@ Recalculate DEGs to either use adjusted or unadjusted p values
 }
 \seealso{
 \code{\link{create_input}}
+}
+\author{
+Dirk de Weerd
 }

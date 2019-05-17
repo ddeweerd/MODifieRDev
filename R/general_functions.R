@@ -8,6 +8,7 @@
 #' @import MODA
 #' @import AnnotationDbi
 #' @import RSQLite
+#' @import edgeR
 #' @importFrom plyr ddply summarise
 #' @importFrom stats as.dist fisher.test hclust median na.omit p.adjust phyper pnorm
 #' @importFrom stats prcomp pt qt quantile runif var
@@ -16,6 +17,8 @@
 #' @importFrom dynamicTreeCut printFlush
 #' @importFrom utils combn
 #' @importFrom graphics plot
+#' @importFrom DESeq2 varianceStabilizingTransformation
+#' @importFrom preprocessCore normalize.quantiles
 #' @importFrom stackoverflow match.call.defaults
 #' @useDynLib MODifieRDev
 
@@ -79,7 +82,7 @@ settings_function <- function(...){
 extract_module_class <- function(MODifieR_module){
   class(MODifieR_module)[2]
 }
-
+#'@export
 plot.MODifieR_module <-function(MODifieR_module, ppi_network){
   ppi_graphed <- module_to_igraph(MODifieR_module = MODifieR_module, ppi_network = ppi_network)
   deg <- degree(ppi_graphed, mode="all")

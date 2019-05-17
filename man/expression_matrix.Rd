@@ -9,8 +9,8 @@
 expression_matrix
 }
 \description{
-An example dataset from GEO (accession number GSE4588) containing systemic lupus erythematosus patients
-and healthy controls
+An example micorarray dataset from GEO (accession number GSE4588) containing
+systemic lupus erythematosus patients and healthy controls
 }
 \details{
 The expression matrix contains 16 microarray samples. Columns 1:9 are healthy controls,
@@ -23,5 +23,8 @@ columns 10:16 are SLE patients. There are 52307 probes in this dataset.
 \code{\link{probe_annotation}}
 
 \code{\link{ppi_network}}
+}
+\author{
+Dirk de Weerd
 }
 \keyword{datasets}

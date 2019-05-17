@@ -7,7 +7,7 @@
 recalculate_expression(MODifieR_input, method)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{method}{character string for determining which method is used to choose a probe among
 exactly 2 corresponding rows or when connectivityBasedCollapsing=FALSE. These are the options:
@@ -33,4 +33,7 @@ Recalculate the collapsing of probes to genes using on the \code{method} options
 }
 \seealso{
 \code{\link{create_input}}
+}
+\author{
+Dirk de Weerd
 }

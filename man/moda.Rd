@@ -4,14 +4,16 @@
 \alias{moda}
 \title{MODA}
 \usage{
-moda(MODifieR_input, cutmethod = "Density", specificTheta = 0.1,
-  conservedTheta = 0.1, dataset_name = NULL, group_of_interest)
+moda(MODifieR_input, cutmethod = "Density", group_of_interest,
+  specificTheta = 0.1, conservedTheta = 0.1, dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{cutmethod}{cutting the dendrogram based on maximal average Density 
 or Modularity}
+
+\item{group_of_interest}{Numerical value denoting which group contains the condition of interest (1 or 2)}
 
 \item{specificTheta}{the threshold to define min(s)+specificTheta, 
 less than which is considered as condition specific module. 
@@ -23,8 +25,6 @@ s is the sums of rows in Jaccard index matrix. See supplementary file.}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}
-
-\item{group_of_interest}{Numerical value denoting which group contains the condition of interest (1 or 2)}
 }
 \value{
 moda returns an object of class "MODifieR_module" with subclass "MODA". 
@@ -63,4 +63,7 @@ MOdule Differential Analysis for weighted gene co-expression network. R package 
 }
 \seealso{
 \url{https://bioconductor.org/packages/release/bioc/vignettes/MODA/inst/doc/MODA.html}
+}
+\author{
+Dirk de Weerd
 }

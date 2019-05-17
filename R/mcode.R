@@ -30,6 +30,7 @@
 #' 
 #' @references \cite{Bader, G. D., & Hogue, C. W. (2003). An automated method for finding molecular complexes in 
 #' large protein interaction networks. BMC Bioinformatics, 4(1), 2. \url{https://doi.org/10.1186/1471-2105-4-2}}
+#' @author DIrk de Weerd
 #' 
 #' @export
 mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, haircut = F, fluff = F,
@@ -87,7 +88,7 @@ mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, hair
 
   return(result_modules)
 }
-
+#@author Dirk de Weerd
 mcode_module <- function(module_genes, module_score, settings){
   new_mcode_module <- list("module_genes" = module_genes,
                            "module_score" = module_score,

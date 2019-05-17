@@ -27,15 +27,20 @@ knitr::opts_chunk$set(
 knitr::opts_chunk$set(package.startup.message = FALSE)
 ```
 ```{r, eval = TRUE, echo = FALSE, message=FALSE, results='hide'}
-input_class <- c("MODifieR_input", "Expression")
+input_class <- c("MODifieR_input", "Expression", "MicroArray")
 
-
+input_class_rna <- c("MODifieR_input", "Expression", "RNA-seq")
 
 head_diff_genes <- structure(list(gene = c("1", "10", "100", "1000", "10000", "100009676"
 ), pvalue = c(0.976932866477861, 0.347847171880988, 0.0065044563904408, 
 0.329104065723672, 0.115466316403267, 0.433955895521179)), .Names = c("gene", 
 "pvalue"), na.action = structure(20527L, .Names = "20527", class = "omit"), row.names = c(NA, 
 6L), class = "data.frame")
+
+head_diff_genes_rna <- structure(list(gene = c("4241", "105378049", "100423062", "155185", 
+"284", "55791"), pvalue = c(8.16294748128523e-05, 0.000162388083892493, 
+0.000296971961131028, 0.000694216342816492, 0.000915673825699305, 
+0.000923805603366887)), row.names = c(NA, 6L), class = "data.frame")
 
 head_limma_table <- structure(list(logFC = c(4455.89841269841, 883.55873015873, 1995.84761904762, 
 845.220634920635, 339.174603174603, 1924.13015873016), AveExpr = c(2263.4, 
@@ -52,6 +57,18 @@ head_limma_table <- structure(list(logFC = c(4455.89841269841, 883.55873015873, 
 "94240", "55008", "4599")), .Names = c("logFC", "AveExpr", "t", 
 "P.Value", "adj.P.Val", "B", "PROBEID", "IDENTIFIER"), row.names = c(NA, 
 6L), class = "data.frame")
+
+head_edgeR_table <- structure(list(logFC = c(1.07199054678345, -2.24707066070738, 
+-5.16115814779394, 1.0119079446301, -1.26474464170258, -0.897363022740586
+), logCPM = c(4.0142387408656, 0.981199314875999, 0.172524136380117, 
+3.40999907382156, 1.82608607013917, 3.81803082726427), F = c(36.6799269666016, 
+31.2071032654355, 26.9389464393761, 21.680293362815, 20.1355002184, 
+20.0874565356837), PValue = c(8.16294748128523e-05, 0.000162388083892493, 
+0.000296971961131028, 0.000694216342816492, 0.000915673825699305, 
+0.000923805603366887), FDR = c(0.957926787186466, 0.957926787186466, 
+0.957926787186466, 0.957926787186466, 0.957926787186466, 0.957926787186466
+)), row.names = c("4241", "105378049", "100423062", "155185", 
+"284", "55791"), class = "data.frame")
 
 head_annotated_exprs <- structure(c(35.6, 1.9, 73.1, 17.1, 105.5, 6.1, 57.4, 2.3, 69.4, 
 13.7, 124.3, 11, 11.9, 1.2, 77.6, 18.7, 113.4, 3.2, 29.7, 1.5, 
@@ -71,6 +88,8 @@ head_annotated_exprs <- structure(c(35.6, 1.9, 73.1, 17.1, 105.5, 6.1, 57.4, 2.3
 group_indici <- structure(list(Control = 1:9, Patient = 10:16), .Names = c("Control", 
 "Patient"))
 
+group_indici_rna <- list(Patient = 1:5, Control = 6:10)
+
 ppi_head <- structure(list(entrez1 = c("5341", "23647", "8853", "5921", "50807", 
 "3002"), entrez2 = c("381", "381", "381", "381", "381", "4074"
 ), SCORE = c(896, 917, 973, 756, 894, 735)), .Names = c("entrez1", 
@@ -86,27 +105,29 @@ so installing Anaconda is recommended. It can be downloaded here:
 In addition, some R packages are required. They can be acquired with the following code:
 ```{r, eval=FALSE, echo=TRUE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
+  install.packages("BiocManager")
 BiocManager::install(c("AnnotationDbi",
                        "MODA", 
                        "STRINGdb", 
                        "limma", 
-                       "org.Hs.eg.db"), 
+                       "org.Hs.eg.db",
+                       "foreach", 
+                       "doParallel", 
+                       "Rcpp", 
+                       "dynamicTreeCut", 
+                       "flashClust", 
+                       "reticulate", 
+                       "plyr", 
+                       "parallel", 
+                       "igraph", 
+                       "WGCNA",
+                       "RSQLite",
+                       "stackoverflow",
+                       "preprocessCore",
+                       "DESeq2",
+                       "edgeR"), 
                      version = "3.8")
 
-
-install.packages(c("foreach", 
-                   "doParallel", 
-                   "Rcpp", 
-                   "dynamicTreeCut", 
-                   "flashClust", 
-                   "reticulate", 
-                   "plyr", 
-                   "parallel", 
-                   "igraph", 
-                   "WGCNA",
-                   "RSQLite",
-                   "stackoverflow"))
 ```
 
 After that, the package can be installed from github:
@@ -131,14 +152,15 @@ could potentially be novel bio markers or therapeutic targets.
 
 Various disease module inference methods have been proposed earlier, using different approaches.
 Here, MODifieR is presented, an R package that bundles 8 different disease module inference
-methods into a single package. The 8 methods methods can be classified into 3 different algorithmic
+methods into a single package that takes either micro array or RNA-seq data as input. 
+The 8 methods methods can be classified into 3 different algorithmic
 classes: seed-based, clique based and co-expression based methods. MODifieR is available under
 the GNU GPL open source license.
 
 Module inference methods included are:
 
 Clique Sum         
-Correlation Clique
+Correlation Clique    
 DIAMoND            
 DiffCoEx          
 MCODE              
@@ -161,26 +183,9 @@ The package is build on two core objects, an input and a module object.
 The first object is an input object for the disease module inference methods, with class `MODifieR_input`. 
 This object can be used for all disease module inference methods. 
 
-The `MODifieR_input` object is a named list and can contain the following components:
+The `MODifieR_input` class has two subclasses, either `MicroArray` or `RNA-seq` depending on the input data type.
 
-`diff_genes` A 2 two column data.frame where the first column are genes and the second column unadjusted p-values
-obtained by differential expression analysis.
-
-`limma_probe_table` A data.frame from `limma topTable` with added gene annotation.
-
-`annotated_exprs_matrix` A matrix where the rows are genes and the columns samples. Probes have been collapsed
-into genes.
-
-`expression_matrix` An expression that has been used as input for the annotated expression matrix.
-
-`annotation_table` A data.frame containing the annotation for the microarray probes. Also part of the input
-
-`group_indici`A named list containing 2 numeric vectors. The names are the group labels, for example "patient" and 
-"control". The values are the indici for each group, so the column indici for the expression matrix for 
-each of the aforementioned groups.
-
-
-The input object contains all necessary input data for the methods.
+The input objects contain all necessary input data for the methods.
 Below is a table showing what methods use an expression matrix, Differentially Expressed Genes (DEGs) or both.
 
 |Method             | Annotated expression matrix | DEGs|
@@ -195,13 +200,54 @@ Below is a table showing what methods use an expression matrix, Differentially E
 |WGCNA trait-based  |       X                     |     |
 Table 1: Input types taken by inference methods
 
+#### Microarray input object
+The `MODifieR_input` with subclass `MicroArray` object is a named list and can contain the following components:
+  
+`diff_genes` A 2 two column data.frame where the first column are genes and the second column unadjusted p-values
+obtained by differential expression analysis.
+
+`limma_probe_table` A data.frame from `limma topTable` with added gene annotation.
+
+`annotated_exprs_matrix` A matrix where the rows are genes and the columns samples. Probes have been collapsed
+into genes.
+
+`expression_matrix` The original input expression matrix.
+
+`annotation_table` A data.frame containing the annotation for the microarray probes. Also part of the input
+
+`group_indici`A named list containing 2 numeric vectors. The names are the group labels, for example "patient" and 
+"control". The values are the indici for each group, so the column indici for the expression matrix for 
+each of the aforementioned groups.
+
+`settings` The parameters used to generate the object.
+
+#### RNA-seq input object
+The `MODifieR_input` with subclass `RNA-seq` object is a named list and can contain the following components:
+  
+`diff_genes` A 2 two column data.frame where the first column are genes and the second column unadjusted p-values
+obtained by differential expression analysis.
+
+`edgeR_deg_table` A data.frame from edgeR glmQLFit.
+
+`annotated_exprs_matrix` A matrix where the rows are genes and the columns samples. Probes have been collapsed
+into genes.
+
+`count_matrix` The orginal input count matrix.
+
+`group_indici`A named list containing 2 numeric vectors. The names are the group labels, for example "patient". and 
+"control". The values are the indici for each group, so the column indici for the expression matrix for 
+each of the aforementioned groups.
+
+`settings` The parameters used to generate the object.
+
+
 ### Module object
 
 The second object, with class `MODifieR_module` is an object that is produced by the disease module
 inference methods. They also have a subclass according to the method that produced them.
 
 Like the input object, the module objects are also named lists. Module objects differ between each function that generates them (hence the subclass) but have certain features in common:
-
+  
 - The module object will always contain an element (character vector) called module_genes which are the genes that make up
 the final module
 
@@ -211,14 +257,14 @@ the final module
 ## Creating an input object
 
 In order to run an analysis, an input object has to be created. This can be done in two ways:
-The first is the usual way and involves microarray data and probe annotation.
-The second way is to create a custom object using previously obtained DEGs or expression data
+The first is the usual way and involves high throughput data and in case of microarray also probe annotation.
+The second way is to create a custom object using previously obtained DEGs or expression data.
 
 ### Using microarray data
 
-To create an input object with microarray data, the function `create_input` can be used. The function 
+To create an input object with microarray data, the function `create_input_microarray` can be used. The function 
 takes several inputs:
-
+  
 - `expression_matrix` A matrix with normalized expression values. The rows are probes and the columns are samples.
 
 - `annotation_table` An two columns dataframe providing annotation for the probes. The first column should contain the probe
@@ -236,6 +282,8 @@ ID, and the second column its corresponding annotation.
 
 - `differential expression` A Boolean value indicating if DEGs data should be calculated.
 
+- `use_adjusted` use adjusted p value for differential expression analysis?
+
 - `method` When collapsing the probes, the collapseRows() method from WGCNA is used. This argument
 determines the collapsing method to use. Please see the WGCNA documentation for more information. Options are:
     - _MaxMean_         Highest mean value
@@ -245,14 +293,38 @@ determines the collapsing method to use. Please see the WGCNA documentation for 
     - _absMinMean_      Lowest mean absolute value
     - _ME_              Eigenrow (first principal component)
 
-To serve as an example, example data has been included. There is an example expression matrix 
+### Using RNA-seq data
+
+Creating an RNA-seq input object is quite similar to creating a microarray input object. The function is `create_input_rnaseq` and the arguments are:
+
+- `count matrix` Matrix containing raw RNA-seq counts
+
+- `group1_indici` A vector that should have the indici in the expression matrix for the samples belonging to group 1.
+
+- `group2_indici` Same, but for group 2
+
+- `group1_label` Label to identify group 1, for example "Control" or "Patient"
+
+- `group2_label` Same, but for group 2
+
+- `expression` A Boolean value indicating if expression matrix data should be calculated.
+
+- `differential expression` A Boolean value indicating if DEGs data should be calculated.
+
+- `use_adjusted` use adjusted p value for differential expression analysis?
+
+- `normalize_quantiles`, Normalize quantiles for WGCNA-based methods?
+
+### Example dataset microarray
+
+Example data has been included in the package. There is an example microarray expression matrix 
 from Gene Expression Omnibus (GEO) with accession number GSE4588. This data set has 16 columns, 
 so 16 samples in total with 9 _systemic lupus erythematosus_ (SLE) patients and 7 healthy controls. 
 The matrix has 52307 rows, meaning 52307 probes. The indici for the healthy controls are 1 to 9, 
 and 10 to 16 make up the SLE patients. The expression matrix can be accessed using `expression_matrix`
 
 We can inspect it using the head function:
-
+  
 ```{r, eval=TRUE, echo=TRUE}
 head(expression_matrix)
 ```
@@ -262,20 +334,20 @@ The first column contains the probe ids where the second column holds the corres
 in this case ENTREZ gene identifiers.
 
 Again using head:
-
+  
 ```{r, eval=TRUE, echo=TRUE}
 head(probe_annotation)
 ```
 Now we can put these things together to create an input object:
-
+  
 ```{r, eval=FALSE, echo=TRUE}
-MODifieR_input <- create_input(expression_matrix = expression_matrix,
+MODifieR_input_microarray <- create_input_microarray(expression_matrix = expression_matrix,
                                annotation_table = probe_annotation,
                                group1_indici = 1:9,
                                group2_indici = 10:16,
                                group1_label = "Control",
                                group2_label = "Patient")
-                              
+
 ```
 When the function has finished, it might take a few minutes, we can inspect the object.
 Let's start with the class:
@@ -291,39 +363,94 @@ The limma_probe_table is the table generated by limma with annotation for the pr
 head_limma_table
 ```
 Finally, we can take a look at the groups indici and it's names by looking at the
-group_indici component of the object
+group_indici component of the object:
 ```{r, eval=TRUE, echo=FALSE}
 group_indici
 ```
-Now we have set up an input object to use in the disease inference methods!
+Now we have set up an microarray input object to use in the disease inference methods.
+
+### Example dataset RNA-seq
+
+There is an example RNA-seq expression matrix from Gene Expression Omnibus (GEO) with accession number GSE123496. This data set has 10 columns, so 10 samples taken from the frontal cortex with in total 5 _Multiple Sclerosis_ (MS) patients and 5 healthy controls. 
+The matrix has 16569 rows, meaning the same amount of genes. The indici for the patients are 1 to 5, 
+and 6 to 10 make up the controls. The count matrix can be accessed using `count_matrix`
+
+We can inspect it using the head function:
+```{r, eval=TRUE, echo=TRUE}
+head(count_matrix)
+```
+To create the input object:
+```{r, eval=FALSE, echo=TRUE}
+MODifieR_input_rna <- create_input_rnaseq(count_matrix = count_matrix, 
+                                          group1_indici = 1:5, 
+                                          group2_indici = 6:10, 
+                                          group1_label = "Patient", 
+                                          group2_label = "Control",
+                                          use_adjusted = F)
+
+```
+
+This dataset does not contain any significant genes after FDR correction, so unadjusted p values are used.
+
+When the function has finished, we can inspect the object.
+Let's start with the class:
+```{r, eval=TRUE, echo=FALSE}
+input_class_rna
+```
+Now we can inspect the DEGs:
+```{r, eval=TRUE, echo=FALSE}
+head_diff_genes_rna
+```
+The edgeR_deg_table is the table generated by edgeR:
+```{r, eval=TRUE, echo=FALSE}
+head_edgeR_table
+```
+Finally, we can take a look at the groups indici and it's names by looking at the
+group_indici component of the object:
+```{r, eval=TRUE, echo=FALSE}
+group_indici_rna
+```
+Now we have set up an RNA-seq input object to use in the disease inference methods.
 
 ### Creating a custom input object
 There is also the possibility to create a custom input object. This can be useful in cases
 where there are already DEGs, an annotated expression or both available. In order to create such
-an object, the function `create_custom_input_object` can be used.
+an object, the functions `create_custom_microarray_input_object` or `create_input_rna_input_object` can be used.
 
-Below is an example on how to use this function. Some of the input data is optional, for
-example limma_probe_table, expression_matrix and annotation_table are not used in any 
+Below are example on how to use the functions. Some of the input data is optional, for
+example limma_probe_table/edgeR, expression_matrix/count_matrix and annotation_table are not used in any 
 disease module inference method. Instead, they can optionally be used to update or recalculate
 an input object.
 
 ```{r, eval=FALSE, echo=TRUE}
-generic_input_object <- create_custom_input_object(diff_genes = NULL, 
-                                                   limma_probe_table = NULL,
-                                                   annotated_exprs_matrix = NULL, 
-                                                   expression_matrix = NULL, 
-                                                   annotation_table = NULL, 
-                                                   group1_indici = NULL,
-                                                   group2_indici = NULL, 
-                                                   group1_label = NULL, 
-                                                   group2_label = NULL)
+generic_input_microarray_object <- create_custom_input_object(diff_genes = NULL, 
+                                                              limma_probe_table = NULL,
+                                                              annotated_exprs_matrix = NULL, 
+                                                              expression_matrix = NULL, 
+                                                              annotation_table = NULL, 
+                                                              group1_indici = NULL,
+                                                              group2_indici = NULL, 
+                                                              group1_label = NULL, 
+                                                              group2_label = NULL)
+```
+
+```{r, eval=FALSE, echo=TRUE}
+generic_input_rna_object <- create_custom_rna_input_object(diff_genes = NULL, 
+                                                           edgeR_deg_table = NULL, 
+                                                           annotated_exprs_matrix = NULL, 
+                                                           count_matrix = NULL, 
+                                                           group1_indici = NULL, 
+                                                           group2_indici = NULL, 
+                                                           group1_label = NULL, 
+                                                           group2_label = NULL, 
+                                                           settings = NULL)
 ```
 Please note that the specific data in the input object that is required differs per 
 inference method, the reader is referred to table 1 in subsection 'Input object' to see 
 what inference methods needs what input data fields. For example, to use the DIAMoND method,
 only the diff_genes input would suffice to run the analysis.
 
-If the inference method requires annotated expression matrix, group indici and
+If the inference method requires annotated_exprs_matrix, group indici and
 labels are also required.
 
 ## Inference methods
@@ -338,13 +465,14 @@ Using head again, we can inspect the first few rows:
 ```{r, eval=TRUE, echo=TRUE}
 ppi_head
 ```
+In this tutorial the previously created microarray input will be used. This can easily be exchanged for the RNA-seq input object, the procedure is exactly the same, only `MODifieR_input_microarray` is replaced by `MODifieR_input_rna`.
 
 Since this is a tutorial on how to run the inference methods, we can change parameters for some inference 
 methods and also make the size of the input object a little smaller to reduce run time.
 
 Also, we can lower the number of genes in the annotated expression matrix:
 ```{r, eval=FALSE, echo=TRUE}
-MODifieR_input$annotated_exprs_matrix <- MODifieR_input$annotated_exprs_matrix[1:10000, ]
+MODifieR_input_microarray$annotated_exprs_matrix <- MODifieR_input_microarray$annotated_exprs_matrix[1:10000, ]
 ```
 
 In addition, some inference methods allow to modify the module object after analysis. If an inference method has these
@@ -379,8 +507,8 @@ In MODifieR, the function can be called using `clique_sum_exact()` and using the
 
 
 ```{r, eval=FALSE, echo=TRUE}
-clique_sum_exact_module <- clique_sum_exact(MODifieR_input = MODifieR_input, 
-                                db = "folder/name/example.sqlite")
+clique_sum_exact_module <- clique_sum_exact(MODifieR_input = MODifieR_input_microarray, 
+                                            db = "folder/name/example.sqlite")
 ```
 
 #### clique_sum_permutation
@@ -395,8 +523,8 @@ In MODifieR, the function can be called using `clique_sum_permutation()` and usi
 
 
 ```{r, eval=FALSE, echo=TRUE}
-clique_sum_permutation_module <- clique_sum_permutation(MODifieR_input = MODifieR_input, 
-                                 db = "folder/name/example.sqlite")
+clique_sum_permutation_module <- clique_sum_permutation(MODifieR_input = MODifieR_input_microarray, 
+                                                        db = "folder/name/example.sqlite")
 ```
 
 
@@ -406,11 +534,11 @@ The correlation clique is a clique-based algorithm using consensus clustering.
 The algorithm starts with calculating a correlation score between each interaction in the PPi network.
 The correlation score is obtained by subtracting the Pearson correlation p-value:
 $correlation score = 1 - Pearson\: p\: value$
-
-Subsequently, the correlation score is multiplied by 
+  
+  Subsequently, the correlation score is multiplied by 
 the correlation confidence.
 $edge score = \sqrt{(correlation score * confidence score  )} $
-
+  
 When the edge scores are calculated the iterative part of the algorithm commences:
 All edge scores are scaled to so that the mean of all edge scores is equal to the `fraction_of_iteration` parameter. Next, the newly scaled scores are compared to random variables from the uniform distribution between (0,1) and only interactions where the edge score is higher than the random variable are used to construct a new PPi network. Because the scores are scaled to `fraction_of_iteration`, this is the average fraction of interactions used for this new network. Then, maximal cliques are inferred from this new network.
 The cliques are tested for significant enrichment of DEGs by Fisher's exact test and
@@ -421,7 +549,7 @@ The function can be called using `correlation_clique()`
 
 In the example code, the number of iterations has been reduced to 10 (from 50) to speed up the analysis
 ```{r, eval=FALSE, echo=TRUE}
-correlation_clique_module <- correlation_clique(MODifieR_input = MODifieR_input, 
+correlation_clique_module <- correlation_clique(MODifieR_input = MODifieR_input_microarray, 
                                                 ppi_network = ppi_network, 
                                                 iteration = 10)
 ```
@@ -435,7 +563,7 @@ set to 0.2, so 20 percent of iterations.
 
 ```{r, eval=FALSE, echo=TRUE}
 correlation_clique_module <- correlation_adjust_cutoff(frequency_cutoff = 0.2, 
-                             correlation_module = correlation_clique_module)
+                                                       correlation_module = correlation_clique_module)
 ```
 
 The second post-processing function is `correlation_set_module_size`. This function is intended to return a module
@@ -443,7 +571,7 @@ where the number of module genes is closest to `size`. In the example, we set th
 
 ```{r, eval=FALSE, echo=TRUE}
 correlation_clique_module <- correlation_set_module_size(size = 10, 
-                             correlation_module = correlation_clique_module)
+                                                         correlation_module = correlation_clique_module)
 ```
 
 ### DIAMoND
@@ -453,7 +581,7 @@ The only change to the original algorithm is the option to include the seed gene
 
 In MODifieR, the function can be called using `diamond()`
 ```{r, eval=FALSE, echo=TRUE}
-diamond_module <- diamond(MODifieR_input = MODifieR_input, 
+diamond_module <- diamond(MODifieR_input = MODifieR_input_microarray, 
                           ppi_network = ppi_network)
 ```
 
@@ -476,7 +604,7 @@ framework for co expression analysis. [@Tesson2010]
 
 In MODifieR, the function can be called using `diffcoex()`
 ```{r, eval=FALSE, echo=TRUE}
-diffcoex_module <- diffcoex(MODifieR_input = MODifieR_input)
+diffcoex_module <- diffcoex(MODifieR_input = MODifieR_input_microarray)
 ```
 
 ###### Post-processing
@@ -498,8 +626,8 @@ Much of the code and documentation has been taken from the now defunct package "
 
 In MODifieR, the function can be called using `mod_mcode()`
 ```{r, eval=FALSE, echo=TRUE}
-mcode_module_list <- mod_mcode(MODifieR_input = MODifieR_input, 
-                          ppi_network = ppi_network)
+mcode_module_list <- mod_mcode(MODifieR_input = MODifieR_input_microarray, 
+                               ppi_network = ppi_network)
 ```
 
 The return type of MCODE is a list (of MCODE modules), as it generally returns multiple modules sorted by 
@@ -521,11 +649,11 @@ Condition specific co-expression modules are then extracted using the Jaccard in
 
 The final module will consist of the co-expression module 
 that has the minimal Jaccard index complemented by co-expression modules that have a Jaccard index 
-below this minimal + `specificTheta`.
+below this minimal + `specificTheta`. The group of interest signifies which group has the trait of interest. In this case that is group 2, the SLE patients.
 
 In MODifieR, the function can be called using `moda()`
 ```{r, eval=FALSE, echo=TRUE}
-moda_module <- moda(MODifieR_input = MODifieR_input, 
+moda_module <- moda(MODifieR_input = MODifieR_input_microarray, 
                     group_of_interest = 2)
 ```
 
@@ -546,7 +674,7 @@ from the original code by Vlaic et al. [@Vlaic2018] For details, please see the 
 
 In MODifieR, the function can be called using `modulediscoverer()`
 ```{r, eval=FALSE, echo=TRUE}
-module_discoverer_module <- modulediscoverer(MODifieR_input = MODifieR_input, 
+module_discoverer_module <- modulediscoverer(MODifieR_input = MODifieR_input_microarray, 
                                              ppi_network = ppi_network, 
                                              permutations = 1000, 
                                              repeats = 3)
@@ -559,11 +687,12 @@ co-expression modules (denoted by color) to a trait.
 Co-expression modules with an adjusted p-value < pval_cutoff will make up the final disease module.
 
 The algorithm infers co-expression modules from combined expression data set from both group1 and group2. 
-Co-expression modules are then correlated to trait (group 1 ~ group 2).
+Co-expression modules are then correlated to trait (group 1 ~ group 2). The group of interest signifies which group has the trait of interest. In this case that is group 2, the SLE patients.
 
 In MODifieR, the function can be called using `wgcna()`
 ```{r, eval=FALSE, echo=TRUE}
-wgnca_module <- wgcna(MODifieR_input = MODifieR_input)
+wgnca_module <- wgcna(MODifieR_input = MODifieR_input_microarray,
+                      group_of_interest = 2)
 ```
 
 ###### Post-processing
@@ -594,7 +723,7 @@ colors into separate MODifieR_module objects. Only colors significantly associat
 The return object is a list of MODifieR module objects.
 
 ```{r, eval=FALSE, echo=TRUE}
-wgnca_module <- (wgcna_module = wgnca_module)
+wgnca_module <- wgcna_split_module_by_color(wgcna_module = wgcna_module)
 ```
 
 The second post-processing function is `wgcna_set_module_size`. This function is intended to return a module
@@ -617,9 +746,10 @@ a gene has to be present in at least 3 of the individual modules.
 To start deriving a consensus module, it is convenient to wrap all the previously acquired modules into a list:
 
 ```{r, eval=FALSE, echo=TRUE}
-module_list <- list(clique_sum_module, 
+module_list <- list(clique_sum_permutation_module, 
                     correlation_clique_module, 
-                    diamond_module, diffcoex_module, 
+                    diamond_module, 
+                    diffcoex_module, 
                     mcode_module, 
                     moda_module, 
                     module_discoverer_module, 
@@ -703,17 +833,11 @@ be used in an exploratory fashion when inferring modules.
 Plotting consensus_module4 again with the example PPi included in MODifieRDev:
 
 ```{r, eval=FALSE, echo=TRUE}
-plot(consensus_module4$module_genes, ppi_network = ppi_network)
+plot(consensus_module4, ppi_network = ppi_network)
 ```
 
 ![Figure 2:  Using the plot function in MODifieRDev with consensus_module4 and the included PPi network as inputs](figures/consensus4.png)
 
-The plot is not as nice as the plot from string-db.org. The built-in plot function can be used 
-
-
-```{r, eval=FALSE, echo=TRUE}
-plot(consensus_module4$module_genes, ppi_network = ppi_network)
-```
 
 ![Figure 3:  Using the plot function in MODifieRDev with the diamond module and the included PPi network as inputs](figures/diamond.png)
 

@@ -1,7 +1,7 @@
 #'Expression matrix
 #'
-#'An example dataset from GEO (accession number GSE4588) containing systemic lupus erythematosus patients
-#'and healthy controls
+#' An example micorarray dataset from GEO (accession number GSE4588) containing
+#' systemic lupus erythematosus patients and healthy controls
 #'
 #' @details 
 #'The expression matrix contains 16 microarray samples. Columns 1:9 are healthy controls,
@@ -13,7 +13,7 @@
 #'@references
 #'\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE4588}.
 #'
-#'
+#'@author Dirk de Weerd
 #'
 "expression_matrix"
 
@@ -30,7 +30,7 @@
 #'
 #' @references \cite{Carlson M (2016). hgu133plus2.db: Affymetrix Human Genome U133 Plus 2.0 
 #' Array annotation data (chip hgu133plus2). R package version 3.2.3.} 
-#'
+#'@author Dirk de Weerd
 "probe_annotation"
 
 #'PPi network
@@ -50,5 +50,24 @@
 #'\code{\link{expression_matrix}}
 #'@references
 #'\url{https://string-db.org/}
-#'
+#'@author Dirk de Weerd
 "ppi_network"
+
+#'Count matrix
+#'
+#' An example RNA-seq dataset from GEO (accession number GSE123496) containing
+#' Multiple Sclerosis (MS) patients and healthy controls
+#'
+#' @details 
+#' The count matrix contains 10 RNA-seq samples. Columns 1:5 contain RNA-seq 
+#' data from the frontal cortex of MS patients, columns 6:10 are matched controls. The dataset
+#' has been filtered, all genes with less than 100 counts per row are removed.
+#' There are 16569 genes in the dataset.
+#'@seealso
+#'\code{\link{ppi_network}}
+#'@references
+#'\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123496}.
+#'
+#'@author Dirk de Weerd
+#'
+"count_matrix"

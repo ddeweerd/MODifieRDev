@@ -9,7 +9,7 @@ clique_sum_permutation(MODifieR_input, db, n_iterations = 10000,
   multiple_cores = T, n_cores = 4, dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{db}{A clique database created by \code{\link{build_clique_db}}}
 
@@ -46,4 +46,7 @@ Clique_sum_permutation finds cliques of at least size \code{min_clique_size} tha
 \cite{Gustafsson, M., Edström, M., Gawel, D., Nestor, C. E., Wang, H., Zhang, H., … Benson, M. (2014). 
 Integrated genomic and prospective clinical studies show the importance of modular pleiotropy for disease susceptibility, 
 diagnosis and treatment. Genome Medicine, 6(2), 17. https://doi.org/10.1186/gm534}
+}
+\author{
+Dirk de Weerd
 }

@@ -31,3 +31,6 @@ Get a consensus module that is composed of genes present in at least \code{min_f
 If the input \code{module_list} is unnamed, the subclasses of the MODifieR objects will be used.
 If there is more than 1 of a given subclass present in \code{module_list}, a number will be appended.
 }
+\author{
+Dirk de Weerd
+}

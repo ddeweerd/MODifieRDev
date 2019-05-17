@@ -24,3 +24,6 @@ This function allows to adjust the frequency cutoff for a \code{correlation_cliq
 \seealso{
 \code{\link{correlation_clique}}
 }
+\author{
+Dirk de Weerd
+}

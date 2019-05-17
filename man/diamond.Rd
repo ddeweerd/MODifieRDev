@@ -9,7 +9,7 @@ diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
   dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 
@@ -50,4 +50,7 @@ For a detailed description of how the algorithm works, please see the paper refe
 A DIseAse MOdule Detection (DIAMOnD) Algorithm Derived from a Systematic Analysis of 
 Connectivity Patterns of Disease Proteins in the Human Interactome. PLoS Computational 
 Biology, 11(4), 1–21. \url{https://doi.org/10.1371/journal.pcbi.1004120}}
+}
+\author{
+Dirk de Weerd
 }

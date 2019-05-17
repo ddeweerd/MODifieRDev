@@ -26,3 +26,6 @@ The function starts with the co-expression module (color) with the lowest
 \seealso{
 \code{\link{wgcna}}
 }
+\author{
+Dirk de Weerd
+}

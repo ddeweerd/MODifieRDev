@@ -21,7 +21,10 @@ Imports:
     stats,
     parallel,
     stackoverflow,
-    RSQLite
+    RSQLite,
+    edgeR,
+    DESeq2,
+    preprocessCore
 Depends:
     R (>= 3.1.0),
     igraph,

@@ -82,7 +82,7 @@ modulediscoverer <- function(MODifieR_input, ppi_network, permutations = 10000, 
 
   database_singleSeed <- moduleDiscoverer.createDatabase(results=db_results_singleSeed,
                                                         proteins=proteins)
-  print("creating MD object")
+ 
   input_singleSeed = moduleDiscoverer.db.create_MD_object(database=database_singleSeed,
                                                           foregrounds=list("NASH"=degs),
                                                           cores=2, background=background,

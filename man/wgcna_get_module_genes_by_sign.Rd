@@ -25,3 +25,6 @@ negatively correlated colors
 \seealso{
 \code{\link{wgcna}}
 }
+\author{
+Dirk de Weerd
+}

@@ -9,7 +9,8 @@ build_clique_db(ppi_network, db_folder, db_name)
 \arguments{
 \item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 
-\item{db_folder}{A directory where the database will be stored}
+\item{db_folder}{A directory where the database will be stored. 
+Please not that tilde expension does not work.}
 
 \item{db_name}{The name of the database. File suffix ".sqlite" will be appended}
 }
@@ -20,4 +21,7 @@ Create a sqlite database containing all maximal cliques from a network
 Creates a SQLite database containing all maximal cliques from the network in the folder 
 \code{db_folder} with filename \code{db_name.sqlite}. This database can be used as in 
 input to \code{\link{clique_sum_exact}} and \code{\link{clique_sum_permutation}}
+}
+\author{
+Dirk de Weerd
 }

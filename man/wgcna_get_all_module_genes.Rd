@@ -19,3 +19,6 @@ Generate a list of module colors with their respective genes.
 \seealso{
 \code{\link{wgcna}}
 }
+\author{
+Dirk de Weerd
+}

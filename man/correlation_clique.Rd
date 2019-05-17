@@ -7,10 +7,10 @@
 correlation_clique(MODifieR_input, ppi_network, frequency_cutoff = 0.5,
   fraction_of_interactions = 0.4, iteration = 50,
   clique_significance = 0.01, deg_cutoff = 0.05, multiple_cores = F,
-  n_cores = 3, tempfolder = NULL, dataset_name = NULL)
+  n_cores = 3, dataset_name = NULL)
 }
 \arguments{
-\item{MODifieR_input}{A MODifieR input object produced by \code{\link{create_input}} function}
+\item{MODifieR_input}{A MODifieR input object produced by one of the \code{create_input} functions}
 
 \item{ppi_network}{A network as a dataframe where the first 2 columns are the interactions}
 
@@ -30,10 +30,10 @@ in each iteration}
 
 \item{n_cores}{Number of cores to use if parallel processing}
 
-\item{tempfolder}{Folder where temporary files are stored}
-
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}
+
+\item{tempfolder}{Folder where temporary files are stored}
 }
 \value{
 correlation_clique returns an object of class "MODifieR_module" with subclass "Correlation_clique". 
@@ -60,4 +60,7 @@ a new PPi network. Then, maximal cliques are inferred from this new network.
 The cliques are tested for significant enrichment of DEGs by Fisher's exact test and
 the union of significant cliques is the disease module for this iteration
 The final disease module will consist of genes that have been present in at least \code{frequency_cutoff} iterations
+}
+\author{
+Dirk de Weerd
 }

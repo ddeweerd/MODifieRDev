@@ -19,6 +19,7 @@ wgcna_module_constructor <- function(module_genes, info_table,
 #'
 #' @inheritParams clique_sum_exact
 #' @inheritParams WGCNA::blockwiseModules
+#' @inheritParams moda
 #' @param pval_cutoff The p-value cutoff to be used for significant co-expression modules (colors)
 #' 
 #' @details
@@ -57,12 +58,15 @@ wgcna_module_constructor <- function(module_genes, info_table,
 #' 
 #' \cite{Peter Langfelder, Steve Horvath (2012). Fast R Functions for Robust Correlations and Hierarchical Clustering. J
 #' ournal of Statistical Software, 46(11), 1-17. URL \url{http://www.jstatsoft.org/v46/i11/}}
+#' 
+#' @author Dirk de Weerd
+#' 
 #' @export
-wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
-                        mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05, corType = "bicor",
-                        maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1, 
-                        dataset_name = deparse(substitute(MODifieR_input))){
- 
+wgcna <- function(MODifieR_input, group_of_interest, minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
+                  mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05, corType = "bicor",
+                  maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1, 
+                  dataset_name = deparse(substitute(MODifieR_input))){
+  
   # Retrieve settings
   evaluated_args <- c(as.list(environment()))
   settings <- as.list(stackoverflow::match.call.defaults()[-1])
@@ -78,7 +82,7 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
   
   allowWGCNAThreads()
   
-  traits <- wgcna_get_trait_data(MODifieR_input = MODifieR_input)
+  traits <- wgcna_get_trait_data(MODifieR_input = MODifieR_input, group_of_interest = group_of_interest)
   
   datExpr <- t(MODifieR_input$annotated_exprs_matrix)
   
@@ -130,15 +134,20 @@ wgcna <- function(MODifieR_input,  minModuleSize = 30, deepSplit = 2, pamRespect
                                                module_colors = significant_module_colors,
                                                settings = settings)
   
-  modules_genes_list <- wgcna_get_all_module_genes(new_wgcna_module)
   
   return(new_wgcna_module)
 }
 
-wgcna_get_trait_data <- function(MODifieR_input){
+wgcna_get_trait_data <- function(MODifieR_input, group_of_interest){
   trait_data <- matrix(data = NA, ncol(MODifieR_input$annotated_exprs_matrix))
-  trait_data[MODifieR_input$group_indici[[1]], ] <- 0
-  trait_data[MODifieR_input$group_indici[[2]], ] <- 1
+  if (group_of_interest == 1){
+    trait_data[MODifieR_input$group_indici[[1]], ] <- 1
+    trait_data[MODifieR_input$group_indici[[2]], ] <- 0
+  }
+  if (group_of_interest == 2){
+    trait_data[MODifieR_input$group_indici[[1]], ] <- 0
+    trait_data[MODifieR_input$group_indici[[2]], ] <- 1
+  }
   rownames(trait_data) <- colnames(MODifieR_input$annotated_exprs_matrix)
   
   return (trait_data)
@@ -147,8 +156,13 @@ wgcna_get_trait_data <- function(MODifieR_input){
 #'@param wgcna_module Module object that has been produced by \code{wgcna} function
 #'@return Returns a \code{named list} of module genes where the names are the module colors. Includes 
 #'non-significant colors 
+#'
 #'@seealso 
 #'\code{\link{wgcna}}
+#'
+#'@author Dirk de Weerd
+#'
+#'
 #'
 wgcna_get_all_module_genes <- function(wgcna_module){
   module_colors <- rownames(wgcna_module$correlation_to_trait_table)
@@ -172,6 +186,9 @@ wgcna_get_module_genes <- function(module_color, info_table){
 #' \code{\link{wgcna}}
 #' 
 #'@return \code{wgcna_module} object
+#'
+#'@author Dirk de Weerd
+#'
 #' @export
 wgcna_get_module_genes_by_sign <- function(wgcna_module, mode){
   if (mode == "p" || mode =="positive"){
@@ -206,6 +223,8 @@ wgcna_get_module_genes_by_sign <- function(wgcna_module, mode){
 #' 
 #' \code{\link{wgcna}}
 #' 
+#' @author Dirk de Weerd
+#' 
 #' @export
 wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted = F){
   col=3
@@ -213,7 +232,7 @@ wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted 
     col=2
   }
   module_colors <- rownames(wgcna_module$correlation_to_trait_table)[
-  wgcna_module$correlation_to_trait_table[ ,col] < pval_cutoff]
+    wgcna_module$correlation_to_trait_table[ ,col] < pval_cutoff]
   
   wgcna_module$settings$pval_cutoff <- pval_cutoff
   wgcna_module$module_genes <- wgcna_module$info_table[which(wgcna_module$info_table[ ,3] %in% module_colors), 1]
@@ -236,11 +255,13 @@ wgcna_adjust_significance <- function(pval_cutoff, wgcna_module, use_unadjusted 
 #' 
 #' \code{\link{wgcna}}
 #' 
+#' @author Dirk de Weerd
+#' 
 #' @export
 wgcna_split_module_by_color <- function(wgcna_module){
   module_colors <- wgcna_module$module_colors
   module_genes <- lapply(X = module_colors, FUN = function(x, module){
-  module$info_table[module$info_table[ ,3] == x, 1]}, module = wgcna_module)
+    module$info_table[module$info_table[ ,3] == x, 1]}, module = wgcna_module)
   
   info_table <- wgcna_module$info_table
   correlation_to_trait_table <- wgcna_module$correlation_to_trait_table
@@ -277,6 +298,8 @@ wgcna_split_module_by_color <- function(wgcna_module){
 #' 
 #' \code{\link{wgcna}}
 #' 
+#' @author Dirk de Weerd
+#' 
 #' @export
 wgcna_set_module_size <- function(size, wgcna_module){
   #Get length of all modules
@@ -289,12 +312,12 @@ wgcna_set_module_size <- function(size, wgcna_module){
   })))
   module_colors <- names(module_lengths)[1:color_index]
   new_wgcna_module <-       wgcna_module_constructor(module_genes = wgcna_module$info_table
-                                                    [which(wgcna_module$info_table[ ,3] %in% module_colors), 1], 
-                                                    info_table = wgcna_module$info_table, 
-                                                    module_cor_and_p_value = wgcna_module$correlation_to_trait_table, 
-                                                    powerEstimate = wgcna_module$softthreshold_value, 
-                                                    module_colors = module_colors, 
-                                                    settings = wgcna_module$settings)
+                                                     [which(wgcna_module$info_table[ ,3] %in% module_colors), 1], 
+                                                     info_table = wgcna_module$info_table, 
+                                                     module_cor_and_p_value = wgcna_module$correlation_to_trait_table, 
+                                                     powerEstimate = wgcna_module$softthreshold_value, 
+                                                     module_colors = module_colors, 
+                                                     settings = wgcna_module$settings)
   
   return(new_wgcna_module)
   

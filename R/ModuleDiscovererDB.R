@@ -431,7 +431,7 @@ moduleDiscoverer.db.create_MD_object <- function(foregrounds=NULL, background=NU
     if(parallel::detectCores()<=cores){
       runCores = parallel::detectCores() - 1
     }
-    cl <- parallel::makeCluster(runCores, outfile = "")
+    cl <- parallel::makeCluster(runCores)
     doParallel::registerDoParallel(cl)
     parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
     

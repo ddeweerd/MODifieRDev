@@ -2,19 +2,24 @@
 #'
 #' @inheritParams clique_sum_permutation
 #' @param ppi_network A network as a dataframe where the first 2 columns are the interactions
-#' @param db_folder A directory where the database will be stored
+#' @param db_folder A directory where the database will be stored. 
+#' Please not that tilde expension does not work.
 #' @param db_name The name of the database. File suffix ".sqlite" will be appended
 #' @details
 #' Creates a SQLite database containing all maximal cliques from the network in the folder 
 #' \code{db_folder} with filename \code{db_name.sqlite}. This database can be used as in 
 #' input to \code{\link{clique_sum_exact}} and \code{\link{clique_sum_permutation}}
 #' 
+#' @author Dirk de Weerd
 #' @export
 build_clique_db <- function(ppi_network, db_folder, db_name){
   db_name <- paste0(db_name, ".sqlite")
   graphed_frame <- igraph::graph.data.frame(unique(ppi_network) , directed = FALSE)
   graphed_frame <- igraph::simplify(graphed_frame)
   vertex_dictionary <- cbind(as.vector((V(graphed_frame)) -1), as.vector(names(V(graphed_frame))))
+  if (length(grep(pattern = "/$", db_folder)) == 0){
+    db_folder <- paste0(db_folder, "/")
+  }
   utils::write.table(x = vertex_dictionary, 
               paste0(db_folder, "vertex_dictionary.txt"), 
               quote = F, 
