@@ -736,10 +736,14 @@ wgnca_module <- wgcna_set_module_size(size = 200,
 
 ## Consensus modules
 
-A consensus module can be derived with the function `create_module_set()`. It will return a module object of 
+Currently, there are two different methods implemented to derive a consensus module. The first is a count-based consensus between a list of modules and the second is specific betweenness (S2B) [@Garcia-Vaquero2018]
+
+### Count based
+
+A count based consensus module can be derived with the function `create_module_set()`. It will return a module object of 
 class `MODifieR_module`, same as the individual methods. The subclass is `Module_set`.
 
-The method currently implemented to derive a consensus module from a set of modules is by tabulating the presence
+The method derives a consensus module from a set of modules is by tabulating the presence
 of each gene in the individual methods. The next step is to set a minimum for this presence; for example, 
 a gene has to be present in at least 3 of the individual modules.
 
@@ -777,7 +781,7 @@ so the consensus module where genes are present in at least 4 individual methods
 consensus_module4 <- consensus_modules[[4]]
 ```
 
-Like other module objects, it has vector containing the module genes and a list containing the settings.
+Like other module objects, it has a vector containing the module genes and a list containing the settings.
 In addition, it has the following elements:
 
 - `module_gene_list` A named list containing the module genes from the original modules  
@@ -819,6 +823,34 @@ And uploaded into [String](https://string-db.org). This resulted in Figure 1 and
 |GO.0043566|structure-specific DNA binding          |	7	                |0.000445             |
 |GO.0019899|enzyme binding                          |	14	              |0.00062              |
 Table 2: Excerpt from Molecular Function GO term table on the result page of [String](https://string-db.org)
+
+### Specific betweenness (S2B)
+
+An S2B consensus module can be derived with the function `S2B()`. It will return a module object of 
+class `MODifieR_module`, same as the individual methods. The subclass is `S2B`.
+
+The method derives a consensus module between two modules. Originally conceived by [@Garcia-Vaquero2018] to find an overlap between two gene sets from related diseases, it can also be applied to find an overlap between gene sets tht have been inferred with different methods but are from the same disease.
+
+The method works by prioritizing genes frequently and specifically present in shortest paths linking two disease modules. For a detailed description of the algorithm, see [@Garcia-Vaquero2018].
+
+The function is called using `S2B()`
+
+In the example below, the clique_sum_permutation and MODA modules are used, and the number of iterations (`nrep` and `nrep2`) is set to 50 instead of 100 to shorten computation time.
+
+```{r, eval=FALSE, echo=TRUE}
+ S2B_module <- S2B(MODifieR_module1 = clique_sum_permutation_module, 
+                   MODifieR_module2 = moda_module, 
+                   ppi_network = ppi_network, 
+                   nrep = 50, 
+                   nrep2 = 50)
+```
+
+
+As with all module objects, the S2B object has a vector called `module_genes` for the genes that make up the module and also a list containing the settings that have been used to generate the object.
+
+In addition it has two related fields, `input_class1` and `input_class2`, that show the class of the `MODifieR_input` objects that have been used as input. In the case of the tutorial they are `Clique_Sum_permutation` and `MODA`
+
+
 
 ## General functions
 

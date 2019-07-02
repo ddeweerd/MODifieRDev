@@ -40,7 +40,7 @@ clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, cli
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
-  con <- RSQLite::dbConnect(RSQLite::SQLite(), db)
+  con <- connect_db(db)
   
   unique_genes <- unname(unlist(RSQLite::dbGetQuery(con, "SELECT * FROM unique_genes")))
   
@@ -118,7 +118,7 @@ clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, cli
 }
 
 clique_sum_core_permutation <- function(chunk_row, db, null_scores, genes, min_clique_size){
-  con <- RSQLite::dbConnect(RSQLite::SQLite(), db)
+  con <- connect_db(db)
   query <- sprintf("SELECT * FROM %s WHERE rowid BETWEEN %s AND %s", chunk_row[1], chunk_row[2], chunk_row[3])
   result <- RSQLite::dbGetQuery(con, query) 
   result <- data.frame(lapply(result, as.character), stringsAsFactors = F)

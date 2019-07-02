@@ -110,3 +110,14 @@ summary.MODifieR_input <- function(MODifieR_input){
   
 }
 
+connect_db <- function(db){
+  if (!grepl(pattern = ".sqlite$", x = db)){
+    db <- paste0(db, ".sqlite")
+  }
+  if (file.exists(db)){
+    con <- RSQLite::dbConnect(RSQLite::SQLite(), db)
+  }else{
+    stop("Database ", db,  " could not be found")
+  }
+  return (con)
+}

@@ -1,4 +1,4 @@
-#' DIAMOnD module
+#' DIAMOnD 
 #' 
 #' A seed gene based algorithm to identify disease module from differentially expressed genes
 #' 

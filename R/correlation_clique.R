@@ -250,7 +250,7 @@ process_clique <- function(clique_file, genes, graphed_ppi, clique_significance,
     }
     clique_genes <- sapply(X = line, FUN = strsplit, split = " ")
     
-    system.time(size_and_deg <- (unname(sapply(X = clique_genes, FUN = function(x) c(length(x), sum(x %in% deg_names))))))
+    size_and_deg <- unname(sapply(X = clique_genes, FUN = function(x) c(length(x), sum(x %in% deg_names))))
     
     clique_sizes <- unique(size_and_deg[1,])
     
