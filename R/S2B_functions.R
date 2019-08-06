@@ -31,7 +31,7 @@ S2B_core = function(seed_graph,index1,index2,nrep,nrep2, n_cores = 4){
     cl <- parallel::makeCluster(n_cores)
     doParallel::registerDoParallel(cl)
     parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
-    foreach(i = 1:nrep2,.packages = "S2B" ) %dopar% {
+    foreach(i = 1:nrep2,.packages = "MODifieRDev" ) %dopar% {
       
       rindex1=sample(igraph::gorder(seed_graph),length(index1),replace=FALSE)
       rindex2=sample(igraph::gorder(seed_graph),length(index2),replace=FALSE)
@@ -49,7 +49,7 @@ S2B_core = function(seed_graph,index1,index2,nrep,nrep2, n_cores = 4){
     cl <- parallel::makeCluster(n_cores)
     doParallel::registerDoParallel(cl)
     parallel::clusterCall(cl, function(x) .libPaths(x), .libPaths())
-    foreach(i = 1:nrep,.packages = "S2B" ) %dopar% {
+    foreach(i = 1:nrep,.packages = "MODifieRDev" ) %dopar% {
       
       rg=igraph::sample_degseq(deglist,method="vl")
       rbt=subS2B(rg,index1,index2,meandist)
