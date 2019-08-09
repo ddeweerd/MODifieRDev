@@ -36,7 +36,18 @@ clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, cli
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
- 
+  
+  #Validate the input parameters
+  check_diff_genes(MODifieR_input)
+  validate_inputs(settings)
+  
+  if ((n_iterations * clique_significance) < 1){
+    min_significance <- 1 / n_iterations
+    warning("With ", n_iterations, " iterations, minimum clique significance is ", min_significance, 
+            ". Changed clique_significance to ", min_significance, call. = F)
+    clique_significance <- 1 / n_iterations
+  }
+  
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
@@ -68,7 +79,10 @@ clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, cli
   
   table_sizes <- as.numeric(sub("clique", "", tables))
   
-  null_scores <- sapply(min_clique_size:max(table_sizes), permute_scores, n_iterations = n_iterations, genes = genes, clique_significance =clique_significance)
+  null_scores <- sapply(min_clique_size:max(table_sizes), permute_scores, 
+                        n_iterations = n_iterations, 
+                        genes = genes, 
+                        clique_significance = clique_significance)
   
   names(null_scores) <- min_clique_size:max(table_sizes)
   
@@ -88,9 +102,9 @@ clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, cli
       
       module_genes <- foreach(i = 1:length(chunk_table),.combine = 'append', .packages = "MODifieRDev" ) %dopar% {
         clique_sum_core_permutation(chunk_row = chunk_table[[i]], db = db, 
-                                                  null_scores = null_scores, 
-                                                  genes = genes, 
-                                                  min_clique_size = min_clique_size)
+                                    null_scores = null_scores, 
+                                    genes = genes, 
+                                    min_clique_size = min_clique_size)
         
       }
       parallel::stopCluster(cl) # stop the cluster
@@ -110,7 +124,7 @@ clique_sum_permutation <- function(MODifieR_input, db, n_iterations = 10000, cli
   new_clique_sum_module <- list("module_genes" =  module_genes,
                                 "settings" = settings)
   
-  class(new_clique_sum_module) <- c("MODifieR_module", "Clique_Sum_permutation")
+  class(new_clique_sum_module) <- c("MODifieR_module", "Clique_Sum_permutation", class(MODifieR_input)[3])
   
   RSQLite::dbDisconnect(conn = con)
   
@@ -167,6 +181,7 @@ get_chunks_perm <- function(result_row, null_scores, genes, min_clique_size){
   
   for (clique in clique_sizes){
     if (sum(n_p_genes[1:clique]) >= null_scores[as.character(clique)]){
+      
       return (c(paste("clique", result_row[3], sep = ""), result_row[1], result_row[2]))
     }
   }

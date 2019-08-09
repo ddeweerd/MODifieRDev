@@ -50,6 +50,7 @@ diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
+  check_expression_matrix(MODifieR_input)
   
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
@@ -81,7 +82,7 @@ diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
                                                          cutHeight = cut_height,
                                                          deepSplit = deepSplit,
                                                          pamRespectsDendro = pamRespectsDendro,
-                                                         minClusterSize = minClusterSize);
+                                                         minClusterSize = minClusterSize)
   
   #Every module is assigned a color. Note that GREY is reserved for genes which do not belong to any differentially coexpressed module
   dynamicColorsHybridC1C2 <- WGCNA::labels2colors(dynamicModsHybridC1C2)
@@ -110,23 +111,18 @@ diffcoex <- function(MODifieR_input, beta = NULL, cor_method = "spearman",
                             group1_indici = MODifieR_input$group_indici[[1]], 
                             color_vector = color_vector, cor_method = cor_method)
   
-  module_p_values <- cbind(sapply(X = pval_null_distr, function(x){x$emp_pvalue}),
-                           sapply(X = pval_null_distr, function(x){x$z_score}))
-  
-  null_distributions <- t(sapply(X = pval_null_distr, function(x)x$null_distribution))
-  
-  colnames(module_p_values) <- c("p_values", "z_scores")
-  
+  module_p_values <<- as.data.frame(sapply(X = pval_null_distr, function(x){x$emp_pvalue}))
   rownames(module_p_values) <- colors
-  
-  module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values[ ,1] < pval_cutoff)])))
+  colnames(module_p_values) <- "pvalue"
+                         
+  module_genes <- as.vector(unlist(unname(module_genes_list[which(module_p_values < pval_cutoff)])))
   module_colors <- names(module_genes_list[which(module_p_values < pval_cutoff)])
   
   new_diffcoex_module <- construct_diffcoex_module(module_genes = module_genes,
                                                    module_colors = module_colors,
                                                    module_p_values = module_p_values,
                                                    color_vector = color_vector,
-                                                   null_distributions = null_distributions,
+                                                   input_class = class(MODifieR_input)[3],
                                                    settings = settings)
   
   return (new_diffcoex_module)
@@ -138,17 +134,16 @@ aggregate_colors <- function(color, genes, color_vector){
 }
 #Module constructor function
 construct_diffcoex_module <- function(module_genes, module_colors, module_p_values,
-                                      color_vector, null_distributions, settings){
+                                      color_vector, input_class, settings){
   
   
   new_diffcoex_module <- list("module_genes" =  module_genes,
                               "module_colors" = module_colors,
                               "module_p_values" = module_p_values,
                               "color_vector" =  color_vector,
-                              "null_distributions" = null_distributions,
                               "settings" = settings)
   
-  class(new_diffcoex_module) <- c("MODifieR_module", "DiffCoEx")
+  class(new_diffcoex_module) <- c("MODifieR_module", "DiffCoEx", input_class)
   
   
   return (new_diffcoex_module)
@@ -177,6 +172,7 @@ diffcoex_split_module_by_color <- function(diffcoex_module){
                                                       module_colors = color,
                                                       color_vector = color_vector,
                                                       module_p_values = diffcoex_module$module_p_values,
+                                                      input_class = class(diffcoex_module)[3],
                                                       settings = diffcoex_module$settings)
   }
   return(module_list)

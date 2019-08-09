@@ -38,7 +38,19 @@ S2B <- function(MODifieR_module1, MODifieR_module2, ppi_network, nrep = 100, nre
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
- 
+  
+  if(class(MODifieR_module1)[1] != "MODifieR_module"){
+    stop("MODifieR_module1 is not of class MODifieR_module", call. = F)
+  }
+  
+  if(class(MODifieR_module2)[1] != "MODifieR_module"){
+    stop("MODifieR_module2 is not of class MODifieR_module", call. = F)
+  }
+  
+  validate_ppi(ppi_network)
+  
+  validate_inputs(settings)
+  
   ppi_graph <- simpmain(igraph::graph_from_data_frame(ppi_network))
  
   set1_index <- seedrows(ppi_graph, MODifieR_module1$module_genes)

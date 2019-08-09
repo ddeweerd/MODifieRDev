@@ -4,7 +4,8 @@
 \alias{S2B}
 \title{S2B}
 \usage{
-S2B(MODifieR_module1, MODifieR_module2, ppi_network, nrep, nrep2, n_cores)
+S2B(MODifieR_module1, MODifieR_module2, ppi_network, nrep = 100,
+  nrep2 = 100, n_cores = 4)
 }
 \arguments{
 \item{MODifieR_module1}{A MODifieR module inferred by a disease module inference method}

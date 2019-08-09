@@ -1,4 +1,4 @@
-#Adapted code from original MODA package
+#Adapted code originally from MODA package
 WMPH <- function (datExpr, indicatename, cutmethod = c("Density", "Modularity"), power = 10) 
 {
   ADJ1 = abs(cor(datExpr, use = "p"))^power
@@ -14,7 +14,7 @@ WMPH <- function (datExpr, indicatename, cutmethod = c("Density", "Modularity"),
     if (cutmethod == "Density") {
       pDensity[i] <- MODA::PartitionDensity(ADJ1, groups)
     }
-    else {
+    else if (cutmethod == "Modularity") {
       pDensity[i] <- MODA::PartitionModularity(ADJ1, groups)
     }
     if (pDensity[i] > maxpDensity) {

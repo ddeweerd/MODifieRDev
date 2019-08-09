@@ -55,27 +55,39 @@ correlation_clique <- function(MODifieR_input, ppi_network,
                                                                               argument)]]
   }
   
+  #Validate the input parameters
+  check_diff_genes(MODifieR_input, deg_cutoff = deg_cutoff)
+  check_expression_matrix(MODifieR_input)
+  ppi_network <- validate_ppi(ppi_network)
+  validate_inputs(settings)
+  
+  if (ncol(ppi_network) == 2){
+    warning("Score column in PPi network missing. Setting the score to 1000 (highest confidence ) for all interactions")
+    ppi_network <- cbind(ppi_network, 1000)
+  }
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
   MODifieR_input$diff_genes <- MODifieR_input$diff_genes[MODifieR_input$diff_genes$gene %in% rownames(MODifieR_input$annotated_exprs_matrix), ]
-  #Making sure the PPi network has 3 columns
-  springConnection <- ppi_network[,1:3]
+  
   #Get DEGs
   pValueMatrix <- MODifieR_input$diff_genes
   pValueMatrix <- stats::na.omit(pValueMatrix)
   #Remove genes from PPi that are not in input
-  overlap <- springConnection[,1] %in% pValueMatrix[,1] & springConnection[,1] %in% rownames(MODifieR_input$annotated_exprs_matrix)
-  springConnection <- springConnection[overlap,]
-  overlap <- springConnection[,2] %in% pValueMatrix[,1] & springConnection[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
-  springConnection <- springConnection[overlap,]
+  overlap <- ppi_network[,1] %in% pValueMatrix[,1] & ppi_network[,1] %in% rownames(MODifieR_input$annotated_exprs_matrix)
+  ppi_network <- ppi_network[overlap,]
+  overlap <- ppi_network[,2] %in% pValueMatrix[,1] & ppi_network[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
+  ppi_network <- ppi_network[overlap,]
   
-  springConnection[,3] <- springConnection[,3] / 1000
+  ppi_network[,3] <- ppi_network[,3] / 1000
+  if (nrow(ppi_network) == 0){
+    stop("No shared genes between ppi_network, diff_genes and annotated_exprs_matrix", call. = F)
+  }
   #Calculates (1- p value) for all relevant connections in the PPi network, and is stored in column 1.
   #Column 2 will contain the PPi score from the PPi network
-  corrPvalues <- cbind(apply(X = springConnection, MARGIN = 1, FUN = calculate_correlation, 
+  corrPvalues <- cbind(apply(X = ppi_network, MARGIN = 1, FUN = calculate_correlation, 
                              expression_matrix = MODifieR_input$annotated_exprs_matrix),
-                       springConnection[,3])
+                       ppi_network[,3])
   #Calculates square root of p-value * PPi score. This is then scaled by probabilityScaleFactor. 
   pval_score <- apply(X = corrPvalues, MARGIN = 1, FUN = function(x){sqrt(x[1] * x[2])})
   
@@ -83,7 +95,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   
   genes <- dataframe_to_vector(as.data.frame(pValueMatrix))
   
-  genes <- genes[names(genes) %in% unique(unlist(springConnection[ ,1:2]))]
+  genes <- genes[names(genes) %in% unique(unlist(ppi_network[ ,1:2]))]
   
   module_list <- list()
   if (multiple_cores){
@@ -93,7 +105,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
     #module_list <- foreach(i=1:iteration, .combine = list, .export = ls(.GlobalEnv)) %do% {
     #Compare computed scores to random scores
     
-    module_list <- parLapply(cl = cl, X = 1:iteration, fun = perform_iterations, pval_score, springConnection, genes, clique_significance, deg_cutoff)
+    module_list <- parLapply(cl = cl, X = 1:iteration, fun = perform_iterations, pval_score, ppi_network, genes, clique_significance, deg_cutoff)
     parallel::stopCluster(cl) # stop the cluster
     
     #}
@@ -104,7 +116,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
       #Compare computed scores to random scores 
       
       
-      module_list[[i]] <- perform_iterations(iteration_n = i, pval_score = pval_score, springConnection = springConnection, genes = genes, clique_significance = clique_significance, deg_cutoff = deg_cutoff)
+      module_list[[i]] <- perform_iterations(iteration_n = i, pval_score = pval_score, ppi_network = ppi_network, genes = genes, clique_significance = clique_significance, deg_cutoff = deg_cutoff)
     }
   }
   #Get the frequency of each gene that has been present in a module, expressed in fraction
@@ -115,17 +127,18 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   
   new_correlation_clique_module <- construct_correlation_module(module_genes = module_genes,
                                                                 frequency_table = tabled_frequencies,
+                                                                input_class = class(MODifieR_input)[3],
                                                                 settings = settings)
   
   return( new_correlation_clique_module)
 }
 
 
-perform_iterations <- function(iteration_n, pval_score, springConnection, genes, clique_significance, deg_cutoff){
+perform_iterations <- function(iteration_n, pval_score, ppi_network, genes, clique_significance, deg_cutoff){
   
   to_pass <- pval_score > runif(n = length(pval_score))
   
-  clique_file_list <- create_clique_file(adjacency_matrix = springConnection[to_pass, ], genes = genes) 
+  clique_file_list <- create_clique_file(adjacency_matrix = ppi_network[to_pass, ], genes = genes) 
   
   module_list <- process_clique(clique_file = clique_file_list$tempfile, genes = clique_file_list$tr_genes, 
                                 graphed_ppi = clique_file_list$graphed_ppi, clique_significance = clique_significance,
@@ -173,6 +186,7 @@ correlation_adjust_cutoff <- function(frequency_cutoff, correlation_module){
   
   new_correlation_clique_module <- construct_correlation_module(module_genes = module_genes,
                                                                 frequency_table = frequency_table,
+                                                                input_class = class(correlation_module)[3],
                                                                 settings = correlation_module$settings)
   return( new_correlation_clique_module)
   
@@ -206,13 +220,13 @@ correlation_set_module_size <- function(size, correlation_module){
   return (new_correlation_clique_module)
 }
 
-construct_correlation_module <- function(module_genes, frequency_table, settings){
+construct_correlation_module <- function(module_genes, frequency_table, input_class, settings){
   
   new_correlation_clique_module <- list("module_genes" = module_genes,
                                         "frequency_table" = frequency_table,
                                         "settings" = settings)
   
-  class( new_correlation_clique_module) <- c("MODifieR_module", "Correlation_clique")
+  class( new_correlation_clique_module) <- c("MODifieR_module", "Correlation_clique", input_class)
   
   return( new_correlation_clique_module)
   
@@ -229,13 +243,13 @@ create_clique_file <- function(adjacency_matrix, genes){
   names(genes) <- sapply(X = names(genes), FUN = entrez_to_index, name_table = name_table)
   
   igraph::max_cliques(graph = g, file = clique_file)
-
+  
   return(list(tempfile = clique_file, graphed_ppi = g, name_table = name_table, tr_genes = genes))
 }
 
 
 process_clique <- function(clique_file, genes, graphed_ppi, clique_significance, deg_cutoff, name_table) {
- 
+  
   deg_genes <- genes[genes < deg_cutoff]
   
   non_deg_genes <- genes[genes >= deg_cutoff]

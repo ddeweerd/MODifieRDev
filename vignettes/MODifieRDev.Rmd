@@ -125,7 +125,8 @@ BiocManager::install(c("AnnotationDbi",
                        "stackoverflow",
                        "preprocessCore",
                        "DESeq2",
-                       "edgeR"), 
+                       "edgeR",
+                       "openxlsx"), 
                      version = "3.8")
 
 ```
@@ -244,7 +245,7 @@ each of the aforementioned groups.
 ### Module object
 
 The second object, with class `MODifieR_module` is an object that is produced by the disease module
-inference methods. They also have a subclass according to the method that produced them.
+inference methods. They also have a subclassses according to the method and input type (Microarray or RNA-seq) that produced them.
 
 Like the input object, the module objects are also named lists. Module objects differ between each function that generates them (hence the subclass) but have certain features in common:
   
@@ -308,10 +309,6 @@ Creating an RNA-seq input object is quite similar to creating a microarray input
 - `group2_label` Same, but for group 2
 
 - `expression` A Boolean value indicating if expression matrix data should be calculated.
-
-- `differential expression` A Boolean value indicating if DEGs data should be calculated.
-
-- `use_adjusted` use adjusted p value for differential expression analysis?
 
 - `normalize_quantiles`, Normalize quantiles for WGCNA-based methods?
 
@@ -625,16 +622,25 @@ A clique based algorithm to identify disease modules from differentially express
 Much of the code and documentation has been taken from the now defunct package "ProNet"
 
 In MODifieR, the function can be called using `mod_mcode()`
+
+The MCODE module is the union of all submodules with a score above `module_score`.
 ```{r, eval=FALSE, echo=TRUE}
-mcode_module_list <- mod_mcode(MODifieR_input = MODifieR_input_microarray, 
+mcode_module <- mod_mcode(MODifieR_input = MODifieR_input_microarray, 
                                ppi_network = ppi_network)
 ```
 
-The return type of MCODE is a list (of MCODE modules), as it generally returns multiple modules sorted by 
-decreasing score. Here, we take out it the first one:
+###### Post-processing
+
+For MCODE, two post-processing functions are available. The first one, `mcode_adjust_score`, allows to change the `module_score`. In the example below the score is set to 12
 
 ```{r, eval=FALSE, echo=TRUE}
-mcode_module <- mcode_module_list[[1]]
+mcode_module <- mcode_adjust_score(module_cutoff = 12, mcode_module = mcode_module)
+```
+
+With the second function, `mcode_split_modules`, splits the mcode_module into the different submodules above threshold `module_cutoff`. The return type is a list of MCODE MODifieR_modules.
+
+```{r, eval=FALSE, echo=TRUE}
+mcode_module_list <- mcode_split_modules(module_cutoff = 3, mcode_module)
 ```
 
 ### MODA
@@ -872,6 +878,42 @@ plot(consensus_module4, ppi_network = ppi_network)
 
 
 ![Figure 3:  Using the plot function in MODifieRDev with the diamond module and the included PPi network as inputs](figures/diamond.png)
+
+### Exporting
+
+MODifieR objects can be exported to both csv and an excel workbook. 
+
+#### Exporting to csv
+
+To export MODifieR objects to csv, the function `export` is used. It takes a MODifieR object as primary input and also a folder to write the object to as a secondary input. If the folder does not exist, it will be created. 
+
+Every element of the object will be written to a separate csv file.
+
+```{r, eval=FALSE, echo=TRUE}
+export(MODifieR_object = consensus_modules[[4]], folder = "modules/consensus_module_4")
+```
+
+The input object can also be exported:
+
+```{r, eval=FALSE, echo=TRUE}
+export(MODifieR_object = MODifieR_input_microarray, folder = "inputs/microarray")
+```
+
+#### Exporting to an excel workbook
+
+To export to an excel workbook, the function `export_xlsx` is used. Like export, it takes a MODifieR object and a folder as inputs, and in addition an optional `filename`. If none given, the name of the object will be the filename.
+
+The output consists of a multi-sheet excel workbook, where every element of the object is a separate sheet.
+
+```{r, eval=FALSE, echo=TRUE}
+export_xlsx(MODifieR_object = diamond_module, folder = "modules/diamond_module")
+```
+
+Also exporting the input object:
+
+```{r, eval=FALSE, echo=TRUE}
+export_xlsx(MODifieR_object = MODifieR_input_microarray, folder = "inputs/microarray")
+```
 
 # References
 

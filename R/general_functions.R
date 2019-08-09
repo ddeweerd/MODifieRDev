@@ -20,6 +20,7 @@
 #' @importFrom DESeq2 varianceStabilizingTransformation
 #' @importFrom preprocessCore normalize.quantiles
 #' @importFrom stackoverflow match.call.defaults
+#' @importFrom openxlsx write.xlsx
 #' @useDynLib MODifieRDev
 
 #'@title Convert the module genes in a MODifieR_input object from official gene symbols to ENTREZ gene IDs

@@ -44,6 +44,12 @@ diamond <- function(MODifieR_input, ppi_network, deg_cutoff = 0.05, n_output_gen
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
+  
+  #Validate the input parameters
+  check_diff_genes(MODifieR_input, deg_cutoff = deg_cutoff)
+  ppi_network <- validate_ppi(ppi_network)
+  validate_inputs(settings)
+  
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }

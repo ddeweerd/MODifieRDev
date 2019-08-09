@@ -39,9 +39,15 @@ clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
+  
+  #Validate the input parameters
+  check_diff_genes(MODifieR_input, deg_cutoff = deg_cutoff)
+  validate_inputs(settings)
+  
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
+  
   con <- connect_db(db)
   
   unique_genes <- unname(unlist(RSQLite::dbGetQuery(con, "SELECT * FROM unique_genes")))
@@ -87,7 +93,7 @@ clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
                                  genes = genes,
                                  min_deg_in_clique = min_deg_in_clique)
   
-  if (is.null(chunk_table)){
+  if (is.null(chunk_table) | length(chunk_table) == 0){
     module_genes <- NULL
   }else{
     if (multiple_cores == T){
@@ -116,7 +122,7 @@ clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
   new_clique_sum_module <- list("module_genes" =  module_genes,
                                 "settings" = settings)
   
-  class(new_clique_sum_module) <- c("MODifieR_module", "Clique_Sum_exact")
+  class(new_clique_sum_module) <- c("MODifieR_module", "Clique_Sum_exact", class(MODifieR_input)[3])
   
   RSQLite::dbDisconnect(conn = con)
   
