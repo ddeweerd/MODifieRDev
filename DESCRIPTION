@@ -24,7 +24,8 @@ Imports:
     RSQLite,
     edgeR,
     DESeq2,
-    preprocessCore
+    preprocessCore,
+    openxlsx
 Depends:
     R (>= 3.1.0),
     igraph,

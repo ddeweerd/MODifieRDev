@@ -125,7 +125,8 @@ BiocManager::install(c("AnnotationDbi",
                        "stackoverflow",
                        "preprocessCore",
                        "DESeq2",
-                       "edgeR"), 
+                       "edgeR",
+                       "openxlsx"), 
                      version = "3.8")
 
 ```
@@ -244,7 +245,7 @@ each of the aforementioned groups.
 ### Module object
 
 The second object, with class `MODifieR_module` is an object that is produced by the disease module
-inference methods. They also have a subclass according to the method that produced them.
+inference methods. They also have a subclassses according to the method and input type (Microarray or RNA-seq) that produced them.
 
 Like the input object, the module objects are also named lists. Module objects differ between each function that generates them (hence the subclass) but have certain features in common:
   
@@ -308,10 +309,6 @@ Creating an RNA-seq input object is quite similar to creating a microarray input
 - `group2_label` Same, but for group 2
 
 - `expression` A Boolean value indicating if expression matrix data should be calculated.
-
-- `differential expression` A Boolean value indicating if DEGs data should be calculated.
-
-- `use_adjusted` use adjusted p value for differential expression analysis?
 
 - `normalize_quantiles`, Normalize quantiles for WGCNA-based methods?
 
@@ -625,16 +622,25 @@ A clique based algorithm to identify disease modules from differentially express
 Much of the code and documentation has been taken from the now defunct package "ProNet"
 
 In MODifieR, the function can be called using `mod_mcode()`
+
+The MCODE module is the union of all submodules with a score above `module_score`.
 ```{r, eval=FALSE, echo=TRUE}
-mcode_module_list <- mod_mcode(MODifieR_input = MODifieR_input_microarray, 
+mcode_module <- mod_mcode(MODifieR_input = MODifieR_input_microarray, 
                                ppi_network = ppi_network)
 ```
 
-The return type of MCODE is a list (of MCODE modules), as it generally returns multiple modules sorted by 
-decreasing score. Here, we take out it the first one:
+###### Post-processing
+
+For MCODE, two post-processing functions are available. The first one, `mcode_adjust_score`, allows to change the `module_score`. In the example below the score is set to 12
 
 ```{r, eval=FALSE, echo=TRUE}
-mcode_module <- mcode_module_list[[1]]
+mcode_module <- mcode_adjust_score(module_cutoff = 12, mcode_module = mcode_module)
+```
+
+With the second function, `mcode_split_modules`, splits the mcode_module into the different submodules above threshold `module_cutoff`. The return type is a list of MCODE MODifieR_modules.
+
+```{r, eval=FALSE, echo=TRUE}
+mcode_module_list <- mcode_split_modules(module_cutoff = 3, mcode_module)
 ```
 
 ### MODA
@@ -736,10 +742,14 @@ wgnca_module <- wgcna_set_module_size(size = 200,
 
 ## Consensus modules
 
-A consensus module can be derived with the function `create_module_set()`. It will return a module object of 
+Currently, there are two different methods implemented to derive a consensus module. The first is a count-based consensus between a list of modules and the second is specific betweenness (S2B) [@Garcia-Vaquero2018]
+
+### Count based
+
+A count based consensus module can be derived with the function `create_module_set()`. It will return a module object of 
 class `MODifieR_module`, same as the individual methods. The subclass is `Module_set`.
 
-The method currently implemented to derive a consensus module from a set of modules is by tabulating the presence
+The method derives a consensus module from a set of modules is by tabulating the presence
 of each gene in the individual methods. The next step is to set a minimum for this presence; for example, 
 a gene has to be present in at least 3 of the individual modules.
 
@@ -777,7 +787,7 @@ so the consensus module where genes are present in at least 4 individual methods
 consensus_module4 <- consensus_modules[[4]]
 ```
 
-Like other module objects, it has vector containing the module genes and a list containing the settings.
+Like other module objects, it has a vector containing the module genes and a list containing the settings.
 In addition, it has the following elements:
 
 - `module_gene_list` A named list containing the module genes from the original modules  
@@ -820,6 +830,34 @@ And uploaded into [String](https://string-db.org). This resulted in Figure 1 and
 |GO.0019899|enzyme binding                          |	14	              |0.00062              |
 Table 2: Excerpt from Molecular Function GO term table on the result page of [String](https://string-db.org)
 
+### Specific betweenness (S2B)
+
+An S2B consensus module can be derived with the function `S2B()`. It will return a module object of 
+class `MODifieR_module`, same as the individual methods. The subclass is `S2B`.
+
+The method derives a consensus module between two modules. Originally conceived by [@Garcia-Vaquero2018] to find an overlap between two gene sets from related diseases, it can also be applied to find an overlap between gene sets tht have been inferred with different methods but are from the same disease.
+
+The method works by prioritizing genes frequently and specifically present in shortest paths linking two disease modules. For a detailed description of the algorithm, see [@Garcia-Vaquero2018].
+
+The function is called using `S2B()`
+
+In the example below, the clique_sum_permutation and MODA modules are used, and the number of iterations (`nrep` and `nrep2`) is set to 50 instead of 100 to shorten computation time.
+
+```{r, eval=FALSE, echo=TRUE}
+ S2B_module <- S2B(MODifieR_module1 = clique_sum_permutation_module, 
+                   MODifieR_module2 = moda_module, 
+                   ppi_network = ppi_network, 
+                   nrep = 50, 
+                   nrep2 = 50)
+```
+
+
+As with all module objects, the S2B object has a vector called `module_genes` for the genes that make up the module and also a list containing the settings that have been used to generate the object.
+
+In addition it has two related fields, `input_class1` and `input_class2`, that show the class of the `MODifieR_input` objects that have been used as input. In the case of the tutorial they are `Clique_Sum_permutation` and `MODA`
+
+
+
 ## General functions
 
 ### Plotting
@@ -840,6 +878,42 @@ plot(consensus_module4, ppi_network = ppi_network)
 
 
 ![Figure 3:  Using the plot function in MODifieRDev with the diamond module and the included PPi network as inputs](figures/diamond.png)
+
+### Exporting
+
+MODifieR objects can be exported to both csv and an excel workbook. 
+
+#### Exporting to csv
+
+To export MODifieR objects to csv, the function `export` is used. It takes a MODifieR object as primary input and also a folder to write the object to as a secondary input. If the folder does not exist, it will be created. 
+
+Every element of the object will be written to a separate csv file.
+
+```{r, eval=FALSE, echo=TRUE}
+export(MODifieR_object = consensus_modules[[4]], folder = "modules/consensus_module_4")
+```
+
+The input object can also be exported:
+
+```{r, eval=FALSE, echo=TRUE}
+export(MODifieR_object = MODifieR_input_microarray, folder = "inputs/microarray")
+```
+
+#### Exporting to an excel workbook
+
+To export to an excel workbook, the function `export_xlsx` is used. Like export, it takes a MODifieR object and a folder as inputs, and in addition an optional `filename`. If none given, the name of the object will be the filename.
+
+The output consists of a multi-sheet excel workbook, where every element of the object is a separate sheet.
+
+```{r, eval=FALSE, echo=TRUE}
+export_xlsx(MODifieR_object = diamond_module, folder = "modules/diamond_module")
+```
+
+Also exporting the input object:
+
+```{r, eval=FALSE, echo=TRUE}
+export_xlsx(MODifieR_object = MODifieR_input_microarray, folder = "inputs/microarray")
+```
 
 # References
 

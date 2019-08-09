@@ -1,7 +1,7 @@
 #Module object constructor
 wgcna_module_constructor <- function(module_genes, info_table, 
                                      module_cor_and_p_value, powerEstimate,
-                                     module_colors, settings){
+                                     module_colors, input_class, settings){
   
   new_wgcna_module <- list("module_genes" =  module_genes,
                            "info_table" = info_table,
@@ -10,7 +10,7 @@ wgcna_module_constructor <- function(module_genes, info_table,
                            "module_colors" = module_colors,
                            "settings" = settings)
   
-  class(new_wgcna_module) <- c("MODifieR_module", "WGCNA")
+  class(new_wgcna_module) <- c("MODifieR_module", "WGCNA", input_class)
   
   return(new_wgcna_module)
 }
@@ -65,7 +65,7 @@ wgcna_module_constructor <- function(module_genes, info_table,
 wgcna <- function(MODifieR_input, group_of_interest, minModuleSize = 30, deepSplit = 2, pamRespectsDendro = F,
                   mergeCutHeight = 0.1, numericLabels = T,  pval_cutoff = 0.05, corType = "bicor",
                   maxBlockSize = 5000, TOMType = "signed", saveTOMs = T, maxPOutliers = 0.1, 
-                  dataset_name = deparse(substitute(MODifieR_input))){
+                  dataset_name = NULL){
   
   # Retrieve settings
   evaluated_args <- c(as.list(environment()))
@@ -74,6 +74,12 @@ wgcna <- function(MODifieR_input, group_of_interest, minModuleSize = 30, deepSpl
   for (argument in replace_args) {
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
+  }
+  #Validate the input parameters
+  check_expression_matrix(MODifieR_input)
+  validate_inputs(settings)
+  if (!(group_of_interest == 1 | group_of_interest == 2)){
+    stop("Group of interest is not 1 or 2", call. = F)
   }
   
   if (!is.null(dataset_name)){
@@ -132,6 +138,7 @@ wgcna <- function(MODifieR_input, group_of_interest, minModuleSize = 30, deepSpl
                                                module_cor_and_p_value = module_cor_and_p_value,
                                                powerEstimate = powerEstimate,
                                                module_colors = significant_module_colors,
+                                               input_class = class(MODifieR_input)[3],
                                                settings = settings)
   
   
@@ -276,6 +283,7 @@ wgcna_split_module_by_color <- function(wgcna_module){
                                                            module_cor_and_p_value = correlation_to_trait_table, 
                                                            powerEstimate = softthreshold_value, 
                                                            module_colors = module_colors[color], 
+                                                           input_class = class(wgcna_module)[3],
                                                            settings = settings)
   }
   return(new_wgcna_modules)
@@ -311,12 +319,13 @@ wgcna_set_module_size <- function(size, wgcna_module){
     size - sum(module_lengths[1:x])
   })))
   module_colors <- names(module_lengths)[1:color_index]
-  new_wgcna_module <-       wgcna_module_constructor(module_genes = wgcna_module$info_table
+  new_wgcna_module  <-       wgcna_module_constructor(module_genes = wgcna_module$info_table
                                                      [which(wgcna_module$info_table[ ,3] %in% module_colors), 1], 
                                                      info_table = wgcna_module$info_table, 
                                                      module_cor_and_p_value = wgcna_module$correlation_to_trait_table, 
                                                      powerEstimate = wgcna_module$softthreshold_value, 
                                                      module_colors = module_colors, 
+                                                     input_class = class(wgcna_module)[3],
                                                      settings = wgcna_module$settings)
   
   return(new_wgcna_module)

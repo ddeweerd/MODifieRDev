@@ -66,7 +66,7 @@ mcode.find.complexex<-function(graph,neighbors,vertex.weight,vwp)
 }
 
 ## post-processing (optional)
-mcode.fluff.complex<-function(graph,vertex.weight,fdt=0.8,complex.g,seen)
+mcode.fluff.complex<-function(graph,vertex.weight, fdt ,complex.g,seen)
 {
   seq_complex.g<-seq_along(complex.g)
   for(i in seq_complex.g){
@@ -83,7 +83,7 @@ mcode.fluff.complex<-function(graph,vertex.weight,fdt=0.8,complex.g,seen)
 }
 
 #	procedure MCODE-POST-PROCESS
-mcode.post.process<-function(graph,vertex.weight,haircut,fluff,fdt=0.8,
+mcode.post.process<-function(graph,vertex.weight,haircut,fluff, fdt,
                              set.complex.g,seen)
 {
   indx<-unlist(lapply(set.complex.g,
@@ -114,12 +114,10 @@ mcode.post.process<-function(graph,vertex.weight,haircut,fluff,fdt=0.8,
   return(set.complex.g)
 }
 
-mcode <- function(graph,vwp=0.5,haircut=FALSE,fluff=FALSE,fdt=0.8,loops=TRUE)
+mcode <- function(graph, vwp=0.5, haircut=FALSE, fluff=FALSE, fdt, loops=TRUE)
 {
   stopifnot(is.igraph(graph))
-  if(vwp>1 | vwp <0){
-    stop("vwp must be between 0 and 1")
-  }
+
   if(!loops){
     graph<-simplify(graph,remove.multiple=FALSE,remove.loops=TRUE)
   }

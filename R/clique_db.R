@@ -13,6 +13,13 @@
 #' @author Dirk de Weerd
 #' @export
 build_clique_db <- function(ppi_network, db_folder, db_name){
+  
+  ppi_network <- validate_ppi(ppi_network)
+  
+  if (!dir.exists(db_folder)){
+    stop("db_folder ", db_folder, " does not exist", call. = F)
+  }
+  
   db_name <- paste0(db_name, ".sqlite")
   graphed_frame <- igraph::graph.data.frame(unique(ppi_network) , directed = FALSE)
   graphed_frame <- igraph::simplify(graphed_frame)

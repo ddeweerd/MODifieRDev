@@ -28,7 +28,7 @@ in each iteration}
 
 \item{multiple_cores}{parallelize iterations using number of cores on system -1?}
 
-\item{n_cores}{Number of cores to use if parallel processing}
+\item{n_cores}{Number of cores to use}
 
 \item{dataset_name}{Optional name for the input object that will be stored in the settings object.
 Default is the variable name of the input object}

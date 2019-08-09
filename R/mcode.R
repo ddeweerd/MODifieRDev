@@ -33,9 +33,9 @@
 #' @author DIrk de Weerd
 #' 
 #' @export
-mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, haircut = F, fluff = F,
-                  fdt = 0.8, loops = T, deg_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL){
- 
+mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp = 0.5, haircut = F, fluff = F,
+                      fdt = 0.8, loops = T, deg_cutoff = 0.05, module_cutoff = 3.5, dataset_name = NULL){
+  
   # Retrieve settings
   evaluated_args <- c(as.list(environment()))
   settings <- as.list(stackoverflow::match.call.defaults()[-1])
@@ -45,10 +45,15 @@ mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, hair
                                                                               argument)]]
   }
   
+  #Validate the input parameters
+  check_diff_genes(MODifieR_input, deg_cutoff = deg_cutoff)
+  ppi_network <- validate_ppi(ppi_network)
+  validate_inputs(settings)
+  
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
-
+  
   deg_genes <- MODifieR_input$diff_genes
   
   deg_genes$pvalue <- -log10(deg_genes$pvalue)
@@ -57,43 +62,77 @@ mod_mcode <- function(MODifieR_input, ppi_network, hierarchy = 1, vwp =0.5, hair
   
   colnames(deg_genes) <- c("hgnc_symbol" , "p_val")
   deg_genes <- deg_genes[deg_genes$p_val > (-log10(deg_cutoff)), ]
- 
+  
   colnames(ppi_network) <- c("Interactor.1.Gene.symbol", "Interactor.2.Gene.symbol")
   
   network <-construction_mod(input = as.data.frame(deg_genes$hgnc_symbol),
-                         db = ppi_network,
-                         species = "human",
-                         hierarchy = 1)
-
+                             db = ppi_network,
+                             species = "human",
+                             hierarchy = hierarchy)
+  
   result <- mcode(network, vwp = vwp, haircut = haircut,
-                          fluff = fluff, fdt = fdt)
-
+                  fluff = fluff, fdt = fdt)
+  
   result_genes <- result$COMPLEX[result$score > module_cutoff]
   result_scores <- result$score[result$score > module_cutoff]
+
+  result_df <- lapply(X = result$COMPLEX, FUN = index_to_gene, ppi_network = ppi_network)
+  result_df <- lapply(result_df, get_module_genes)
   
-  result_df <- c()
-  for (k in 1:length(result_genes)){
-    result_df[[k]] <- ppi_network[result_genes[[k]] ,]
-    
-  }
+  module_genes <- get_module_genes(result_df[result$score > module_cutoff])
+   
+  result_modules <- construct_mcode_module(module_genes =  module_genes,
+                                      modules = result_df,
+                                      module_scores = result$score,
+                                      input_class = class(MODifieR_input)[3],
+                                      settings = settings)
   
-
-  result_modules <- list()
-
-  for (i in 1:length(result_genes)){
-    result_modules[[i]] <- mcode_module(module_genes =  unique(c(as.character(result_df[[i]]$Interactor.1.Gene.symbol) , as.character(result_df[[i]]$Interactor.2.Gene.symbol))),
-                                        module_score = result_scores[i],
-                                        settings = settings)
-  }
-
+  
   return(result_modules)
 }
 #@author Dirk de Weerd
-mcode_module <- function(module_genes, module_score, settings){
+construct_mcode_module <- function(module_genes, modules, module_scores, input_class, settings){
   new_mcode_module <- list("module_genes" = module_genes,
-                           "module_score" = module_score,
-                           "settings " = settings)
-
-  class(new_mcode_module) <- c("MODifieR_module", "Mcode")
+                           "modules" = modules,
+                           "module_scores" = module_scores,
+                           "settings" = settings)
+  
+  class(new_mcode_module) <- c("MODifieR_module", "Mcode", input_class)
   return(new_mcode_module)
+}
+
+index_to_gene <- function(indici, ppi_network){
+  ppi_network[indici, ]
+}
+
+get_module_genes <- function(gene_set){
+ unique(unname(unlist(gene_set)))
+}
+#' @export
+mcode_adjust_score <- function(module_cutoff, mcode_module){
+  mcode_module$settings$module_cutoff <- module_cutoff
+  
+  module_genes <-  get_module_genes(mcode_module$modules[mcode_module$module_score > module_cutoff])
+  
+  new_mcode_module <- construct_mcode_module(module_genes = module_genes, 
+                                   modules = mcode_module$modules,
+                                   module_scores = mcode_module$module_scores,
+                                   input_class = class(mcode_module)[3],
+                                   settings = mcode_module$settings)
+  
+  return(new_mcode_module)
+}
+#' @export
+mcode_split_modules <- function(module_cutoff, mcode_module){
+  new_mcode_modules <- list()
+  for(i in 1:length(mcode_module$modules[mcode_module$module_scores > module_cutoff])){
+    settings <- mcode_module$settings
+    settings$module_cutoff <- mcode_module$module_scores[i]
+    new_mcode_modules[[i]] <- construct_mcode_module(module_genes = mcode_module$modules[[i]], 
+                                           modules = , mcode_module$modules, 
+                                           module_scores <- mcode_module$module_scores,
+                                           input_class = class(mcode_module)[3],
+                                           settings = settings)
+  }
+  return(new_mcode_modules)
 }

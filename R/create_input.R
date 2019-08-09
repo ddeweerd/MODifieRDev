@@ -41,9 +41,8 @@
 #' 
 #' @author Dirk de Weerd
 #' @export
-create_input_microarray <- function (expression_matrix, annotation_table, group1_indici, group2_indici, group1_label, group2_label,
-                                     expression = T,  differential_expression= T, method = "MaxMean", filter_expression = T,
-                                     use_adjusted = T){
+create_input_microarray <- function (expression_matrix, annotation_table, group1_indici, group2_indici, group1_label, 
+                                     group2_label, method = "MaxMean", filter_expression = F, use_adjusted = T){ 
   
   # Retrieve settings
   evaluated_args <- c(as.list(environment()))
@@ -53,6 +52,17 @@ create_input_microarray <- function (expression_matrix, annotation_table, group1
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
+  
+  if (!is.matrix(expression_matrix)){
+    stop("expression_matrix is not a matrix")
+  }
+  if (!is.data.frame(annotation_table)){
+    stop("annotation_table is not a data.frame")
+  }
+  validate_indici(group1_indici, group2_indici, ncol(expression_matrix))
+  
+  validate_inputs(settings)
+
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
@@ -67,13 +77,13 @@ create_input_microarray <- function (expression_matrix, annotation_table, group1
   #And of the right class
   annotation_table$IDENTIFIER <- as.character(annotation_table$IDENTIFIER)
   #Should expression data be generated? 
-  if (expression == T){
+
     collapsed_exprs_mat <- collapse_probes(expression_matrix = expression_matrix, 
                                            annotation_table = annotation_table, 
                                            method = method)
-  }
+  
   #Same for expression data
-  if (differential_expression == T){
+
     P.Value = NULL
     adj.P.Val = NULL
     
@@ -90,7 +100,7 @@ create_input_microarray <- function (expression_matrix, annotation_table, group1
     diff_genes <- stats::na.omit(diff_genes)
     
     
-  }
+  
   modifier_input <- create_custom_microarray_input_object(diff_genes = diff_genes, 
                                                           limma_probe_table = limma_probe_table,
                                                           annotated_exprs_matrix = collapsed_exprs_mat,
@@ -135,7 +145,7 @@ create_input_microarray <- function (expression_matrix, annotation_table, group1
 #' are the group indici}
 #' @export
 create_input_rnaseq <- function(count_matrix, group1_indici, group2_indici, group1_label, group2_label,
-                                expression = T,  differential_expression= T, use_adjusted = T, normalize_quantiles = F){
+                                use_adjusted = T, normalize_quantiles = F){
   
   #Retrieve settings
   evaluated_args <- c(as.list(environment()))
@@ -145,22 +155,25 @@ create_input_rnaseq <- function(count_matrix, group1_indici, group2_indici, grou
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
+  
+  if (!is.matrix(count_matrix)){
+    stop("count_matrix is not a matrix")
+  }
+  validate_indici(group1_indici, group2_indici, ncol(count_matrix))
+  
+  validate_inputs(settings)
   #Initialize outputs
   diff_genes <- NULL
   collapsed_exprs_mat <- NULL
   edgeR_deg_table <- NULL
-  #Put here quantile normalization and variance stability
-  if (expression){
+ 
     collapsed_exprs_mat <- DESeq2::varianceStabilizingTransformation(count_matrix)
     if(normalize_quantiles){
       collapsed_exprs_mat <- preprocessCore::normalize.quantiles(as.matrix(collapsed_exprs_mat), copy = TRUE)
     }
-  }
-  #Same for expression data
-  if (differential_expression == T){
-    P.Value = NULL
-    adj.P.Val = NULL
-    
+  
+ 
+  
     group_factor <- create_group_factor(samples = colnames(count_matrix),
                                         group1_indici = group1_indici,
                                         group2_indici = group2_indici)
@@ -184,7 +197,7 @@ create_input_rnaseq <- function(count_matrix, group1_indici, group2_indici, grou
     diff_genes <- stats::na.omit(diff_genes)
     
     
-  }
+  
   modifier_input <- create_custom_rna_input_object(diff_genes = diff_genes, 
                                                    edgeR_deg_table = edgeR_deg_table$table,
                                                    annotated_exprs_matrix = collapsed_exprs_mat,
@@ -273,8 +286,6 @@ create_custom_microarray_input_object <- function(diff_genes = NULL, limma_probe
   class(modifier_input) <- c("MODifieR_input", "Expression", "MicroArray")
   
   return (modifier_input)
-  
-  
 }
 #
 summarize_probes <- function(limma_probe_table, use_adjusted){
@@ -291,12 +302,13 @@ summarize_probes <- function(limma_probe_table, use_adjusted){
 }
 
 collapse_probes <- function(expression_matrix, annotation_table, method){
-  
   freq_probes <- table(annotation_table$PROBEID)
   
   probe_names <- names(freq_probes[freq_probes == 1])
   
-  annotation_table_expression <- annotation_table[annotation_table$PROBEID  %in% probe_names,]
+  annotation_table_expression <- annotation_table[annotation_table$PROBEID  %in% probe_names, ]
+  
+  annotation_table_expression <- annotation_table_expression[annotation_table_expression$PROBEID %in% rownames(expression_matrix), ]
   
   annotation_table_expression <- stats::na.omit(annotation_table_expression)
   
@@ -307,6 +319,7 @@ collapse_probes <- function(expression_matrix, annotation_table, method){
   collapsed_exprs_mat <- collapsed_data$datETcollapsed
   
   return (collapsed_exprs_mat)
+  
 }
 #' Recalculate DEGs 
 #' @inheritParams create_input_microarray
@@ -407,7 +420,7 @@ create_custom_rna_input_object <- function(diff_genes = NULL, edgeR_deg_table = 
                          "count_matrix" = count_matrix,
                          "group_indici" = group_indici,
                          "settings" = settings)
-  class(modifier_input) <- c("MODifieR_input", "Expression", "RNA-seq")
+  class(modifier_input) <- c("MODifieR_input", "Expression", "RNA_seq")
   
   return (modifier_input)
   

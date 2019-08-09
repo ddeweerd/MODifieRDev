@@ -33,6 +33,11 @@ create_module_set <- function(min_frequency, module_list){
                                                                               argument)]]
   }
   
+  validate_integer(min_frequency, "min_frequency")
+  
+  if (!all(sapply(module_list, function(x)class(x)[1]) == "MODifieR_module")){
+    stop("Not all elements in module_list are of class MODifieR_module")
+  }
   
   module_gene_list <- sapply(X = module_list, FUN = function(x)x$module_genes)
   

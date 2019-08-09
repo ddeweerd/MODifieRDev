@@ -8,7 +8,7 @@
 #' @param min_clique_size Minimal size for cliques 
 #' @param min_deg_in_clique Minimum number of DEGs to be present in a clique
 #' @param multiple_cores Parallel process using multiple cores?
-#' @param n_cores Number of cores to use if parallel processing
+#' @param n_cores Number of cores to use 
 #' @param dataset_name Optional name for the input object that will be stored in the settings object.
 #' Default is the variable name of the input object
 #' @return clique_sum_exact returns an object of class "MODifieR_module" with subclass "Clique_Sum_exact". 
@@ -39,10 +39,16 @@ clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
     settings[[which(names(settings) == argument)]] <- evaluated_args[[which(names(evaluated_args) == 
                                                                               argument)]]
   }
+  
+  #Validate the input parameters
+  check_diff_genes(MODifieR_input, deg_cutoff = deg_cutoff)
+  validate_inputs(settings)
+  
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
-  con <- RSQLite::dbConnect(RSQLite::SQLite(), db)
+  
+  con <- connect_db(db)
   
   unique_genes <- unname(unlist(RSQLite::dbGetQuery(con, "SELECT * FROM unique_genes")))
   
@@ -87,7 +93,7 @@ clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
                                  genes = genes,
                                  min_deg_in_clique = min_deg_in_clique)
   
-  if (is.null(chunk_table)){
+  if (is.null(chunk_table) | length(chunk_table) == 0){
     module_genes <- NULL
   }else{
     if (multiple_cores == T){
@@ -116,7 +122,7 @@ clique_sum_exact <- function(MODifieR_input, db, clique_significance = 0.01,
   new_clique_sum_module <- list("module_genes" =  module_genes,
                                 "settings" = settings)
   
-  class(new_clique_sum_module) <- c("MODifieR_module", "Clique_Sum_exact")
+  class(new_clique_sum_module) <- c("MODifieR_module", "Clique_Sum_exact", class(MODifieR_input)[3])
   
   RSQLite::dbDisconnect(conn = con)
   
@@ -206,7 +212,7 @@ get_chunk_table <- function(con, deg_genes, cutoff_per_size, min_clique_size, ge
 #that will be checked for significance. Return a unique set of genes from the siginificant cliques
 clique_sum_core_exact <- function(chunk_row, db, deg_genes, genes, cutoff_per_size, min_clique_size){
   
-  con <- RSQLite::dbConnect(RSQLite::SQLite(), db)
+  con <- connect_db(db)
   query <- sprintf("SELECT * FROM %s WHERE rowid BETWEEN %s AND %s", chunk_row[1], chunk_row[2], chunk_row[3])
   result <- RSQLite::dbGetQuery(con, query) 
   #Make a 2 column matrix with:

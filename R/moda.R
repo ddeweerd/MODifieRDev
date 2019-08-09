@@ -56,6 +56,15 @@ moda <- function(MODifieR_input,
                                                                               argument)]]
   }
   
+  #Validate the input parameters
+  check_expression_matrix(MODifieR_input)
+  validate_inputs(settings)
+  if (!(cutmethod == "Density" | cutmethod == "Modularity")){
+    stop('Cutmethod is not "Density" or "Modularity"', call. = F)
+  }
+  if (!(group_of_interest == 1 | group_of_interest == 2)){
+    stop("Group of interest is not 1 or 2", call. = F)
+  }
   if (!is.null(dataset_name)){
     settings$MODifieR_input <- dataset_name
   }
@@ -86,7 +95,7 @@ moda <- function(MODifieR_input,
                           "jaccard_table" = jaccard_table,
                           "settings" = settings)
   
-  class(new_moda_module) <- c("MODifieR_module", "MODA")
+  class(new_moda_module) <- c("MODifieR_module", "MODA", class(MODifieR_input)[3])
   
   return (new_moda_module)
 }

@@ -274,7 +274,7 @@ moduleDiscoverer.createDatabase <- function(results=NULL, proteins=NULL){
     stop()
   }
 
-  proteinsInClique <<- c()
+  proteinsInClique <- c()
   results.indexed <- do.call(rbind, lapply(1:length(results), function(run){
     
     if(dim(results[[run]])[1]!=0){

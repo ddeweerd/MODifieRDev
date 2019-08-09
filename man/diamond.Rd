@@ -2,7 +2,7 @@
 % Please edit documentation in R/diamond.R
 \name{diamond}
 \alias{diamond}
-\title{DIAMOnD module}
+\title{DIAMOnD}
 \usage{
 diamond(MODifieR_input, ppi_network, deg_cutoff = 0.05,
   n_output_genes = 200, seed_weight = 10, include_seed = FALSE,
