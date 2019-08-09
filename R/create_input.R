@@ -81,8 +81,6 @@ create_input_microarray <- function (expression_matrix, annotation_table, group1
     collapsed_exprs_mat <- collapse_probes(expression_matrix = expression_matrix, 
                                            annotation_table = annotation_table, 
                                            method = method)
-  
-  #Same for expression data
 
     P.Value = NULL
     adj.P.Val = NULL
