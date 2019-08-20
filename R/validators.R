@@ -72,7 +72,7 @@ validate_ppi <- function(ppi_network){
   ppi_network[,1] <- as.character(ppi_network[,1])
   ppi_network[,2] <- as.character(ppi_network[,2])
   if (ncol(ppi_network) == 3){
-    ppi_network[,1] <- as.numeric(ppi_network[,3])
+    ppi_network[,3] <- as.numeric(ppi_network[,3])
   }
   return(ppi_network)
 }
