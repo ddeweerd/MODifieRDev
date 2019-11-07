@@ -78,6 +78,7 @@ correlation_clique <- function(MODifieR_input, ppi_network,
   ppi_network <- ppi_network[overlap,]
   overlap <- ppi_network[,2] %in% pValueMatrix[,1] & ppi_network[,2] %in% rownames(MODifieR_input$annotated_exprs_matrix)
   ppi_network <- ppi_network[overlap,]
+  ppi_network <- ppi_network[!duplicated(data.frame(t(apply(ppi_network[1:2], 1, sort)), ppi_network[, 3])), ]
   
   ppi_network[,3] <- ppi_network[,3] / 1000
   if (nrow(ppi_network) == 0){
